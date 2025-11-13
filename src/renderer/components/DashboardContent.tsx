@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { GlassCard } from './common';
 import { ConnectedDevices } from './ConnectedDevices';
 import { WaterParameterSelector } from './WaterParameterSelector';
-import type { Aquarium, WaterParameterOption } from '../../shared/types';
+import { WaterParameterGraph } from './WaterParameterGraph';
+import type { Aquarium, WaterParameterOption, WaterTest } from '../../shared/types';
 
 interface DashboardContentProps {
   aquarium: Aquarium;
@@ -62,6 +63,10 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ aquarium }) 
   const [selectedParameters, setSelectedParameters] = useState<WaterParameterOption[]>([]);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
+  // State for water test data (US-015)
+  const [waterTests, setWaterTests] = useState<WaterTest[]>([]);
+  const [isLoadingWaterTests, setIsLoadingWaterTests] = useState(true);
+
   // Load aquarium settings on mount (US-014)
   useEffect(() => {
     const loadSettings = async () => {
@@ -80,6 +85,24 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ aquarium }) 
     loadSettings();
   }, [aquarium.id]);
 
+  // Load water test data on mount (US-015)
+  useEffect(() => {
+    const loadWaterTests = async () => {
+      try {
+        const result = await window.electron.data.getWaterTests(aquarium.id);
+        if (result.success && result.data) {
+          setWaterTests(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to load water tests:', error);
+      } finally {
+        setIsLoadingWaterTests(false);
+      }
+    };
+
+    loadWaterTests();
+  }, [aquarium.id]);
+
   // Save selected parameters when they change (US-014)
   const handleParameterSelectionChange = async (parameters: WaterParameterOption[]) => {
     setSelectedParameters(parameters);
@@ -91,6 +114,45 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ aquarium }) 
     } catch (error) {
       console.error('Failed to save aquarium settings:', error);
     }
+  };
+
+  // Transform water test data for graphs (US-015)
+  const getParameterData = (parameter: WaterParameterOption) => {
+    return waterTests
+      .map((test) => {
+        // Find the parameter in the test's parameters array
+        // Note: WaterTest uses different naming (e.g., 'ph', 'temperature') vs WaterParameterOption (e.g., 'pH', 'Temperature')
+        // For now, we'll match by the display name directly
+        const param = test.parameters.find((p) => {
+          // Try to match parameter names (case-insensitive and flexible)
+          const pType = p.type.toLowerCase();
+          const paramLower = parameter.toLowerCase();
+
+          // Direct matches
+          if (pType === paramLower) return true;
+
+          // Special cases for matching
+          if (parameter === 'pH' && pType === 'ph') return true;
+          if (parameter === 'Temperature' && pType === 'temperature') return true;
+          if (parameter === 'GH' && pType === 'hardness') return true;
+          if (parameter === 'KH' && pType === 'alkalinity') return true;
+          if (parameter === 'NO₂' && pType === 'nitrite') return true;
+          if (parameter === 'NO₃' && pType === 'nitrate') return true;
+          if (parameter === 'NH₄' && pType === 'ammonia') return true;
+          if (parameter === 'PO₄' && pType === 'phosphate') return true;
+
+          return false;
+        });
+
+        if (param) {
+          return {
+            date: test.testDate,
+            value: param.value,
+          };
+        }
+        return null;
+      })
+      .filter((data): data is { date: string; value: number } => data !== null);
   };
 
   return (
@@ -223,15 +285,24 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ aquarium }) 
               </div>
             )}
 
-            {/* Graph Placeholder (US-015 will implement actual graphs) */}
+            {/* Water Parameter Graphs (US-015) */}
             {selectedParameters.length > 0 && (
-              <div className="mt-6 p-8 rounded-lg border border-white/10 bg-white/5 text-center">
-                <p className="text-white/70">
-                  Water parameter graphs will be implemented in US-015
-                </p>
-                <p className="text-white/40 text-sm mt-2">
-                  Selected: {selectedParameters.join(', ')}
-                </p>
+              <div className="mt-6">
+                {isLoadingWaterTests ? (
+                  <div className="p-8 rounded-lg border border-white/10 bg-white/5 text-center">
+                    <p className="text-white/70">Loading water test data...</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {selectedParameters.map((parameter) => (
+                      <WaterParameterGraph
+                        key={parameter}
+                        parameter={parameter}
+                        data={getParameterData(parameter)}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </>

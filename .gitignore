@@ -91,6 +91,9 @@ web_modules/
 .next
 out
 
+# Vite build output
+.vite
+
 # Nuxt.js build / generate output
 .nuxt
 dist

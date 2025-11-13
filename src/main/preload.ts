@@ -51,6 +51,12 @@ const electronAPI: ElectronAPI = {
     },
     getThumbnailPath: (filename: string) => ipcRenderer.invoke('files:getThumbnailPath', filename),
   },
+  eheim: {
+    // Eheim discovery operations (US-019)
+    discover: () => ipcRenderer.invoke('eheim:discover'),
+    connectManual: (ipAddress: string, port: number) => ipcRenderer.invoke('eheim:connectManual', ipAddress, port),
+    getDeviceInfo: (ipAddress: string, macAddress?: string) => ipcRenderer.invoke('eheim:getDeviceInfo', ipAddress, macAddress),
+  },
 };
 
 // Expose the API to the renderer process

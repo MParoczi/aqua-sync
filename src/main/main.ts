@@ -3,6 +3,7 @@ import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import * as dataService from './services/dataService';
 import * as fileService from './services/fileService';
+import * as eheimService from './services/eheimDiscoveryService';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -209,4 +210,21 @@ ipcMain.handle('files:copyThumbnail', async (_event, buffer: Buffer, originalNam
 
 ipcMain.handle('files:getThumbnailPath', async (_event, filename: string) => {
   return await fileService.getThumbnailPath(filename);
+});
+
+// ============================================
+// IPC Handlers for Eheim Integration (US-019)
+// ============================================
+
+// Eheim discovery handlers
+ipcMain.handle('eheim:discover', async () => {
+  return await eheimService.discoverDevices();
+});
+
+ipcMain.handle('eheim:connectManual', async (_event, ipAddress: string, port: number) => {
+  return await eheimService.connectManual(ipAddress, port);
+});
+
+ipcMain.handle('eheim:getDeviceInfo', async (_event, ipAddress: string) => {
+  return await eheimService.getDeviceInfo(ipAddress, 80);
 });

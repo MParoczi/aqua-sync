@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { AquariumProvider } from './contexts/AquariumContext';
 import App from './App';
 import './index.css';
 
@@ -13,7 +14,9 @@ root.render(
   <React.StrictMode>
     <ThemeProvider>
       <ToastProvider>
-        <App />
+        <AquariumProvider>
+          <App />
+        </AquariumProvider>
       </ToastProvider>
     </ThemeProvider>
   </React.StrictMode>

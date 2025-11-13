@@ -4,9 +4,11 @@ import type { Aquarium } from '../../shared/types';
 import { AquariumModal } from '../components/AquariumModal';
 import { AquariumGrid } from '../components/AquariumGrid';
 import { useToast } from '../contexts/ToastContext';
+import { useAquarium } from '../contexts/AquariumContext';
 
 export const LandingPage: React.FC = () => {
   const { showSuccess, showError } = useToast();
+  const { selectAquarium } = useAquarium();
   const [aquariums, setAquariums] = useState<Aquarium[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -81,6 +83,10 @@ export const LandingPage: React.FC = () => {
     setEditingAquarium(undefined);
   };
 
+  const handleCardClick = (aquarium: Aquarium) => {
+    selectAquarium(aquarium);
+  };
+
   // Show loading state
   if (isLoading) {
     return (
@@ -139,6 +145,7 @@ export const LandingPage: React.FC = () => {
         onAddNew={() => setIsModalOpen(true)}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onClick={handleCardClick}
       />
 
       <AquariumModal

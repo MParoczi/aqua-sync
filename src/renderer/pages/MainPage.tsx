@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GlassCard, GlassButton } from '../components/common';
 import { useAquarium } from '../contexts/AquariumContext';
 import { DashboardContent } from '../components/DashboardContent';
+import { TestsContent } from '../components/TestsContent';
 
 // Section types for navigation
 type Section = 'dashboard' | 'filters' | 'lamps' | 'tests';
@@ -40,21 +41,6 @@ const LampsContent: React.FC = () => (
     <GlassCard className="p-6">
       <p className="text-white/70">
         Lamp management will be implemented in Epic 6 (US-029 to US-037)
-      </p>
-    </GlassCard>
-  </div>
-);
-
-const TestsContent: React.FC = () => (
-  <div className="space-y-6">
-    <div>
-      <h2 className="text-3xl font-bold text-white mb-2">Water Tests</h2>
-      <p className="text-white/60">Track your water parameters</p>
-    </div>
-
-    <GlassCard className="p-6">
-      <p className="text-white/70">
-        Water test tracking will be implemented in Epic 4 (US-016 to US-018)
       </p>
     </GlassCard>
   </div>

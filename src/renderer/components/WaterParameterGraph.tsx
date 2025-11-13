@@ -10,44 +10,7 @@ import {
 } from 'recharts';
 import { GlassCard } from './common';
 import type { WaterParameterOption } from '../../shared/types';
-
-/**
- * Color configuration for each water parameter (US-015)
- */
-export const PARAMETER_COLORS: Record<WaterParameterOption, string> = {
-  pH: '#0099CC',
-  GH: '#8D7B65',
-  KH: '#B89B5E',
-  'NO₂': '#A347BA',
-  'NO₃': '#E05C2B',
-  'NH₄': '#7AC943',
-  Fe: '#A63E14',
-  Cu: '#0097A7',
-  'SiO₂': '#C4B998',
-  'PO₄': '#1FA75D',
-  'CO₂': '#546E7A',
-  'O₂': '#42A5F5',
-  Temperature: '#F39C12',
-};
-
-/**
- * Unit labels for each parameter (US-015)
- */
-export const PARAMETER_UNITS: Record<WaterParameterOption, string> = {
-  pH: '',
-  GH: '°dGH',
-  KH: '°dKH',
-  'NO₂': 'mg/l',
-  'NO₃': 'mg/l',
-  'NH₄': 'mg/l',
-  Fe: 'mg/l',
-  Cu: 'mg/l',
-  'SiO₂': 'mg/l',
-  'PO₄': 'mg/l',
-  'CO₂': '',
-  'O₂': 'mg/l',
-  Temperature: '°C',
-};
+import { PARAMETER_COLORS, PARAMETER_UNITS } from '../../shared/waterParameters';
 
 interface WaterParameterGraphProps {
   parameter: WaterParameterOption;

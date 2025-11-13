@@ -1,0 +1,17 @@
+{
+  "name": "aqua-sync",
+  "version": "1.0.0",
+  "description": "Electron + React application for managing aquatic equipment",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "https://github.com/MParoczi/aqua-sync.git",
+  "author": "Márk Paróczi",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "electron": "^39.1.2"
+  }
+}

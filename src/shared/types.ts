@@ -51,6 +51,11 @@ export interface Device {
   model: string;
   status: DeviceStatus;
   bluetoothAddress?: string;
+  macAddress?: string; // MAC address for Eheim devices (US-019)
+  ipAddress?: string; // IP address for Eheim devices (US-019)
+  firmwareVersion?: string; // Firmware version (e.g., "S2037") (US-019)
+  lastSeen?: string; // ISO date - last time device was seen online (US-019)
+  config?: Record<string, unknown>; // Device-specific configuration (US-019)
   createdAt: string; // ISO date
   updatedAt?: string; // ISO date
 }
@@ -232,4 +237,69 @@ export interface FileAPI {
 export interface ElectronAPI {
   data: DataAPI;
   files: FileAPI;
+  eheim: EheimAPI;
+}
+
+// ============================================
+// Eheim Integration Types (US-019)
+// ============================================
+
+/**
+ * Discovered Eheim device from mDNS scan
+ */
+export interface DiscoveredEheimDevice {
+  hostname: string; // e.g., "eheimdigital.local"
+  ipAddress: string; // e.g., "192.168.2.5"
+  port: number; // typically 80
+  macAddress?: string; // Retrieved after initial API call
+  model?: string; // Detected from API response
+  firmwareVersion?: string; // e.g., "S2037"
+}
+
+/**
+ * Eheim filter data from WebSocket FILTER_DATA message
+ */
+export interface EheimFilterData {
+  title: 'FILTER_DATA';
+  from: string; // MAC address
+  filterActive: number; // 0 or 1
+  freq: number; // Current frequency in Hz
+  freqSoll: number; // Target frequency in Hz
+  rotSpeed: number; // Rotation speed
+  pumpMode: number; // 1=Manual, 2=Pulse, 3=Constant Flow, 4=Bio
+  rotorSpeed?: number; // 0-10 scale for manual mode
+  // Bio mode fields
+  nm_dfs_soll_day?: number; // Day flow level (0-10)
+  nm_dfs_soll_night?: number; // Night flow level (0-10)
+  end_time_night_mode?: number; // Day start time in minutes since midnight
+  start_time_night_mode?: number; // Night start time in minutes since midnight
+  runTime?: number; // Total running hours
+  dfsFaktor?: number; // Flow factor (internal)
+}
+
+/**
+ * Eheim user data from WebSocket USRDTA message
+ */
+export interface EheimUserData {
+  title: 'USRDTA';
+  macAddress: string;
+  revision: [number, number]; // [master, client] firmware versions
+  latestAvailableRevision: [number, number];
+  firmwareAvailable: number; // 0 or 1
+}
+
+/**
+ * Eheim API for IPC communication
+ */
+export interface EheimAPI {
+  // Discovery
+  discover: () => Promise<IpcResult<DiscoveredEheimDevice[]>>;
+  connectManual: (ipAddress: string, port: number) => Promise<IpcResult<DiscoveredEheimDevice>>;
+
+  // Device information
+  getDeviceInfo: (ipAddress: string, macAddress?: string) => Promise<IpcResult<EheimUserData>>;
+
+  // WebSocket status (to be implemented in US-019a)
+  // subscribe: (deviceId: string) => void;
+  // unsubscribe: (deviceId: string) => void;
 }

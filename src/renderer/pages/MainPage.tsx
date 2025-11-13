@@ -101,6 +101,18 @@ const TestsContent: React.FC = () => (
 export const MainPage: React.FC = () => {
   const { selectedAquarium, selectAquarium } = useAquarium();
   const [activeSection, setActiveSection] = useState<Section>('dashboard');
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Handle section change with transition
+  const handleSectionChange = (section: Section) => {
+    if (section === activeSection) return;
+
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setActiveSection(section);
+      setIsTransitioning(false);
+    }, 150); // Half of the transition duration for smooth crossfade
+  };
 
   // If no aquarium is selected, show error state
   if (!selectedAquarium) {
@@ -179,7 +191,7 @@ export const MainPage: React.FC = () => {
             {navigationItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveSection(item.id)}
+                onClick={() => handleSectionChange(item.id)}
                 className={`
                   w-full flex items-center gap-3 px-4 py-3 rounded-lg
                   transition-all duration-200
@@ -219,7 +231,14 @@ export const MainPage: React.FC = () => {
 
       {/* Right Content Area - 72% width, scrollable */}
       <main className="flex-1 w-[72%] min-h-screen overflow-y-auto p-8">
-        {renderContent()}
+        <div
+          className={`
+            transition-all duration-300 ease-in-out
+            ${isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}
+          `}
+        >
+          {renderContent()}
+        </div>
       </main>
     </div>
   );

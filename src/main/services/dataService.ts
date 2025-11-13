@@ -14,6 +14,7 @@ import type {
   Device,
   WaterTest,
   AppSettings,
+  AquariumSettings,
   IpcResult,
 } from '../../shared/types';
 
@@ -46,6 +47,7 @@ const DEFAULT_SETTINGS: AppSettings = {
     enabled: false,
     intervalDays: 7,
   },
+  aquariumSettings: {},
 };
 
 /**
@@ -436,6 +438,66 @@ export async function updateSettings(
 
     await writeJsonFile(DATA_FILES.SETTINGS, updatedSettings);
     return success(updatedSettings);
+  } catch (err) {
+    return error((err as Error).message);
+  }
+}
+
+// ============================================
+// Aquarium-Specific Settings (US-014)
+// ============================================
+
+/**
+ * Default aquarium settings
+ */
+const DEFAULT_AQUARIUM_SETTINGS: AquariumSettings = {
+  selectedWaterParameters: [],
+};
+
+/**
+ * Get settings for a specific aquarium
+ */
+export async function getAquariumSettings(
+  aquariumId: string
+): Promise<IpcResult<AquariumSettings>> {
+  try {
+    const appSettings = await readJsonFile<AppSettings>(DATA_FILES.SETTINGS, DEFAULT_SETTINGS);
+
+    // Get aquarium-specific settings or return default
+    const aquariumSettings = appSettings.aquariumSettings[aquariumId] || DEFAULT_AQUARIUM_SETTINGS;
+
+    return success(aquariumSettings);
+  } catch (err) {
+    return error((err as Error).message);
+  }
+}
+
+/**
+ * Update settings for a specific aquarium
+ */
+export async function updateAquariumSettings(
+  aquariumId: string,
+  updates: Partial<AquariumSettings>
+): Promise<IpcResult<AquariumSettings>> {
+  try {
+    const appSettings = await readJsonFile<AppSettings>(DATA_FILES.SETTINGS, DEFAULT_SETTINGS);
+
+    // Get current aquarium settings or default
+    const currentAquariumSettings = appSettings.aquariumSettings[aquariumId] || DEFAULT_AQUARIUM_SETTINGS;
+
+    // Merge updates
+    const updatedAquariumSettings: AquariumSettings = {
+      ...currentAquariumSettings,
+      ...updates,
+    };
+
+    // Update in app settings
+    appSettings.aquariumSettings[aquariumId] = updatedAquariumSettings;
+
+    // Save to file
+    await writeJsonFile(DATA_FILES.SETTINGS, appSettings);
+
+    return success(updatedAquariumSettings);
   } catch (err) {
     return error((err as Error).message);
   }

@@ -133,6 +133,15 @@ ipcMain.handle('data:updateSettings', async (_event, settings) => {
   return await dataService.updateSettings(settings);
 });
 
+// Aquarium-specific settings IPC handlers (US-014)
+ipcMain.handle('data:getAquariumSettings', async (_event, aquariumId: string) => {
+  return await dataService.getAquariumSettings(aquariumId);
+});
+
+ipcMain.handle('data:updateAquariumSettings', async (_event, aquariumId: string, settings) => {
+  return await dataService.updateAquariumSettings(aquariumId, settings);
+});
+
 // Utility IPC handlers
 ipcMain.handle('data:getDataPath', async () => {
   return { success: true, data: dataService.getDataPath() };

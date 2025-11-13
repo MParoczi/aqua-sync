@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { GlassCard, GlassButton } from '../components/common';
 import { useAquarium } from '../contexts/AquariumContext';
+import { DashboardContent } from '../components/DashboardContent';
 
 // Section types for navigation
 type Section = 'dashboard' | 'filters' | 'lamps' | 'tests';
@@ -14,45 +15,6 @@ const navigationItems: { id: Section; label: string; icon: string }[] = [
 ];
 
 // Placeholder content components
-const DashboardContent: React.FC = () => (
-  <div className="space-y-6">
-    <div>
-      <h2 className="text-3xl font-bold text-white mb-2">Dashboard</h2>
-      <p className="text-white/60">Overview of your aquarium</p>
-    </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <GlassCard className="p-6">
-        <h3 className="text-xl font-bold text-white mb-4">Quick Stats</h3>
-        <p className="text-white/70">
-          Statistics and quick actions will be implemented in US-012 to US-015
-        </p>
-      </GlassCard>
-
-      <GlassCard className="p-6">
-        <h3 className="text-xl font-bold text-white mb-4">Recent Activity</h3>
-        <p className="text-white/70">
-          Activity feed will be implemented in future user stories
-        </p>
-      </GlassCard>
-
-      <GlassCard className="p-6">
-        <h3 className="text-xl font-bold text-white mb-4">Alerts</h3>
-        <p className="text-white/70">
-          Maintenance alerts and notifications will be implemented in Epic 7
-        </p>
-      </GlassCard>
-
-      <GlassCard className="p-6">
-        <h3 className="text-xl font-bold text-white mb-4">Quick Actions</h3>
-        <p className="text-white/70">
-          Quick action buttons will be added in future implementations
-        </p>
-      </GlassCard>
-    </div>
-  </div>
-);
-
 const FiltersContent: React.FC = () => (
   <div className="space-y-6">
     <div>
@@ -141,7 +103,7 @@ export const MainPage: React.FC = () => {
   const renderContent = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <DashboardContent />;
+        return <DashboardContent aquarium={selectedAquarium} />;
       case 'filters':
         return <FiltersContent />;
       case 'lamps':
@@ -149,7 +111,7 @@ export const MainPage: React.FC = () => {
       case 'tests':
         return <TestsContent />;
       default:
-        return <DashboardContent />;
+        return <DashboardContent aquarium={selectedAquarium} />;
     }
   };
 

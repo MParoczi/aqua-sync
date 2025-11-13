@@ -77,7 +77,8 @@ export const TestsContent: React.FC = () => {
 
   const handleMeasurementSaved = () => {
     // Modal will close automatically after save
-    // Future: Could refresh dashboard graphs here if needed
+    // Trigger dashboard refresh (US-018)
+    window.dispatchEvent(new Event('refreshWaterTests'));
   };
 
   return (

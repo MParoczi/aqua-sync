@@ -59,6 +59,11 @@ export const MainPage: React.FC = () => {
     setTimeout(() => {
       setActiveSection(section);
       setIsTransitioning(false);
+
+      // Refresh dashboard data when navigating to dashboard (US-018)
+      if (section === 'dashboard') {
+        window.dispatchEvent(new Event('refreshWaterTests'));
+      }
     }, 150); // Half of the transition duration for smooth crossfade
   };
 

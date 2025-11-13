@@ -101,20 +101,17 @@ export type WaterParameterType =
   | 'salinity'; // for marine aquariums
 
 /**
- * Water test measurement
+ * Water test measurement (US-018)
+ * One measurement per record for simplified querying and graphing
  */
 export interface WaterTest {
   id: string; // GUID
   aquariumId: string; // Reference to Aquarium
-  testDate: string; // ISO date
-  parameters: {
-    type: WaterParameterType;
-    value: number;
-    unit: string;
-    status?: 'normal' | 'warning' | 'critical';
-  }[];
-  notes?: string;
-  createdAt: string; // ISO date
+  parameter: WaterParameterOption; // The parameter being measured
+  value: number; // The measured value
+  unit: string; // Unit of measurement (e.g., 'pH', 'mg/l', '°C')
+  measuredAt: string; // ISO datetime when measurement was taken
+  createdAt: string; // ISO datetime when record was created
 }
 
 /**

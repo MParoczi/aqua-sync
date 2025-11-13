@@ -7,6 +7,7 @@ interface GlassButtonProps {
   variant?: 'primary' | 'secondary';
   className?: string;
   type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
 }
 
 export const GlassButton: React.FC<GlassButtonProps> = ({
@@ -14,11 +15,14 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   onClick,
   variant = 'primary',
   className = '',
-  type = 'button'
+  type = 'button',
+  disabled = false
 }) => {
   const { theme } = useTheme();
 
-  const baseClasses = 'px-6 py-3 rounded-lg backdrop-blur-[10px] border transition-all duration-300 font-medium hover:scale-105 active:scale-95 cursor-pointer';
+  const baseClasses = disabled
+    ? 'px-6 py-3 rounded-lg backdrop-blur-[10px] border transition-all duration-300 font-medium cursor-not-allowed opacity-50'
+    : 'px-6 py-3 rounded-lg backdrop-blur-[10px] border transition-all duration-300 font-medium hover:scale-105 active:scale-95 cursor-pointer';
 
   const variantClasses = variant === 'primary'
     ? theme === 'light'
@@ -32,6 +36,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
     <button
       type={type}
       onClick={onClick}
+      disabled={disabled}
       className={`${baseClasses} ${variantClasses} ${className}`}
     >
       {children}

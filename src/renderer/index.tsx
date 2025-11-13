@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { ToastProvider } from './contexts/ToastContext';
 import App from './App';
 import './index.css';
 
@@ -11,7 +12,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <ThemeProvider>
-      <App />
+      <ToastProvider>
+        <App />
+      </ToastProvider>
     </ThemeProvider>
   </React.StrictMode>
 );

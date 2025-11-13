@@ -35,6 +35,10 @@ const electronAPI: ElectronAPI = {
     getSettings: () => ipcRenderer.invoke('data:getSettings'),
     updateSettings: (settings) => ipcRenderer.invoke('data:updateSettings', settings),
 
+    // Aquarium-specific settings operations (US-014)
+    getAquariumSettings: (aquariumId: string) => ipcRenderer.invoke('data:getAquariumSettings', aquariumId),
+    updateAquariumSettings: (aquariumId: string, settings) => ipcRenderer.invoke('data:updateAquariumSettings', aquariumId, settings),
+
     // Utility operations
     getDataPath: () => ipcRenderer.invoke('data:getDataPath'),
   },

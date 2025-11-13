@@ -118,6 +118,31 @@ export interface WaterTest {
 }
 
 /**
+ * Water parameter types for US-014 graph selector
+ */
+export type WaterParameterOption =
+  | 'pH'
+  | 'GH'
+  | 'KH'
+  | 'NO₂'
+  | 'NO₃'
+  | 'NH₄'
+  | 'Fe'
+  | 'Cu'
+  | 'SiO₂'
+  | 'PO₄'
+  | 'CO₂'
+  | 'O₂'
+  | 'Temperature';
+
+/**
+ * Aquarium-specific settings
+ */
+export interface AquariumSettings {
+  selectedWaterParameters: WaterParameterOption[];
+}
+
+/**
  * Application settings
  */
 export interface AppSettings {
@@ -137,6 +162,10 @@ export interface AppSettings {
   autoBackup: {
     enabled: boolean;
     intervalDays: number;
+  };
+  // Aquarium-specific settings (US-014)
+  aquariumSettings: {
+    [aquariumId: string]: AquariumSettings;
   };
 }
 
@@ -181,6 +210,10 @@ export interface DataAPI {
   // Settings
   getSettings: () => Promise<IpcResult<AppSettings>>;
   updateSettings: (settings: Partial<AppSettings>) => Promise<IpcResult<AppSettings>>;
+
+  // Aquarium-specific settings (US-014)
+  getAquariumSettings: (aquariumId: string) => Promise<IpcResult<AquariumSettings>>;
+  updateAquariumSettings: (aquariumId: string, settings: Partial<AquariumSettings>) => Promise<IpcResult<AquariumSettings>>;
 
   // Utility
   getDataPath: () => Promise<IpcResult<string>>;

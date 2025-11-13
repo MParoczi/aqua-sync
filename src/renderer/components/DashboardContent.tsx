@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { GlassCard } from './common';
 import { ConnectedDevices } from './ConnectedDevices';
-import type { Aquarium } from '../../shared/types';
+import { WaterParameterSelector } from './WaterParameterSelector';
+import type { Aquarium, WaterParameterOption } from '../../shared/types';
 
 interface DashboardContentProps {
   aquarium: Aquarium;
@@ -56,6 +57,41 @@ const formatType = (type: Aquarium['type']): string => {
 export const DashboardContent: React.FC<DashboardContentProps> = ({ aquarium }) => {
   const daysSinceStart = calculateDaysSinceStart(aquarium.startDate);
   const formattedStartDate = formatDate(aquarium.startDate);
+
+  // State for selected water parameters (US-014)
+  const [selectedParameters, setSelectedParameters] = useState<WaterParameterOption[]>([]);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+
+  // Load aquarium settings on mount (US-014)
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const result = await window.electron.data.getAquariumSettings(aquarium.id);
+        if (result.success && result.data) {
+          setSelectedParameters(result.data.selectedWaterParameters);
+        }
+      } catch (error) {
+        console.error('Failed to load aquarium settings:', error);
+      } finally {
+        setIsLoadingSettings(false);
+      }
+    };
+
+    loadSettings();
+  }, [aquarium.id]);
+
+  // Save selected parameters when they change (US-014)
+  const handleParameterSelectionChange = async (parameters: WaterParameterOption[]) => {
+    setSelectedParameters(parameters);
+
+    try {
+      await window.electron.data.updateAquariumSettings(aquarium.id, {
+        selectedWaterParameters: parameters,
+      });
+    } catch (error) {
+      console.error('Failed to save aquarium settings:', error);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -149,12 +185,57 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ aquarium }) 
         </p>
       </GlassCard>
 
-      {/* Water Parameters Section Placeholder */}
+      {/* Water Parameters Section (US-014) */}
       <GlassCard className="p-6">
         <h3 className="text-xl font-bold text-white mb-4">Water Parameters</h3>
-        <p className="text-white/70">
-          Water parameter graphs will be implemented in US-014 and US-015
-        </p>
+
+        {isLoadingSettings ? (
+          <p className="text-white/70">Loading settings...</p>
+        ) : (
+          <>
+            <WaterParameterSelector
+              selectedParameters={selectedParameters}
+              onSelectionChange={handleParameterSelectionChange}
+            />
+
+            {/* Empty State (US-014) */}
+            {selectedParameters.length === 0 && (
+              <div className="mt-6 p-8 rounded-lg border border-white/10 bg-white/5 text-center">
+                <svg
+                  className="w-16 h-16 mx-auto text-white/40 mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+                <p className="text-white/60 text-lg">
+                  Select at least one test to display graphs
+                </p>
+                <p className="text-white/40 text-sm mt-2">
+                  Choose water parameters from the dropdown above to start tracking
+                </p>
+              </div>
+            )}
+
+            {/* Graph Placeholder (US-015 will implement actual graphs) */}
+            {selectedParameters.length > 0 && (
+              <div className="mt-6 p-8 rounded-lg border border-white/10 bg-white/5 text-center">
+                <p className="text-white/70">
+                  Water parameter graphs will be implemented in US-015
+                </p>
+                <p className="text-white/40 text-sm mt-2">
+                  Selected: {selectedParameters.join(', ')}
+                </p>
+              </div>
+            )}
+          </>
+        )}
       </GlassCard>
     </div>
   );

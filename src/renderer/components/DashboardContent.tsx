@@ -85,23 +85,38 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ aquarium }) 
     loadSettings();
   }, [aquarium.id]);
 
-  // Load water test data on mount (US-015)
+  // Load water test data on mount and when aquarium changes (US-015, US-018)
   useEffect(() => {
-    const loadWaterTests = async () => {
-      try {
-        const result = await window.electron.data.getWaterTests(aquarium.id);
-        if (result.success && result.data) {
-          setWaterTests(result.data);
-        }
-      } catch (error) {
-        console.error('Failed to load water tests:', error);
-      } finally {
-        setIsLoadingWaterTests(false);
-      }
-    };
-
     loadWaterTests();
   }, [aquarium.id]);
+
+  // Listen for water test data refresh events (US-018)
+  useEffect(() => {
+    const handleRefresh = () => {
+      loadWaterTests();
+    };
+
+    window.addEventListener('refreshWaterTests', handleRefresh);
+
+    return () => {
+      window.removeEventListener('refreshWaterTests', handleRefresh);
+    };
+  }, [aquarium.id]);
+
+  // Function to load/reload water test data (US-018)
+  const loadWaterTests = async () => {
+    setIsLoadingWaterTests(true);
+    try {
+      const result = await window.electron.data.getWaterTests(aquarium.id);
+      if (result.success && result.data) {
+        setWaterTests(result.data);
+      }
+    } catch (error) {
+      console.error('Failed to load water tests:', error);
+    } finally {
+      setIsLoadingWaterTests(false);
+    }
+  };
 
   // Save selected parameters when they change (US-014)
   const handleParameterSelectionChange = async (parameters: WaterParameterOption[]) => {
@@ -116,43 +131,15 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ aquarium }) 
     }
   };
 
-  // Transform water test data for graphs (US-015)
+  // Transform water test data for graphs (US-015, US-018)
   const getParameterData = (parameter: WaterParameterOption) => {
     return waterTests
-      .map((test) => {
-        // Find the parameter in the test's parameters array
-        // Note: WaterTest uses different naming (e.g., 'ph', 'temperature') vs WaterParameterOption (e.g., 'pH', 'Temperature')
-        // For now, we'll match by the display name directly
-        const param = test.parameters.find((p) => {
-          // Try to match parameter names (case-insensitive and flexible)
-          const pType = p.type.toLowerCase();
-          const paramLower = parameter.toLowerCase();
-
-          // Direct matches
-          if (pType === paramLower) return true;
-
-          // Special cases for matching
-          if (parameter === 'pH' && pType === 'ph') return true;
-          if (parameter === 'Temperature' && pType === 'temperature') return true;
-          if (parameter === 'GH' && pType === 'hardness') return true;
-          if (parameter === 'KH' && pType === 'alkalinity') return true;
-          if (parameter === 'NO₂' && pType === 'nitrite') return true;
-          if (parameter === 'NO₃' && pType === 'nitrate') return true;
-          if (parameter === 'NH₄' && pType === 'ammonia') return true;
-          if (parameter === 'PO₄' && pType === 'phosphate') return true;
-
-          return false;
-        });
-
-        if (param) {
-          return {
-            date: test.testDate,
-            value: param.value,
-          };
-        }
-        return null;
-      })
-      .filter((data): data is { date: string; value: number } => data !== null);
+      .filter((test) => test.parameter === parameter)
+      .map((test) => ({
+        date: test.measuredAt,
+        value: test.value,
+      }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   };
 
   return (

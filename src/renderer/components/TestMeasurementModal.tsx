@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GlassModal, GlassButton } from './common';
 import { useToast } from '../contexts/ToastContext';
 import { useAquarium } from '../contexts/AquariumContext';
-import type { WaterParameterOption, WaterParameterType, WaterTest } from '../../shared/types';
+import type { WaterParameterOption, WaterTest } from '../../shared/types';
 import {
   PARAMETER_COLORS,
   PARAMETER_DISPLAY_NAMES,
@@ -10,52 +10,6 @@ import {
   PARAMETER_RANGES,
 } from '../../shared/waterParameters';
 
-/**
- * Map WaterParameterOption to WaterParameterType
- * This is needed because the UI uses display names (e.g., 'pH', 'Temperature')
- * but the data storage uses type names (e.g., 'ph', 'temperature')
- */
-const mapParameterOptionToType = (option: WaterParameterOption): WaterParameterType => {
-  const mapping: Record<WaterParameterOption, WaterParameterType> = {
-    'pH': 'ph',
-    'GH': 'hardness',
-    'KH': 'alkalinity',
-    'NO₂': 'nitrite',
-    'NO₃': 'nitrate',
-    'NH₄': 'ammonia',
-    'Fe': 'hardness', // Iron - using hardness as placeholder (not in original enum)
-    'Cu': 'hardness', // Copper - using hardness as placeholder (not in original enum)
-    'SiO₂': 'hardness', // Silica - using hardness as placeholder (not in original enum)
-    'PO₄': 'phosphate',
-    'CO₂': 'hardness', // CO2 - using hardness as placeholder (not in original enum)
-    'O₂': 'hardness', // O2 - using hardness as placeholder (not in original enum)
-    'Temperature': 'temperature',
-  };
-  return mapping[option];
-};
-
-/**
- * Check if a WaterParameterType matches a WaterParameterOption
- */
-const isParameterMatch = (type: WaterParameterType, option: WaterParameterOption): boolean => {
-  const typeStr = type.toLowerCase();
-  const optionStr = option.toLowerCase();
-
-  // Direct matches
-  if (typeStr === optionStr) return true;
-
-  // Special case mappings
-  if (option === 'pH' && typeStr === 'ph') return true;
-  if (option === 'Temperature' && typeStr === 'temperature') return true;
-  if (option === 'GH' && typeStr === 'hardness') return true;
-  if (option === 'KH' && typeStr === 'alkalinity') return true;
-  if (option === 'NO₂' && typeStr === 'nitrite') return true;
-  if (option === 'NO₃' && typeStr === 'nitrate') return true;
-  if (option === 'NH₄' && typeStr === 'ammonia') return true;
-  if (option === 'PO₄' && typeStr === 'phosphate') return true;
-
-  return false;
-};
 
 interface TestMeasurementModalProps {
   isOpen: boolean;
@@ -113,7 +67,7 @@ export const TestMeasurementModal: React.FC<TestMeasurementModalProps> = ({
   }, [isOpen, parameter]);
 
   /**
-   * Load historical measurements for the selected parameter
+   * Load historical measurements for the selected parameter (US-018)
    */
   const loadHistoricalData = async () => {
     if (!selectedAquarium || !parameter) return;
@@ -121,19 +75,12 @@ export const TestMeasurementModal: React.FC<TestMeasurementModalProps> = ({
     try {
       const result = await window.electron.data.getWaterTests(selectedAquarium.id);
       if (result.success && result.data) {
-        // Filter tests that have the current parameter
+        // Filter tests for the current parameter and sort by date (newest first)
         const filteredTests = result.data
-          .filter((test) =>
-            test.parameters.some((p) => isParameterMatch(p.type, parameter))
-          )
-          .map((test) => ({
-            ...test,
-            // Find the specific parameter value
-            parameterValue: test.parameters.find((p) => isParameterMatch(p.type, parameter)),
-          }))
+          .filter((test) => test.parameter === parameter)
           .sort((a, b) => {
-            // Sort by testDate descending (newest first)
-            return new Date(b.testDate).getTime() - new Date(a.testDate).getTime();
+            // Sort by measuredAt descending (newest first)
+            return new Date(b.measuredAt).getTime() - new Date(a.measuredAt).getTime();
           })
           .slice(0, 10); // Show last 10 measurements
 
@@ -197,17 +144,13 @@ export const TestMeasurementModal: React.FC<TestMeasurementModalProps> = ({
       const numValue = parseFloat(formData.value);
       const measuredDate = new Date(formData.measuredAt);
 
-      // Create water test record
+      // Create water test record (US-018: one measurement per record)
       const waterTestData = {
         aquariumId: selectedAquarium.id,
-        testDate: measuredDate.toISOString(),
-        parameters: [
-          {
-            type: mapParameterOptionToType(parameter),
-            value: numValue,
-            unit: parameterUnit,
-          },
-        ],
+        parameter: parameter,
+        value: numValue,
+        unit: parameterUnit,
+        measuredAt: measuredDate.toISOString(),
       };
 
       const result = await window.electron.data.createWaterTest(waterTestData);
@@ -355,31 +298,26 @@ export const TestMeasurementModal: React.FC<TestMeasurementModalProps> = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {historicalTests.map((test, index) => {
-                      const paramValue = test.parameters.find(
-                        (p) => p.type === parameter
-                      );
-                      return (
-                        <tr
-                          key={test.id}
-                          className={`border-t border-white/5 ${
-                            index % 2 === 0 ? 'bg-white/0' : 'bg-white/[0.02]'
-                          }`}
-                        >
-                          <td className="px-4 py-3 text-white">
-                            {paramValue?.value.toFixed(2)}{' '}
-                            {parameterUnit && (
-                              <span className="text-white/60">
-                                {parameterUnit}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-white/80">
-                            {formatDateTime(test.testDate)}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {historicalTests.map((test, index) => (
+                      <tr
+                        key={test.id}
+                        className={`border-t border-white/5 ${
+                          index % 2 === 0 ? 'bg-white/0' : 'bg-white/[0.02]'
+                        }`}
+                      >
+                        <td className="px-4 py-3 text-white">
+                          {test.value.toFixed(2)}{' '}
+                          {parameterUnit && (
+                            <span className="text-white/60">
+                              {parameterUnit}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-white/80">
+                          {formatDateTime(test.measuredAt)}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               )}

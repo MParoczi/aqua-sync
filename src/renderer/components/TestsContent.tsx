@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GlassCard } from './common';
+import { TestMeasurementModal } from './TestMeasurementModal';
 import {
   ALL_PARAMETERS,
   PARAMETER_COLORS,
@@ -54,17 +55,29 @@ const ParameterCard: React.FC<ParameterCardProps> = ({
 };
 
 /**
- * Tests Content component (US-016)
+ * Tests Content component (US-016, US-017)
  * Displays all water test parameter cards in a responsive grid
+ * Opens measurement modal when a parameter is selected
  */
 export const TestsContent: React.FC = () => {
   const [selectedParameter, setSelectedParameter] =
     useState<WaterParameterOption | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleParameterClick = (parameter: WaterParameterOption) => {
     setSelectedParameter(parameter);
-    // TODO (US-017): Open measurement modal
-    console.log('Parameter clicked:', parameter);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    // Don't clear selectedParameter immediately to avoid UI flash
+    setTimeout(() => setSelectedParameter(null), 300);
+  };
+
+  const handleMeasurementSaved = () => {
+    // Modal will close automatically after save
+    // Future: Could refresh dashboard graphs here if needed
   };
 
   return (
@@ -88,15 +101,13 @@ export const TestsContent: React.FC = () => {
         ))}
       </div>
 
-      {/* Debug info (will be removed in US-017) */}
-      {selectedParameter && (
-        <GlassCard className="p-4">
-          <p className="text-white/70 text-sm">
-            Selected parameter: <strong>{selectedParameter}</strong> (Modal
-            will open here in US-017)
-          </p>
-        </GlassCard>
-      )}
+      {/* Measurement Modal (US-017) */}
+      <TestMeasurementModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        parameter={selectedParameter}
+        onSaved={handleMeasurementSaved}
+      />
     </div>
   );
 };

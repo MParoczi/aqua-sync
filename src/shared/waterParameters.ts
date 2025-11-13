@@ -78,3 +78,29 @@ export const PARAMETER_DISPLAY_NAMES: Record<WaterParameterOption, string> = {
   'O₂': 'O₂ (Oxygen)',
   Temperature: 'Temperature',
 };
+
+/**
+ * Value ranges for water parameters (US-017)
+ * Used for input validation in measurement modal
+ */
+export interface ParameterRange {
+  min: number;
+  max: number;
+  step: number; // Input step size
+}
+
+export const PARAMETER_RANGES: Record<WaterParameterOption, ParameterRange> = {
+  pH: { min: 0, max: 14, step: 0.1 },
+  GH: { min: 0, max: 30, step: 0.5 }, // °dGH
+  KH: { min: 0, max: 30, step: 0.5 }, // °dKH
+  'NO₂': { min: 0, max: 10, step: 0.01 }, // mg/l (should be close to 0)
+  'NO₃': { min: 0, max: 200, step: 0.1 }, // mg/l
+  'NH₄': { min: 0, max: 10, step: 0.01 }, // mg/l (should be close to 0)
+  Fe: { min: 0, max: 5, step: 0.01 }, // mg/l
+  Cu: { min: 0, max: 1, step: 0.001 }, // mg/l (toxic at low levels)
+  'SiO₂': { min: 0, max: 50, step: 0.1 }, // mg/l
+  'PO₄': { min: 0, max: 10, step: 0.01 }, // mg/l
+  'CO₂': { min: 0, max: 50, step: 1 }, // mg/l or ppm
+  'O₂': { min: 0, max: 20, step: 0.1 }, // mg/l
+  Temperature: { min: 0, max: 50, step: 0.1 }, // °C
+};

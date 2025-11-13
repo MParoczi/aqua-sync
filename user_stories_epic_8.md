@@ -1,6 +1,6 @@
 ## Epic 8: Polish & Error Handling
 
-### US-038: Implement Comprehensive Error Handling
+### US-045: Implement Comprehensive Error Handling
 **As a** user  
 **I want** to see helpful error messages when things go wrong  
 **So that** I understand what happened and how to fix it
@@ -33,7 +33,7 @@
 
 ---
 
-### US-039: Implement Loading States and Spinners
+### US-046: Implement Loading States and Spinners
 **As a** user  
 **I want** to see loading indicators during operations  
 **So that** I know the app is working
@@ -56,7 +56,7 @@
 
 ---
 
-### US-040: Implement Context Menu on Landing Page (Right-Click)
+### US-047: Implement Context Menu on Landing Page (Right-Click)
 **As a** user  
 **I want** a custom context menu on aquarium cards  
 **So that** the right-click experience is polished
@@ -75,7 +75,7 @@
 
 ---
 
-### US-041: Implement Auto-unit Conversion
+### US-048: Implement Auto-unit Conversion
 **As a** user  
 **I want** measurements to convert automatically when I change units  
 **So that** I don't lose data when switching between metric/imperial
@@ -101,7 +101,7 @@
 
 ---
 
-### US-042: Add Keyboard Shortcuts
+### US-049: Add Keyboard Shortcuts
 **As a** user  
 **I want** keyboard shortcuts for common actions  
 **So that** I can work more efficiently
@@ -121,7 +121,7 @@
 
 ---
 
-### US-043: Implement Default Aquarium Thumbnail
+### US-050: Implement Default Aquarium Thumbnail
 **As a** user  
 **I want** a nice default image when I don't upload a thumbnail  
 **So that** my aquarium cards look complete
@@ -139,7 +139,7 @@
 
 ---
 
-### US-044: Add "Days Running" Calculation to Dashboard
+### US-051: Add "Days Running" Calculation to Dashboard
 **As a** developer  
 **I want** to calculate days since aquarium start  
 **So that** users can track their tank's maturity
@@ -156,7 +156,7 @@
 
 ---
 
-### US-045: Optimize Performance for Large Datasets
+### US-052: Optimize Performance for Large Datasets
 **As a** developer  
 **I want** the app to perform well with many measurements  
 **So that** users with long histories have a good experience
@@ -176,7 +176,7 @@
 
 ---
 
-### US-046: Add Application Icon and Branding
+### US-053: Add Application Icon and Branding
 **As a** designer/developer  
 **I want** a professional app icon and branding  
 **So that** the app looks polished
@@ -198,7 +198,7 @@
 
 ---
 
-### US-047: Implement Build and Packaging
+### US-054: Implement Build and Packaging
 **As a** developer  
 **I want** to package the app for Windows distribution  
 **So that** users can install it easily

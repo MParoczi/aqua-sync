@@ -1,6 +1,6 @@
 ## Epic 7: Lamps (Chihiros Integration)
 
-### US-029: Implement Chihiros Bluetooth Service
+### US-036: Implement Chihiros Bluetooth Service
 **As a** developer  
 **I want** to discover and control Chihiros lamps via Bluetooth  
 **So that** users can manage their lighting
@@ -26,7 +26,7 @@
 
 ---
 
-### US-030: Create Lamps Page Empty State
+### US-037: Create Lamps Page Empty State
 **As a** user  
 **I want** to see instructions when no lamps are connected  
 **So that** I know how to add one
@@ -49,7 +49,7 @@
 
 ---
 
-### US-031: Implement Lamp Discovery Modal (Step 1)
+### US-038: Implement Lamp Discovery Modal (Step 1)
 **As a** user  
 **I want** to discover available Chihiros lamps via Bluetooth  
 **So that** I can add them to my aquarium
@@ -78,7 +78,7 @@
 
 ---
 
-### US-032: Implement Lamp Naming Modal (Step 2)
+### US-039: Implement Lamp Naming Modal (Step 2)
 **As a** user  
 **I want** to give my lamp a custom name  
 **So that** I can easily identify it
@@ -107,7 +107,7 @@
 
 ---
 
-### US-033: Display Lamp Cards on Lamps Page
+### US-040: Display Lamp Cards on Lamps Page
 **As a** user  
 **I want** to see my connected lamps as cards  
 **So that** I can view their status at a glance
@@ -131,7 +131,7 @@
 
 ---
 
-### US-034: Implement Lamp Detail View
+### US-041: Implement Lamp Detail View
 **As a** user  
 **I want** to view and control a specific lamp  
 **So that** I can manage its operation
@@ -161,7 +161,7 @@
 
 ---
 
-### US-035: Implement Automatic Mode Configuration
+### US-042: Implement Automatic Mode Configuration
 **As a** user  
 **I want** to configure my lamp's Automatic mode  
 **So that** it turns on/off and ramps automatically
@@ -207,7 +207,7 @@
 
 ---
 
-### US-036: Implement Manual Mode Configuration
+### US-043: Implement Manual Mode Configuration
 **As a** user  
 **I want** to configure my lamp's Manual mode  
 **So that** I can set a static brightness level
@@ -245,7 +245,7 @@
 
 ---
 
-### US-037: Implement Lamp Mode Switching Logic
+### US-044: Implement Lamp Mode Switching Logic
 **As a** user  
 **I want** my lamp to behave correctly based on selected mode  
 **So that** lighting operates as expected

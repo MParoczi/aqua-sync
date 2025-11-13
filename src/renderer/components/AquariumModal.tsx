@@ -7,6 +7,7 @@ interface AquariumModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAquariumCreated?: () => void;
+  onAquariumUpdated?: () => void;
   aquarium?: Aquarium; // For editing (US-008)
 }
 
@@ -43,8 +44,10 @@ export const AquariumModal: React.FC<AquariumModalProps> = ({
   isOpen,
   onClose,
   onAquariumCreated,
+  onAquariumUpdated,
   aquarium,
 }) => {
+  const isEditMode = !!aquarium;
   const { showSuccess, showError } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
@@ -312,18 +315,30 @@ export const AquariumModal: React.FC<AquariumModalProps> = ({
           isCustom: formData.isCustomVolume,
         },
         startDate: new Date(formData.startDate).toISOString(),
-        thumbnailPath,
+        thumbnailPath: thumbnailPath || aquarium?.thumbnailPath,
       };
 
-      // Create aquarium
-      const result = await window.electron.data.createAquarium(aquariumData);
-
-      if (result.success) {
-        showSuccess('Aquarium created successfully!');
-        onAquariumCreated?.();
-        onClose();
+      let result;
+      if (isEditMode && aquarium) {
+        // Update existing aquarium
+        result = await window.electron.data.updateAquarium(aquarium.id, aquariumData);
+        if (result.success) {
+          showSuccess('Aquarium updated successfully!');
+          onAquariumUpdated?.();
+          onClose();
+        } else {
+          showError(result.error || 'Failed to update aquarium');
+        }
       } else {
-        showError(result.error || 'Failed to create aquarium');
+        // Create new aquarium
+        result = await window.electron.data.createAquarium(aquariumData);
+        if (result.success) {
+          showSuccess('Aquarium created successfully!');
+          onAquariumCreated?.();
+          onClose();
+        } else {
+          showError(result.error || 'Failed to create aquarium');
+        }
       }
     } catch (error) {
       console.error('Error creating aquarium:', error);
@@ -339,7 +354,11 @@ export const AquariumModal: React.FC<AquariumModalProps> = ({
   };
 
   return (
-    <GlassModal isOpen={isOpen} onClose={handleCancel} title="Create Aquarium">
+    <GlassModal
+      isOpen={isOpen}
+      onClose={handleCancel}
+      title={isEditMode ? 'Edit Aquarium' : 'Create Aquarium'}
+    >
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Name Field */}
         <div>
@@ -583,7 +602,13 @@ export const AquariumModal: React.FC<AquariumModalProps> = ({
             disabled={isSubmitting}
             className="flex-1"
           >
-            {isSubmitting ? 'Creating...' : 'Create Aquarium'}
+            {isSubmitting
+              ? isEditMode
+                ? 'Updating...'
+                : 'Creating...'
+              : isEditMode
+              ? 'Update Aquarium'
+              : 'Create Aquarium'}
           </GlassButton>
         </div>
       </form>

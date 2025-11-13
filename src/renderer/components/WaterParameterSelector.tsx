@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { WaterParameterOption } from '../../shared/types';
-import { GlassCard } from './common';
 
 interface WaterParameterSelectorProps {
   selectedParameters: WaterParameterOption[];

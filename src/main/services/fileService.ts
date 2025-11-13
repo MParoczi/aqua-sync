@@ -102,6 +102,17 @@ export async function getThumbnailPath(filename: string): Promise<IpcResult<stri
 }
 
 /**
+ * Get the protocol URL for a thumbnail
+ * Converts a filename to a custom protocol URL that can be used in the renderer
+ *
+ * @param filename - The thumbnail filename
+ * @returns Protocol URL (aquasync://thumbnails/{filename})
+ */
+export function getThumbnailProtocolUrl(filename: string): string {
+  return `aquasync://thumbnails/${filename}`;
+}
+
+/**
  * Delete a thumbnail file
  *
  * @param filename - The thumbnail filename to delete

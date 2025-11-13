@@ -85,7 +85,9 @@ export const AquariumModal: React.FC<AquariumModalProps> = ({
           thumbnail: null,
         });
         if (aquarium.thumbnailPath) {
-          // TODO: Load existing thumbnail preview
+          // Load existing thumbnail preview using custom protocol
+          const protocolUrl = `aquasync://thumbnails/${aquarium.thumbnailPath}`;
+          setThumbnailPreview(protocolUrl);
         }
       } else {
         // Reset form for new aquarium

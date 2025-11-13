@@ -67,6 +67,20 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ aquarium }) 
   const [waterTests, setWaterTests] = useState<WaterTest[]>([]);
   const [isLoadingWaterTests, setIsLoadingWaterTests] = useState(true);
 
+  // State for thumbnail URL
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
+
+  // Load thumbnail URL when aquarium changes
+  useEffect(() => {
+    if (aquarium.thumbnailPath) {
+      // Use custom protocol URL to load thumbnail
+      const protocolUrl = `aquasync://thumbnails/${aquarium.thumbnailPath}`;
+      setThumbnailUrl(protocolUrl);
+    } else {
+      setThumbnailUrl('');
+    }
+  }, [aquarium.thumbnailPath]);
+
   // Load aquarium settings on mount (US-014)
   useEffect(() => {
     const loadSettings = async () => {
@@ -196,9 +210,9 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ aquarium }) 
 
           {/* Right side - Thumbnail */}
           <div className="w-48 h-48 flex-shrink-0">
-            {aquarium.thumbnailPath ? (
+            {thumbnailUrl ? (
               <img
-                src={aquarium.thumbnailPath}
+                src={thumbnailUrl}
                 alt={aquarium.name}
                 className="w-full h-full object-cover rounded-lg border border-white/20"
               />

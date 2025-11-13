@@ -21,14 +21,10 @@ export const AquariumCard: React.FC<AquariumCardProps> = ({
 
   React.useEffect(() => {
     if (aquarium.thumbnailPath) {
-      // Get the full path to the thumbnail
-      window.electron.files.getThumbnailPath(aquarium.thumbnailPath)
-        .then((result) => {
-          if (result.success && result.data) {
-            setThumbnailSrc(`file://${result.data}`);
-          }
-        })
-        .catch(() => setImageError(true));
+      // Use custom protocol URL to load thumbnail
+      // This bypasses the file:// protocol security restrictions
+      const protocolUrl = `aquasync://thumbnails/${aquarium.thumbnailPath}`;
+      setThumbnailSrc(protocolUrl);
     }
   }, [aquarium.thumbnailPath]);
 

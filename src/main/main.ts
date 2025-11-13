@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, protocol, net } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import * as dataService from './services/dataService';
@@ -32,10 +32,61 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools();
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+// ============================================
+// Custom Protocol Handler for Thumbnails
+// ============================================
+
+/**
+ * Register custom protocol handler for serving thumbnail images
+ * This allows the renderer to load local files using aquasync://thumbnails/{filename}
+ * without violating same-origin security policies
+ */
+app.whenReady().then(() => {
+  // Register custom protocol handler
+  protocol.handle('aquasync', async (request) => {
+    try {
+      // Parse URL: aquasync://thumbnails/{filename}
+      const url = new URL(request.url);
+
+      // Security: Only allow 'thumbnails' hostname
+      if (url.hostname !== 'thumbnails') {
+        return new Response('Not found', {
+          status: 404,
+          headers: { 'content-type': 'text/plain' }
+        });
+      }
+
+      // Get filename (e.g., "uuid.jpg")
+      const filename = url.pathname.slice(1); // Remove leading '/'
+
+      // Security: Prevent directory traversal attacks
+      if (!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+        return new Response('Invalid filename', {
+          status: 400,
+          headers: { 'content-type': 'text/plain' }
+        });
+      }
+
+      // Get full path to thumbnail
+      const fullPath = path.join(fileService.getThumbnailsPath(), filename);
+
+      // Normalize path for Windows compatibility
+      const normalizedPath = path.normalize(fullPath);
+
+      // Return file using net.fetch with file:// protocol
+      return net.fetch(`file:///${normalizedPath.replace(/\\/g, '/')}`);
+    } catch (err) {
+      console.error('Protocol handler error:', err);
+      return new Response('Internal server error', {
+        status: 500,
+        headers: { 'content-type': 'text/plain' }
+      });
+    }
+  });
+
+  // Create the main window
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

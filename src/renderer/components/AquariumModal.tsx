@@ -51,6 +51,7 @@ export const AquariumModal: React.FC<AquariumModalProps> = ({
   const { showSuccess, showError } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [thumbnailRemoved, setThumbnailRemoved] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     type: 'freshwater',
@@ -107,6 +108,7 @@ export const AquariumModal: React.FC<AquariumModalProps> = ({
         setThumbnailPreview(null);
       }
       setErrors({});
+      setThumbnailRemoved(false); // Reset removal flag
     }
   }, [isOpen, aquarium]);
 
@@ -231,6 +233,24 @@ export const AquariumModal: React.FC<AquariumModalProps> = ({
         setThumbnailPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      // Reset removal flag since user is uploading a new thumbnail
+      setThumbnailRemoved(false);
+    }
+  };
+
+  const handleRemoveThumbnail = () => {
+    // Clear preview and form data
+    setThumbnailPreview(null);
+    setFormData((prev) => ({ ...prev, thumbnail: null }));
+
+    // Mark as removed (important for edit mode to clear existing thumbnail)
+    setThumbnailRemoved(true);
+
+    // Reset file input
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
     }
   };
 
@@ -301,6 +321,19 @@ export const AquariumModal: React.FC<AquariumModalProps> = ({
         }
       }
 
+      // Determine final thumbnail path
+      let finalThumbnailPath: string | undefined;
+      if (thumbnailRemoved) {
+        // User explicitly removed the thumbnail - set to undefined to use default
+        finalThumbnailPath = undefined;
+      } else if (thumbnailPath) {
+        // New thumbnail uploaded
+        finalThumbnailPath = thumbnailPath;
+      } else if (aquarium?.thumbnailPath) {
+        // Keep existing thumbnail (edit mode, no changes)
+        finalThumbnailPath = aquarium.thumbnailPath;
+      }
+
       // Prepare aquarium data
       const aquariumData = {
         name: formData.name.trim(),
@@ -317,7 +350,7 @@ export const AquariumModal: React.FC<AquariumModalProps> = ({
           isCustom: formData.isCustomVolume,
         },
         startDate: new Date(formData.startDate).toISOString(),
-        thumbnailPath: thumbnailPath || aquarium?.thumbnailPath,
+        thumbnailPath: finalThumbnailPath,
       };
 
       let result;
@@ -576,12 +609,33 @@ export const AquariumModal: React.FC<AquariumModalProps> = ({
               <p className="text-white/60 text-xs mt-1">Max size: 5MB. Formats: JPG, PNG, GIF</p>
             </div>
             {thumbnailPreview && (
-              <div className="w-20 h-20 rounded-lg overflow-hidden border border-white/20">
+              <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/20 group">
                 <img
                   src={thumbnailPreview}
                   alt="Thumbnail preview"
                   className="w-full h-full object-cover"
                 />
+                {/* Remove button overlay */}
+                <button
+                  type="button"
+                  onClick={handleRemoveThumbnail}
+                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                  title="Remove thumbnail"
+                >
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
               </div>
             )}
           </div>

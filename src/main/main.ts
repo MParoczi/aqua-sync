@@ -4,6 +4,7 @@ import started from 'electron-squirrel-startup';
 import * as dataService from './services/dataService';
 import * as fileService from './services/fileService';
 import * as eheimService from './services/eheimDiscoveryService';
+import * as eheimWebSocketService from './services/eheimWebSocketService';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -104,6 +105,12 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+app.on('before-quit', () => {
+  // Clean up all WebSocket connections before quitting
+  console.log('[App] Cleaning up WebSocket connections...');
+  eheimWebSocketService.unsubscribeAll();
 });
 
 // In this file you can include the rest of your app's specific main process
@@ -227,4 +234,22 @@ ipcMain.handle('eheim:connectManual', async (_event, ipAddress: string, port: nu
 
 ipcMain.handle('eheim:getDeviceInfo', async (_event, ipAddress: string) => {
   return await eheimService.getDeviceInfo(ipAddress, 80);
+});
+
+// ============================================
+// IPC Handlers for Eheim WebSocket (US-019a)
+// ============================================
+
+// WebSocket connection handlers
+ipcMain.handle('eheim:subscribe', async (_event, deviceId: string, ipAddress: string, macAddress?: string) => {
+  return eheimWebSocketService.subscribe(deviceId, ipAddress, macAddress);
+});
+
+ipcMain.handle('eheim:unsubscribe', async (_event, deviceId: string) => {
+  return eheimWebSocketService.unsubscribe(deviceId);
+});
+
+ipcMain.handle('eheim:getConnectionStatus', async (_event, deviceId: string) => {
+  const status = eheimWebSocketService.getConnectionStatus(deviceId);
+  return { success: true, data: status };
 });

@@ -289,6 +289,23 @@ export interface EheimUserData {
 }
 
 /**
+ * WebSocket status update event types (US-019a)
+ */
+export type EheimStatusUpdateType = 'connection' | 'filter_data' | 'user_data' | 'mesh_network' | 'error';
+
+/**
+ * WebSocket status update event (US-019a)
+ */
+export interface EheimStatusUpdate {
+  deviceId: string;
+  timestamp: string; // ISO datetime
+  type: EheimStatusUpdateType;
+  status?: 'connected' | 'connecting' | 'offline' | 'error';
+  data?: EheimFilterData | EheimUserData | unknown;
+  error?: string;
+}
+
+/**
  * Eheim API for IPC communication
  */
 export interface EheimAPI {
@@ -299,7 +316,11 @@ export interface EheimAPI {
   // Device information
   getDeviceInfo: (ipAddress: string, macAddress?: string) => Promise<IpcResult<EheimUserData>>;
 
-  // WebSocket status (to be implemented in US-019a)
-  // subscribe: (deviceId: string) => void;
-  // unsubscribe: (deviceId: string) => void;
+  // WebSocket operations (US-019a)
+  subscribe: (deviceId: string, ipAddress: string, macAddress?: string) => Promise<IpcResult<boolean>>;
+  unsubscribe: (deviceId: string) => Promise<IpcResult<boolean>>;
+  getConnectionStatus: (deviceId: string) => Promise<IpcResult<'connected' | 'connecting' | 'offline'>>;
+
+  // WebSocket status update listener (US-019a)
+  onStatusUpdate: (callback: (event: EheimStatusUpdate) => void) => () => void;
 }

@@ -2,7 +2,7 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 import { contextBridge, ipcRenderer } from 'electron';
-import type { ElectronAPI } from '../shared/types';
+import type { ElectronAPI, EheimStatusUpdate } from '../shared/types';
 
 /**
  * Expose IPC API to renderer process via contextBridge
@@ -56,6 +56,19 @@ const electronAPI: ElectronAPI = {
     discover: () => ipcRenderer.invoke('eheim:discover'),
     connectManual: (ipAddress: string, port: number) => ipcRenderer.invoke('eheim:connectManual', ipAddress, port),
     getDeviceInfo: (ipAddress: string, macAddress?: string) => ipcRenderer.invoke('eheim:getDeviceInfo', ipAddress, macAddress),
+
+    // Eheim WebSocket operations (US-019a)
+    subscribe: (deviceId: string, ipAddress: string, macAddress?: string) => ipcRenderer.invoke('eheim:subscribe', deviceId, ipAddress, macAddress),
+    unsubscribe: (deviceId: string) => ipcRenderer.invoke('eheim:unsubscribe', deviceId),
+    getConnectionStatus: (deviceId: string) => ipcRenderer.invoke('eheim:getConnectionStatus', deviceId),
+
+    // WebSocket status update listener (US-019a)
+    onStatusUpdate: (callback: (event: EheimStatusUpdate) => void) => {
+      const subscription = (_event: unknown, data: unknown) => callback(data as EheimStatusUpdate);
+      ipcRenderer.on('eheim:status-update', subscription);
+      // Return cleanup function
+      return () => ipcRenderer.removeListener('eheim:status-update', subscription);
+    },
   },
 };
 

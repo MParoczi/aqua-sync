@@ -449,9 +449,9 @@
   optionalDependencies:
     global-agent "^3.0.0"
 
-"@electron/node-gyp@https://github.com/electron/node-gyp#06b29aafb7708acef8b3669835c8a7857ebc92d2":
+"@electron/node-gyp@git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2":
   version "10.2.0-electron.1"
-  resolved "https://github.com/electron/node-gyp#06b29aafb7708acef8b3669835c8a7857ebc92d2"
+  resolved "git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2"
   dependencies:
     env-paths "^2.2.0"
     exponential-backoff "^3.1.1"
@@ -4371,9 +4371,9 @@ nice-try@^1.0.4:
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
 node-abi@^3.45.0:
-  version "3.81.0"
-  resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-3.81.0.tgz#176a80904b2d382f5e5d1abcfb44d681cf9105c5"
-  integrity sha512-I+SHs7vmUV9ooMDHVzFfUxFQRWeiBCGbI02+XB503WBS8RCDJl4vXSoAXzcnSWpzgItirp2EraDq7jQ2c7CIiA==
+  version "3.83.0"
+  resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-3.83.0.tgz#6a6c2e8c59b3f13081570825de5000e91dd68b0f"
+  integrity sha512-o2PH88PgFlfoSDjU5oq/b/p9m+DJaPfslRI5FzNqcK1ea1i2/8xo/FL850kdgw0EAQJ/cSyyi2W2fBjHBdg5rA==
   dependencies:
     semver "^7.3.5"
 

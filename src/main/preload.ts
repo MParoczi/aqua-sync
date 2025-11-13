@@ -38,6 +38,15 @@ const electronAPI: ElectronAPI = {
     // Utility operations
     getDataPath: () => ipcRenderer.invoke('data:getDataPath'),
   },
+  files: {
+    // File operations
+    copyThumbnail: async (file: File) => {
+      // Convert File to Buffer for IPC transmission
+      const buffer = await file.arrayBuffer();
+      return ipcRenderer.invoke('files:copyThumbnail', Buffer.from(buffer), file.name);
+    },
+    getThumbnailPath: (filename: string) => ipcRenderer.invoke('files:getThumbnailPath', filename),
+  },
 };
 
 // Expose the API to the renderer process

@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import * as dataService from './services/dataService';
+import * as fileService from './services/fileService';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -135,4 +136,17 @@ ipcMain.handle('data:updateSettings', async (_event, settings) => {
 // Utility IPC handlers
 ipcMain.handle('data:getDataPath', async () => {
   return { success: true, data: dataService.getDataPath() };
+});
+
+// ============================================
+// IPC Handlers for File Operations (US-006)
+// ============================================
+
+// File operation handlers
+ipcMain.handle('files:copyThumbnail', async (_event, buffer: Buffer, originalName: string) => {
+  return await fileService.copyThumbnail(buffer, originalName);
+});
+
+ipcMain.handle('files:getThumbnailPath', async (_event, filename: string) => {
+  return await fileService.getThumbnailPath(filename);
 });

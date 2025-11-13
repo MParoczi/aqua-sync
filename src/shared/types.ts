@@ -187,8 +187,19 @@ export interface DataAPI {
 }
 
 /**
+ * File operations API
+ */
+export interface FileAPI {
+  // Copy uploaded thumbnail to userData/thumbnails folder
+  copyThumbnail: (file: File) => Promise<IpcResult<string>>;
+  // Get thumbnail path from userData
+  getThumbnailPath: (filename: string) => Promise<IpcResult<string>>;
+}
+
+/**
  * Window API exposed via preload
  */
 export interface ElectronAPI {
   data: DataAPI;
+  files: FileAPI;
 }

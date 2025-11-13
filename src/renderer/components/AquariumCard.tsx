@@ -1,14 +1,23 @@
 import React from 'react';
-import { GlassCard } from './common';
+import { GlassCard, ContextMenu, type ContextMenuItem } from './common';
 import type { Aquarium } from '../../shared/types';
 
 interface AquariumCardProps {
   aquarium: Aquarium;
+  onEdit?: (aquarium: Aquarium) => void;
+  onDelete?: (aquarium: Aquarium) => void;
+  onClick?: (aquarium: Aquarium) => void;
 }
 
-export const AquariumCard: React.FC<AquariumCardProps> = ({ aquarium }) => {
+export const AquariumCard: React.FC<AquariumCardProps> = ({
+  aquarium,
+  onEdit,
+  onDelete,
+  onClick
+}) => {
   const [thumbnailSrc, setThumbnailSrc] = React.useState<string>('');
   const [imageError, setImageError] = React.useState(false);
+  const [contextMenu, setContextMenu] = React.useState<{ x: number; y: number } | null>(null);
 
   React.useEffect(() => {
     if (aquarium.thumbnailPath) {
@@ -46,6 +55,51 @@ export const AquariumCard: React.FC<AquariumCardProps> = ({ aquarium }) => {
 
   const displayThumbnail = !imageError && thumbnailSrc ? thumbnailSrc : defaultThumbnail;
 
+  // Handle right-click for context menu
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  };
+
+  // Handle left-click for navigation
+  const handleClick = () => {
+    if (onClick) {
+      onClick(aquarium);
+    }
+  };
+
+  // Context menu items
+  const contextMenuItems: ContextMenuItem[] = [
+    {
+      label: 'Edit',
+      icon: (
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      ),
+      onClick: () => {
+        if (onEdit) {
+          onEdit(aquarium);
+        }
+      },
+    },
+    {
+      label: 'Delete',
+      icon: (
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      ),
+      onClick: () => {
+        if (onDelete) {
+          onDelete(aquarium);
+        }
+      },
+      variant: 'danger',
+    },
+  ];
+
   // Icon for aquarium type
   const TypeIcon = aquarium.type === 'marine' ? (
     // Marine icon (waves)
@@ -60,9 +114,14 @@ export const AquariumCard: React.FC<AquariumCardProps> = ({ aquarium }) => {
   );
 
   return (
-    <GlassCard className="overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl group">
-      {/* Thumbnail */}
-      <div className="relative w-full h-48 overflow-hidden">
+    <>
+      <GlassCard
+        className="overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl group"
+        onClick={handleClick}
+        onContextMenu={handleContextMenu}
+      >
+        {/* Thumbnail */}
+        <div className="relative w-full h-48 overflow-hidden">
         <img
           src={displayThumbnail}
           alt={aquarium.name}
@@ -93,6 +152,17 @@ export const AquariumCard: React.FC<AquariumCardProps> = ({ aquarium }) => {
           </span>
         </div>
       </div>
-    </GlassCard>
+      </GlassCard>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenuItems}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
+    </>
   );
 };

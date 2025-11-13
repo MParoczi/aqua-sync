@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { GlassCard, GlassButton } from '../components/common';
+import { GlassCard, GlassButton, DeleteConfirmationModal } from '../components/common';
 import type { Aquarium } from '../../shared/types';
 import { AquariumModal } from '../components/AquariumModal';
 import { AquariumGrid } from '../components/AquariumGrid';
+import { useToast } from '../contexts/ToastContext';
 
 export const LandingPage: React.FC = () => {
+  const { showSuccess, showError } = useToast();
   const [aquariums, setAquariums] = useState<Aquarium[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAquarium, setEditingAquarium] = useState<Aquarium | undefined>(undefined);
+  const [deletingAquarium, setDeletingAquarium] = useState<Aquarium | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadAquariums();
@@ -31,6 +36,49 @@ export const LandingPage: React.FC = () => {
     // Reload aquariums after creation
     loadAquariums();
     setIsModalOpen(false);
+    setEditingAquarium(undefined);
+  };
+
+  const handleAquariumUpdated = () => {
+    // Reload aquariums after update
+    loadAquariums();
+    setIsModalOpen(false);
+    setEditingAquarium(undefined);
+  };
+
+  const handleEdit = (aquarium: Aquarium) => {
+    setEditingAquarium(aquarium);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (aquarium: Aquarium) => {
+    setDeletingAquarium(aquarium);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingAquarium) return;
+
+    setIsDeleting(true);
+    try {
+      const result = await window.electron.data.deleteAquarium(deletingAquarium.id);
+      if (result.success) {
+        showSuccess(`Aquarium "${deletingAquarium.name}" deleted successfully!`);
+        loadAquariums();
+        setDeletingAquarium(null);
+      } else {
+        showError(result.error || 'Failed to delete aquarium');
+      }
+    } catch (error) {
+      console.error('Error deleting aquarium:', error);
+      showError('An unexpected error occurred');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingAquarium(undefined);
   };
 
   // Show loading state
@@ -68,8 +116,16 @@ export const LandingPage: React.FC = () => {
 
         <AquariumModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={handleCloseModal}
           onAquariumCreated={handleAquariumCreated}
+        />
+
+        <DeleteConfirmationModal
+          isOpen={!!deletingAquarium}
+          onClose={() => setDeletingAquarium(null)}
+          onConfirm={handleConfirmDelete}
+          itemName={deletingAquarium?.name || ''}
+          isDeleting={isDeleting}
         />
       </>
     );
@@ -81,12 +137,24 @@ export const LandingPage: React.FC = () => {
       <AquariumGrid
         aquariums={aquariums}
         onAddNew={() => setIsModalOpen(true)}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
 
       <AquariumModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         onAquariumCreated={handleAquariumCreated}
+        onAquariumUpdated={handleAquariumUpdated}
+        aquarium={editingAquarium}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={!!deletingAquarium}
+        onClose={() => setDeletingAquarium(null)}
+        onConfirm={handleConfirmDelete}
+        itemName={deletingAquarium?.name || ''}
+        isDeleting={isDeleting}
       />
     </>
   );

@@ -6,9 +6,18 @@ import type { Aquarium } from '../../shared/types';
 interface AquariumGridProps {
   aquariums: Aquarium[];
   onAddNew: () => void;
+  onEdit?: (aquarium: Aquarium) => void;
+  onDelete?: (aquarium: Aquarium) => void;
+  onClick?: (aquarium: Aquarium) => void;
 }
 
-export const AquariumGrid: React.FC<AquariumGridProps> = ({ aquariums, onAddNew }) => {
+export const AquariumGrid: React.FC<AquariumGridProps> = ({
+  aquariums,
+  onAddNew,
+  onEdit,
+  onDelete,
+  onClick
+}) => {
   // Sort aquariums by createdAt (oldest first)
   const sortedAquariums = React.useMemo(() => {
     return [...aquariums].sort((a, b) => {
@@ -45,7 +54,13 @@ export const AquariumGrid: React.FC<AquariumGridProps> = ({ aquariums, onAddNew 
       {/* Grid of aquarium cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {sortedAquariums.map((aquarium) => (
-          <AquariumCard key={aquarium.id} aquarium={aquarium} />
+          <AquariumCard
+            key={aquarium.id}
+            aquarium={aquarium}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onClick={onClick}
+          />
         ))}
       </div>
     </div>

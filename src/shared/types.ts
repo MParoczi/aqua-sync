@@ -37,7 +37,7 @@ export interface Aquarium {
  * Device types
  */
 export type DeviceType = 'filter' | 'lamp';
-export type DeviceStatus = 'connected' | 'disconnected' | 'error';
+export type DeviceStatus = 'connecting' | 'connected' | 'offline' | 'error';
 
 /**
  * Base device interface

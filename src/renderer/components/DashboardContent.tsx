@@ -1,5 +1,6 @@
 import React from 'react';
 import { GlassCard } from './common';
+import { ConnectedDevices } from './ConnectedDevices';
 import type { Aquarium } from '../../shared/types';
 
 interface DashboardContentProps {
@@ -137,22 +138,16 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ aquarium }) 
         </div>
       </GlassCard>
 
-      {/* Placeholder sections for future user stories */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <GlassCard className="p-6">
-          <h3 className="text-xl font-bold text-white mb-4">Connected Devices</h3>
-          <p className="text-white/70">
-            Device status cards will be implemented in US-013
-          </p>
-        </GlassCard>
+      {/* Connected Devices Section */}
+      <ConnectedDevices aquariumId={aquarium.id} />
 
-        <GlassCard className="p-6">
-          <h3 className="text-xl font-bold text-white mb-4">Quick Stats</h3>
-          <p className="text-white/70">
-            Statistics and quick actions will be added in future user stories
-          </p>
-        </GlassCard>
-      </div>
+      {/* Quick Stats Placeholder */}
+      <GlassCard className="p-6">
+        <h3 className="text-xl font-bold text-white mb-4">Quick Stats</h3>
+        <p className="text-white/70">
+          Statistics and quick actions will be added in future user stories
+        </p>
+      </GlassCard>
 
       {/* Water Parameters Section Placeholder */}
       <GlassCard className="p-6">

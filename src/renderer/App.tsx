@@ -1,11 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from './contexts/ThemeContext';
 import { GlassCard, GlassButton, GlassModal } from './components/common';
+import type { Aquarium } from '../shared/types';
 import './App.css';
 
 function App() {
   const { theme, toggleTheme } = useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dataPath, setDataPath] = useState<string>('');
+  const [aquariums, setAquariums] = useState<Aquarium[]>([]);
+  const [isTestingData, setIsTestingData] = useState(false);
+
+  // Load data path and aquariums on mount
+  useEffect(() => {
+    loadDataPath();
+    loadAquariums();
+  }, []);
+
+  const loadDataPath = async () => {
+    const result = await window.electron.data.getDataPath();
+    if (result.success && result.data) {
+      setDataPath(result.data);
+    }
+  };
+
+  const loadAquariums = async () => {
+    const result = await window.electron.data.getAquariums();
+    if (result.success && result.data) {
+      setAquariums(result.data);
+    }
+  };
+
+  const testDataPersistence = async () => {
+    setIsTestingData(true);
+    try {
+      // Create a test aquarium
+      const testAquarium = {
+        name: 'Test Aquarium',
+        type: 'freshwater' as const,
+        dimensions: {
+          width: 100,
+          length: 50,
+          height: 60,
+          unit: 'cm' as const,
+        },
+        volume: {
+          value: 300,
+          unit: 'liter' as const,
+          isCustom: false,
+        },
+        startDate: new Date().toISOString(),
+      };
+
+      const createResult = await window.electron.data.createAquarium(testAquarium);
+      if (createResult.success) {
+        console.log('✅ Test aquarium created:', createResult.data);
+        // Reload aquariums
+        await loadAquariums();
+      } else {
+        console.error('❌ Failed to create test aquarium:', createResult.error);
+      }
+    } catch (error) {
+      console.error('❌ Error testing data persistence:', error);
+    } finally {
+      setIsTestingData(false);
+    }
+  };
+
+  const deleteAquarium = async (id: string) => {
+    const result = await window.electron.data.deleteAquarium(id);
+    if (result.success) {
+      console.log('✅ Aquarium deleted');
+      await loadAquariums();
+    } else {
+      console.error('❌ Failed to delete aquarium:', result.error);
+    }
+  };
 
   return (
     <div className="min-h-screen p-8 flex flex-col items-center justify-center gap-8">
@@ -63,6 +133,70 @@ function App() {
           <div className="flex items-center gap-2">
             <span className="text-green-400">✓</span>
             <span>GlassModal - Accessible modal with backdrop blur</span>
+          </div>
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-6 max-w-2xl w-full">
+        <h2 className="text-2xl font-semibold text-white mb-4">
+          US-003: Local Data Persistence
+        </h2>
+
+        <div className="space-y-4 text-white/80">
+          <div className="p-3 rounded-lg bg-white/5">
+            <h3 className="text-sm font-semibold text-white/70 mb-1">Data Path</h3>
+            <p className="text-sm font-mono break-all">{dataPath || 'Loading...'}</p>
+          </div>
+
+          <div className="p-3 rounded-lg bg-white/5">
+            <h3 className="text-sm font-semibold text-white/70 mb-2">
+              Aquariums ({aquariums.length})
+            </h3>
+            {aquariums.length === 0 ? (
+              <p className="text-sm text-white/60">No aquariums created yet</p>
+            ) : (
+              <div className="space-y-2">
+                {aquariums.map((aquarium) => (
+                  <div
+                    key={aquarium.id}
+                    className="flex items-center justify-between p-2 rounded bg-white/5"
+                  >
+                    <div className="flex-1">
+                      <p className="font-semibold text-white">{aquarium.name}</p>
+                      <p className="text-xs text-white/60">
+                        {aquarium.type} • {aquarium.volume.value} {aquarium.volume.unit}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => deleteAquarium(aquarium.id)}
+                      className="px-2 py-1 text-xs rounded bg-red-500/20 hover:bg-red-500/30 text-red-300"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-3">
+            <GlassButton
+              variant="primary"
+              onClick={testDataPersistence}
+              disabled={isTestingData}
+            >
+              {isTestingData ? 'Creating...' : 'Create Test Aquarium'}
+            </GlassButton>
+            <GlassButton variant="secondary" onClick={loadAquariums}>
+              Refresh Data
+            </GlassButton>
+          </div>
+
+          <div className="text-xs text-white/60">
+            <p>
+              💡 Tip: Click "Create Test Aquarium" to test the persistence layer.
+              Data is stored in JSON files in the AppData folder.
+            </p>
           </div>
         </div>
       </GlassCard>

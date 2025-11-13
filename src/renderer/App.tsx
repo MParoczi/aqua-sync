@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from './contexts/ThemeContext';
+import { useToast } from './contexts/ToastContext';
 import { GlassCard, GlassButton, GlassModal } from './components/common';
 import type { Aquarium } from '../shared/types';
 import './App.css';
 
 function App() {
   const { theme, toggleTheme } = useTheme();
+  const { showSuccess, showError, showInfo, showWarning } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dataPath, setDataPath] = useState<string>('');
   const [aquariums, setAquariums] = useState<Aquarium[]>([]);
@@ -55,13 +57,16 @@ function App() {
       const createResult = await window.electron.data.createAquarium(testAquarium);
       if (createResult.success) {
         console.log('✅ Test aquarium created:', createResult.data);
+        showSuccess('Test aquarium created successfully!');
         // Reload aquariums
         await loadAquariums();
       } else {
         console.error('❌ Failed to create test aquarium:', createResult.error);
+        showError(`Failed to create aquarium: ${createResult.error}`);
       }
     } catch (error) {
       console.error('❌ Error testing data persistence:', error);
+      showError('An unexpected error occurred while creating aquarium');
     } finally {
       setIsTestingData(false);
     }
@@ -71,9 +76,11 @@ function App() {
     const result = await window.electron.data.deleteAquarium(id);
     if (result.success) {
       console.log('✅ Aquarium deleted');
+      showSuccess('Aquarium deleted successfully');
       await loadAquariums();
     } else {
       console.error('❌ Failed to delete aquarium:', result.error);
+      showError(`Failed to delete aquarium: ${result.error}`);
     }
   };
 
@@ -133,6 +140,58 @@ function App() {
           <div className="flex items-center gap-2">
             <span className="text-green-400">✓</span>
             <span>GlassModal - Accessible modal with backdrop blur</span>
+          </div>
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-6 max-w-xl w-full">
+        <h2 className="text-2xl font-semibold text-white mb-4">
+          US-004: Toast Notification System
+        </h2>
+
+        <div className="space-y-4 text-white/80">
+          <p className="text-sm">
+            Test the toast notification system by clicking the buttons below.
+            Toasts will appear in the top-right corner with glassmorphism styling.
+          </p>
+
+          <div className="grid grid-cols-2 gap-3">
+            <GlassButton
+              variant="primary"
+              onClick={() => showSuccess('Operation completed successfully!')}
+            >
+              Show Success
+            </GlassButton>
+            <GlassButton
+              variant="secondary"
+              onClick={() => showError('An error occurred during the operation')}
+            >
+              Show Error
+            </GlassButton>
+            <GlassButton
+              variant="primary"
+              onClick={() => showInfo('Here is some useful information for you')}
+            >
+              Show Info
+            </GlassButton>
+            <GlassButton
+              variant="secondary"
+              onClick={() => showWarning('Please be careful with this action')}
+            >
+              Show Warning
+            </GlassButton>
+          </div>
+
+          <div className="p-3 rounded-lg bg-white/5">
+            <h3 className="text-sm font-semibold text-white/70 mb-2">Features</h3>
+            <ul className="text-xs space-y-1">
+              <li>✓ Auto-dismisses after 5 seconds</li>
+              <li>✓ Multiple toasts stack vertically</li>
+              <li>✓ Theme-aware colors (light/dark)</li>
+              <li>✓ Accessible with ARIA labels</li>
+              <li>✓ Smooth animations</li>
+              <li>✓ Manual dismiss option</li>
+            </ul>
           </div>
         </div>
       </GlassCard>

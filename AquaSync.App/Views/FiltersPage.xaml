@@ -1,0 +1,12 @@
+<Page
+    x:Class="AquaSync.App.Views.FiltersPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid>
+        <TextBlock
+            Text="Filters"
+            Style="{StaticResource TitleTextBlockStyle}"
+            Margin="36,24,0,0" />
+    </Grid>
+</Page>

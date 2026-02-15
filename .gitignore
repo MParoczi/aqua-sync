@@ -1,0 +1,96 @@
+## .NET / MSBuild
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## MSBuild output
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## NuGet
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nupkg
+*.snupkg
+**/nuget.exe
+**/NuGet.exe
+
+## Build results
+[Dd]ebugPublic/
+[Rr]eleases/
+build/
+*.[Cc]ache
+!?*.[Cc]ache/
+
+## Visual Studio
+.vs/
+*.rsuser
+*.sln.iml
+_ReSharper*/
+*.[Rr]e[Ss]harper
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.VisualState.xml
+TestResult.xml
+*.DotSettings.user
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pfx
+*.publishsettings
+*.pubxml
+!**/[Pp]ublish[Pp]rofiles/*.pubxml
+*.azurePubxml
+
+## WinUI / MSIX
+AppPackages/
+BundleArtifacts/
+*.appx
+*.appxbundle
+*.appxupload
+*.msix
+*.msixbundle
+*.msixupload
+
+## JetBrains Rider / IntelliJ
+.idea/
+
+## VS Code
+.vscode/
+
+## Claude Code
+.claude/
+
+## Editor config (user-requested)
+.editorconfig
+
+## OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+.DS_Store
+.DS_Store?
+._*
+
+## User-specific files
+*.suo
+*.user
+*.sln.docstates
+
+## Crash dumps / logs
+*.stackdump
+*.log

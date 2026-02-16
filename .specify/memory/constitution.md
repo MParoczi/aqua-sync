@@ -2,13 +2,12 @@
   ============================================================================
   SYNC IMPACT REPORT
   ============================================================================
-  Version change: N/A → 1.0.0 (initial ratification)
-  Modified principles: N/A (initial creation)
-  Added sections:
-    - Core Principles (7 principles)
-    - Technology Stack
-    - Project Structure & Constraints
-    - Governance
+  Version change: 1.0.0 → 1.1.0
+  Modified principles:
+    - VI. Single-Aquarium Context: Settings page now has dual scope
+      (global + aquarium-scoped profile editing). Previously: "Settings
+      is the only page that is global (not aquarium-scoped)."
+  Added sections: N/A
   Removed sections: N/A
   Templates requiring updates:
     - .specify/templates/plan-template.md ✅ no updates needed (generic)
@@ -128,11 +127,17 @@ cards. All subsequent pages are scoped to that selected aquarium.
   Water Parameters, Maintenance, Gallery, Fertilizers, Plants.
 - There MUST NOT be a multi-aquarium view within the shell — the user
   MUST return to the selector to switch aquariums.
-- Settings is the only page that is global (not aquarium-scoped).
+- Settings has dual scope: a global section for app-wide settings
+  and an aquarium-scoped section for editing the current aquarium's
+  profile (name, notes, thumbnail, substrates) when inside the
+  management shell. All other pages are purely aquarium-scoped.
 
 **Rationale**: A single-aquarium context simplifies state management,
 navigation, and data binding. It avoids confusion from multi-context
-views and keeps each page focused on one aquarium's data.
+views and keeps each page focused on one aquarium's data. The Settings
+page is the natural home for profile editing since it avoids adding
+a separate sidebar item and mirrors common app patterns where settings
+contain both global and contextual preferences.
 
 ### VII. English Only
 
@@ -263,4 +268,4 @@ When this constitution is amended, verify consistency with:
 - [ ] `.specify/templates/agent-file-template.md` — Development
   guidelines reference current principles.
 
-**Version**: 1.0.0 | **Ratified**: 2026-02-15 | **Last Amended**: 2026-02-15
+**Version**: 1.1.0 | **Ratified**: 2026-02-15 | **Last Amended**: 2026-02-16

@@ -37,7 +37,7 @@ Built on the existing WinUI3 MVVM infrastructure (ViewModelBase, INavigationServ
 | III. MVVM Architecture | PASS | ViewModels inherit ViewModelBase, manual `SetProperty` calls, DI via `App.GetService<T>()`, services registered in `App.xaml.cs`. |
 | IV. Device Integration | N/A | This feature does not interact with Chihiros or Eheim devices directly. Profile metadata (aquarium type, volume) will be available to device features via shared context. |
 | V. Minimal Dependencies | PASS | Zero new NuGet packages. All functionality uses built-in .NET and WinUI3 APIs (System.Text.Json, file I/O, Windows.Storage.Pickers). |
-| VI. Single-Aquarium Context | PASS | User selects one aquarium from grid, all shell pages scoped to that aquarium. Must return to selector to switch. Settings page is global context only for app-wide settings; profile editing is scoped to current aquarium. |
+| VI. Single-Aquarium Context | PASS | User selects one aquarium from grid, all shell pages scoped to that aquarium. Must return to selector to switch. Settings page has dual scope: global section for app-wide settings + aquarium-scoped section for profile editing (name, notes, thumbnail, substrates). Constitution v1.1.0 amended to reflect this. |
 | VII. English Only | PASS | All strings hardcoded in English. No `x:Uid`, no resource files. |
 
 **Gate result**: ALL PASS — proceed to Phase 0.
@@ -132,14 +132,14 @@ ShellPage back → MainWindow.ContentFrame.Navigate(AquariumSelectorPage) + Aqua
 ### 3. Profile Creation via ContentDialog
 
 Per constitution principle I ("MUST use ContentDialog for modal forms"), profile creation uses a ContentDialog containing:
-- Scrollable form with all required/optional fields
-- UOM toggle switches (liters/gallons, cm/inches)
+- ScrollViewer wrapping a scrollable form with all required/optional fields
+- UOM toggle switches (liters/gallons defaulting to liters, cm/inches defaulting to cm)
 - Aquarium type ComboBox
-- CalendarDatePicker for setup date
-- Image upload button with preview
-- Substrate/additive list with add/edit/remove inline controls
+- CalendarDatePicker for setup date (date-only, defaulting to today)
+- Image upload button with preview display before save (max 10MB)
+- Substrate/additive list with add/edit/remove/reorder (up/down) inline controls
 
-The dialog validates all required fields before allowing the primary button (Save) to proceed.
+The dialog validates all required fields on save attempt with inline error indicators. Canceling a form with entered data shows a "Discard changes?" confirmation prompt. Duplicate aquarium names trigger an inline warning (non-blocking). Numeric inputs accept system locale decimal separators.
 
 ### 4. Substrate Management
 
@@ -151,16 +151,18 @@ Substrates/additives are managed within the profile creation/edit ContentDialog 
 
 ### 5. Profile Editing
 
-Accessible from the **Settings page** within the management shell (when an aquarium is active). Only editable fields shown: name, description/notes, thumbnail photo. Locked fields displayed as read-only with a lock icon. Uses the same ContentDialog pattern for consistency.
+Accessible from the **Settings page** within the management shell, which has dual scope per constitution v1.1.0: a global section for app-wide settings and an aquarium-scoped section for profile editing. Only editable fields shown: name, notes, thumbnail photo. Locked fields (volume, dimensions, units, aquarium type, setup date) displayed as read-only with a lock indicator. Substrate management (add/edit/remove/reorder via up/down controls) is also accessible from this section. Uses the same ContentDialog pattern for consistency.
 
 ### 6. Archive/Restore/Delete
 
-Triggered from the **aquarium selector grid** via a **MenuFlyout** (right-click or overflow "..." button on each card):
-- **Archive**: Confirmation via ContentDialog → sets status to Archived → card becomes visually muted
-- **Restore**: Available only on archived cards → sets status back to Active
-- **Delete**: Confirmation via ContentDialog (destructive warning) → removes JSON file and gallery folder
+Triggered from the **aquarium selector grid** via a **MenuFlyout** (right-click or overflow "..." button on each card). Menu items are context-sensitive based on card status:
+- **Archive** (active cards only): Confirmation ContentDialog ("This aquarium will be archived. You can restore it later. Archive?") → sets status to Archived
+- **Restore** (archived cards only): Sets status back to Active
+- **Delete** (all cards): Confirmation ContentDialog ("Permanently delete [Name]? This will remove all profile data, substrates, and photos. This action cannot be undone.") → removes JSON file and gallery folder
 
-Archived cards in the grid use reduced opacity and an "Archived" badge overlay. Clicking an archived card enters the management shell in **read-only mode** (IAquariumContext exposes an `IsReadOnly` flag).
+Archived cards in the grid use **50% opacity** and an **"Archived" badge** overlay. Clicking an archived card enters the management shell in **read-only mode** (IAquariumContext exposes an `IsReadOnly` flag). The shell displays a banner: "This aquarium is archived (read-only). Restore to make changes." with a Restore button.
+
+A brief success notification (InfoBar) is shown after archive, restore, and delete operations.
 
 ### 7. Data Storage Layout
 

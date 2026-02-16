@@ -12,14 +12,14 @@ Represents a single aquarium profile. Stored as an individual JSON file at `aqua
 |-------|------|----------|---------|-------|
 | Id | Guid | Yes | Auto-generated | Primary identifier; also used as filename |
 | Name | string | Yes | — | Max 100 characters |
-| Volume | double | Yes | — | Must be > 0 |
+| Volume | double | Yes | — | Must be > 0; display up to 1 decimal place, store input precision |
 | VolumeUnit | VolumeUnit | Yes | Liters | Locked after creation |
 | Length | double | Yes | — | Must be > 0 |
 | Width | double | Yes | — | Must be > 0 |
 | Height | double | Yes | — | Must be > 0 |
 | DimensionUnit | DimensionUnit | Yes | Centimeters | Locked after creation |
 | AquariumType | AquariumType | Yes | — | Locked after creation |
-| SetupDate | DateTimeOffset | Yes | — | Locked after creation |
+| SetupDate | DateTimeOffset | Yes | — | Date-only input (time stored as midnight UTC); locked after creation |
 | Description | string? | No | null | Max 2000 characters |
 | ThumbnailPath | string? | No | null | Relative path to image in gallery folder; null = use default graphic |
 | Status | AquariumStatus | Yes | Active | Active or Archived |
@@ -42,7 +42,7 @@ Represents a single substrate or additive layer within an aquarium. Embedded in 
 | ProductName | string | Yes | — | Specific product name |
 | Type | SubstrateType | Yes | — | Substrate, Additive, or SoilCap |
 | LayerDepth | double | Yes | — | Must be > 0; uses parent aquarium's DimensionUnit |
-| DateAdded | DateTimeOffset | Yes | — | When the substrate was added to the tank |
+| DateAdded | DateTimeOffset | Yes | — | Date-only input (time stored as midnight UTC) |
 | Notes | string? | No | null | Optional notes |
 | DisplayOrder | int | Yes | Auto-assigned | Order in the substrate list (0-based) |
 
@@ -126,13 +126,13 @@ Aquarium (1) ──contains──> (0..*) SubstrateEntry
 | VR-004 | Aquarium.Width | Required; must be > 0 |
 | VR-005 | Aquarium.Height | Required; must be > 0 |
 | VR-006 | Aquarium.AquariumType | Required; must be a valid enum value |
-| VR-007 | Aquarium.SetupDate | Required; must be a valid date |
+| VR-007 | Aquarium.SetupDate | Required; must be a valid date (date-only, no time component) |
 | VR-008 | Aquarium.Description | Optional; max 2000 characters if provided |
 | VR-009 | SubstrateEntry.Brand | Required; non-empty |
 | VR-010 | SubstrateEntry.ProductName | Required; non-empty |
 | VR-011 | SubstrateEntry.Type | Required; must be a valid enum value |
 | VR-012 | SubstrateEntry.LayerDepth | Required; must be > 0 |
-| VR-013 | SubstrateEntry.DateAdded | Required; must be a valid date |
+| VR-013 | SubstrateEntry.DateAdded | Required; must be a valid date (date-only) |
 | VR-014 | ThumbnailPath image file | If provided, must be JPEG, PNG, BMP, GIF, or WebP |
 
 ## JSON Serialization
@@ -183,3 +183,10 @@ Uses `System.Text.Json` with `JsonNamingPolicy.CamelCase` (matching existing `Da
 ```
 
 **Enum serialization**: Uses `JsonStringEnumConverter` to serialize enums as readable strings (e.g., `"Freshwater"` instead of `0`).
+
+## Numeric Precision & Locale
+
+- **Storage**: Volume, dimensions, and layer depth are stored as `double` with full input precision.
+- **Display**: Values are displayed with up to 1 decimal place (e.g., 60.5 L, 30.0 cm).
+- **Input**: The system accepts the user's system locale decimal separator (comma or period). Parsing uses `CultureInfo.CurrentCulture`.
+- **Date fields**: SetupDate and DateAdded are date-only inputs. Stored as `DateTimeOffset` with time set to midnight UTC for serialization compatibility.

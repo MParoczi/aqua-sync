@@ -19,13 +19,13 @@
 
 **Purpose**: Create all data model types that every subsequent phase depends on
 
-- [ ] T001 [P] Create AquariumType enum (Freshwater, Saltwater, Brackish) with JsonStringEnumConverter in AquaSync.App/Models/AquariumType.cs
-- [ ] T002 [P] Create VolumeUnit enum (Liters, Gallons) with JsonStringEnumConverter in AquaSync.App/Models/VolumeUnit.cs
-- [ ] T003 [P] Create DimensionUnit enum (Centimeters, Inches) with JsonStringEnumConverter in AquaSync.App/Models/DimensionUnit.cs
-- [ ] T004 [P] Create SubstrateType enum (Substrate, Additive, SoilCap) with JsonStringEnumConverter in AquaSync.App/Models/SubstrateType.cs
-- [ ] T005 [P] Create AquariumStatus enum (Active, Archived) with JsonStringEnumConverter in AquaSync.App/Models/AquariumStatus.cs
-- [ ] T006 [P] Create SubstrateEntry model class with all fields (Id, Brand, ProductName, Type, LayerDepth, DateAdded, Notes, DisplayOrder) per data-model.md in AquaSync.App/Models/SubstrateEntry.cs
-- [ ] T007 Create Aquarium model class with all fields (Id, Name, Volume, VolumeUnit, Length, Width, Height, DimensionUnit, AquariumType, SetupDate, Description, ThumbnailPath, Status, CreatedAt, Substrates) per data-model.md in AquaSync.App/Models/Aquarium.cs
+- [x] T001 [P] Create AquariumType enum (Freshwater, Saltwater, Brackish) with JsonStringEnumConverter in AquaSync.App/Models/AquariumType.cs
+- [x] T002 [P] Create VolumeUnit enum (Liters, Gallons) with JsonStringEnumConverter in AquaSync.App/Models/VolumeUnit.cs
+- [x] T003 [P] Create DimensionUnit enum (Centimeters, Inches) with JsonStringEnumConverter in AquaSync.App/Models/DimensionUnit.cs
+- [x] T004 [P] Create SubstrateType enum (Substrate, Additive, SoilCap) with JsonStringEnumConverter in AquaSync.App/Models/SubstrateType.cs
+- [x] T005 [P] Create AquariumStatus enum (Active, Archived) with JsonStringEnumConverter in AquaSync.App/Models/AquariumStatus.cs
+- [x] T006 [P] Create SubstrateEntry model class with all fields (Id, Brand, ProductName, Type, LayerDepth, DateAdded, Notes, DisplayOrder) per data-model.md in AquaSync.App/Models/SubstrateEntry.cs
+- [x] T007 Create Aquarium model class with all fields (Id, Name, Volume, VolumeUnit, Length, Width, Height, DimensionUnit, AquariumType, SetupDate, Description, ThumbnailPath, Status, CreatedAt, Substrates) per data-model.md in AquaSync.App/Models/Aquarium.cs
 
 **Checkpoint**: All model types compile. `dotnet build AquaSync.App/AquaSync.App.csproj` succeeds.
 

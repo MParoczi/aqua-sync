@@ -136,10 +136,10 @@
 
 ### Implementation
 
-- [ ] T032 [US5] Implement archive and restore commands in AquariumSelectorViewModel — ArchiveProfileCommand shows confirmation ContentDialog ("This aquarium will be archived. You can restore it later. Archive?") then sets Status to Archived via IAquariumService.SaveAsync and refreshes grid (FR-028), RestoreProfileCommand sets Status back to Active and refreshes grid (FR-031) in AquaSync.App/ViewModels/AquariumSelectorViewModel.cs
-- [ ] T033 [P] [US5] Add archived visual styling to card DataTemplate — bind card container Opacity to Status via AquariumStatusToOpacityConverter for 50% opacity on archived cards, add "Archived" TextBlock badge overlay with Visibility bound to Status == Archived (FR-029) in AquaSync.App/Views/AquariumSelectorPage.xaml
-- [ ] T034 [US5] Add read-only mode to ShellPage XAML — add InfoBar banner at top of content area: "This aquarium is archived (read-only). Restore to make changes." with a Restore action button, bind banner Visibility to ShellViewModel.IsReadOnly (FR-030) in AquaSync.App/Views/ShellPage.xaml
-- [ ] T035 [US5] Wire read-only restore action in ShellPage code-behind — handle Restore button click on banner: call IAquariumService to update status, refresh IAquariumContext, update ShellViewModel.IsReadOnly to false, hide banner in AquaSync.App/Views/ShellPage.xaml.cs
+- [x] T032 [US5] Implement archive and restore commands in AquariumSelectorViewModel — ArchiveProfileCommand shows confirmation ContentDialog ("This aquarium will be archived. You can restore it later. Archive?") then sets Status to Archived via IAquariumService.SaveAsync and refreshes grid (FR-028), RestoreProfileCommand sets Status back to Active and refreshes grid (FR-031) in AquaSync.App/ViewModels/AquariumSelectorViewModel.cs
+- [x] T033 [P] [US5] Add archived visual styling to card DataTemplate — bind card container Opacity to Status via AquariumStatusToOpacityConverter for 50% opacity on archived cards, add "Archived" TextBlock badge overlay with Visibility bound to Status == Archived (FR-029) in AquaSync.App/Views/AquariumSelectorPage.xaml
+- [x] T034 [US5] Add read-only mode to ShellPage XAML — add InfoBar banner at top of content area: "This aquarium is archived (read-only). Restore to make changes." with a Restore action button, bind banner Visibility to ShellViewModel.IsReadOnly (FR-030) in AquaSync.App/Views/ShellPage.xaml
+- [x] T035 [US5] Wire read-only restore action in ShellPage code-behind — handle Restore button click on banner: call IAquariumService to update status, refresh IAquariumContext, update ShellViewModel.IsReadOnly to false, hide banner in AquaSync.App/Views/ShellPage.xaml.cs
 
 **Checkpoint**: Archive/restore cycle works fully. Archived cards show 50% opacity + badge. Archived profile opens in read-only shell with banner. Restore from both context menu and shell banner works. All data preserved through archive/restore cycle (SC-005).
 
@@ -155,7 +155,7 @@
 
 ### Implementation
 
-- [ ] T036 [US6] Implement delete command in AquariumSelectorViewModel — DeleteProfileCommand shows confirmation ContentDialog ("Permanently delete [Name]? This will remove all profile data, substrates, and photos. This action cannot be undone.") with destructive styling, on confirm calls IAquariumService.DeleteAsync(id) which removes JSON file and gallery folder (FR-033), then removes profile from ObservableCollection to refresh grid in AquaSync.App/ViewModels/AquariumSelectorViewModel.cs
+- [x] T036 [US6] Implement delete command in AquariumSelectorViewModel — DeleteProfileCommand shows confirmation ContentDialog ("Permanently delete [Name]? This will remove all profile data, substrates, and photos. This action cannot be undone.") with destructive styling, on confirm calls IAquariumService.DeleteAsync(id) which removes JSON file and gallery folder (FR-033), then removes profile from ObservableCollection to refresh grid in AquaSync.App/ViewModels/AquariumSelectorViewModel.cs
 
 **Checkpoint**: Delete permanently removes profile data and gallery. Grid updates immediately. Deleting last profile shows empty state. Cancel leaves profile unchanged.
 
@@ -165,11 +165,11 @@
 
 **Purpose**: UX polish, error handling, and edge cases that span multiple user stories
 
-- [ ] T037 [P] Add InfoBar success notifications after create, edit, archive, restore, and delete operations — add InfoBar control to AquariumSelectorPage.xaml bound to ViewModel notification properties, show briefly then auto-dismiss (FR-039) in AquaSync.App/Views/AquariumSelectorPage.xaml and AquaSync.App/ViewModels/AquariumSelectorViewModel.cs
-- [ ] T038 [P] Add ProgressRing indicators for async operations — show during profile loading, saving, and photo upload, bind to IsBusy/IsLoading properties on relevant ViewModels (FR-040) in AquaSync.App/Views/AquariumSelectorPage.xaml and AquaSync.App/Views/SettingsPage.xaml
-- [ ] T039 Implement error handling for edge cases — corrupted JSON files: show warning InfoBar listing unreadable profiles (FR-037), missing gallery folder: silently fall back to default graphic (FR-038), storage inaccessible: show "Could not save profile. Please check disk space and permissions." and preserve previous state, photo upload failure: preserve previous thumbnail and show error, external JSON deletion while shell is open: show error notification and navigate back to selector in AquaSync.App/ViewModels/AquariumSelectorViewModel.cs and AquaSync.App/ViewModels/ShellViewModel.cs
-- [ ] T040 Verify locale-aware decimal input parsing for volume, dimensions, and layer depth — ensure CultureInfo.CurrentCulture is used for parsing, test with comma and period decimal separators (FR-015) in AquaSync.App/ViewModels/AquariumSelectorViewModel.cs and AquaSync.App/ViewModels/SettingsViewModel.cs
-- [ ] T041 Run quickstart.md validation checklist — manually verify all 14 items: empty state, profile creation saves correctly, UOM locks, default thumbnail, uploaded photo, active card navigation, archived card read-only, archive/restore, delete, profile editing, substrate CRUD, back navigation, data persistence (SC-001 through SC-008)
+- [x] T037 [P] Add InfoBar success notifications after create, edit, archive, restore, and delete operations — add InfoBar control to AquariumSelectorPage.xaml bound to ViewModel notification properties, show briefly then auto-dismiss (FR-039) in AquaSync.App/Views/AquariumSelectorPage.xaml and AquaSync.App/ViewModels/AquariumSelectorViewModel.cs
+- [x] T038 [P] Add ProgressRing indicators for async operations — show during profile loading, saving, and photo upload, bind to IsBusy/IsLoading properties on relevant ViewModels (FR-040) in AquaSync.App/Views/AquariumSelectorPage.xaml and AquaSync.App/Views/SettingsPage.xaml
+- [x] T039 Implement error handling for edge cases — corrupted JSON files: show warning InfoBar listing unreadable profiles (FR-037), missing gallery folder: silently fall back to default graphic (FR-038), storage inaccessible: show "Could not save profile. Please check disk space and permissions." and preserve previous state, photo upload failure: preserve previous thumbnail and show error, external JSON deletion while shell is open: show error notification and navigate back to selector in AquaSync.App/ViewModels/AquariumSelectorViewModel.cs and AquaSync.App/ViewModels/ShellViewModel.cs
+- [x] T040 Verify locale-aware decimal input parsing for volume, dimensions, and layer depth — ensure CultureInfo.CurrentCulture is used for parsing, test with comma and period decimal separators (FR-015) in AquaSync.App/ViewModels/AquariumSelectorViewModel.cs and AquaSync.App/ViewModels/SettingsViewModel.cs
+- [x] T041 Run quickstart.md validation checklist — manually verify all 14 items: empty state, profile creation saves correctly, UOM locks, default thumbnail, uploaded photo, active card navigation, archived card read-only, archive/restore, delete, profile editing, substrate CRUD, back navigation, data persistence (SC-001 through SC-008)
 
 ---
 

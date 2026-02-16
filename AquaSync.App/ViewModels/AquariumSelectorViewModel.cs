@@ -45,6 +45,17 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     // --- Discard confirmation ---
     private bool _showDiscardConfirmation;
 
+    // --- Notification (FR-039) ---
+    private string _notificationMessage = string.Empty;
+    private bool _isNotificationOpen;
+
+    // --- Error notification ---
+    private string _errorMessage = string.Empty;
+    private bool _isErrorOpen;
+
+    // --- Saving indicator (FR-040) ---
+    private bool _isSaving;
+
     // --- Substrate entry form ---
     private bool _isAddingSubstrate;
     private string _entryBrand = string.Empty;
@@ -316,6 +327,76 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         set => SetProperty(ref _showDiscardConfirmation, value);
     }
 
+    // ========================================================================
+    // Notification properties (FR-039)
+    // ========================================================================
+
+    public string NotificationMessage
+    {
+        get => _notificationMessage;
+        private set => SetProperty(ref _notificationMessage, value);
+    }
+
+    public bool IsNotificationOpen
+    {
+        get => _isNotificationOpen;
+        private set => SetProperty(ref _isNotificationOpen, value);
+    }
+
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        private set => SetProperty(ref _errorMessage, value);
+    }
+
+    public bool IsErrorOpen
+    {
+        get => _isErrorOpen;
+        private set => SetProperty(ref _isErrorOpen, value);
+    }
+
+    /// <summary>
+    /// Shows an error notification that auto-dismisses after 5 seconds.
+    /// </summary>
+    public void ShowError(string message)
+    {
+        ErrorMessage = message;
+        IsErrorOpen = true;
+        _ = AutoDismissErrorAsync();
+    }
+
+    private async Task AutoDismissErrorAsync()
+    {
+        await Task.Delay(5000);
+        IsErrorOpen = false;
+    }
+
+    // ========================================================================
+    // Saving indicator (FR-040)
+    // ========================================================================
+
+    public bool IsSaving
+    {
+        get => _isSaving;
+        private set => SetProperty(ref _isSaving, value);
+    }
+
+    /// <summary>
+    /// Shows a success notification that auto-dismisses after 3 seconds (FR-039).
+    /// </summary>
+    public void ShowNotification(string message)
+    {
+        NotificationMessage = message;
+        IsNotificationOpen = true;
+        _ = AutoDismissNotificationAsync();
+    }
+
+    private async Task AutoDismissNotificationAsync()
+    {
+        await Task.Delay(3000);
+        IsNotificationOpen = false;
+    }
+
     /// <summary>
     /// True when the user has entered data in the creation form.
     /// </summary>
@@ -352,12 +433,79 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
                 Profiles.Add(aquarium);
             }
         }
+        catch (IOException)
+        {
+            ShowError("Could not load profiles. Please check disk permissions.");
+        }
         finally
         {
             IsLoading = false;
         }
 
         HasProfiles = Profiles.Count > 0;
+    }
+
+    // ========================================================================
+    // Archive / Restore methods (FR-028, FR-031)
+    // ========================================================================
+
+    /// <summary>
+    /// Sets aquarium status to Archived and refreshes the grid (FR-028).
+    /// Called by code-behind after confirmation dialog.
+    /// </summary>
+    public async Task ArchiveProfileAsync(Aquarium aquarium, CancellationToken cancellationToken = default)
+    {
+        var previousStatus = aquarium.Status;
+
+        try
+        {
+            aquarium.Status = AquariumStatus.Archived;
+            await _aquariumService.SaveAsync(aquarium, cancellationToken).ConfigureAwait(false);
+            await LoadProfilesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (IOException)
+        {
+            aquarium.Status = previousStatus;
+            ShowError("Could not archive profile. Please check disk space and permissions.");
+        }
+    }
+
+    /// <summary>
+    /// Sets aquarium status to Active and refreshes the grid (FR-031).
+    /// </summary>
+    public async Task RestoreProfileAsync(Aquarium aquarium, CancellationToken cancellationToken = default)
+    {
+        var previousStatus = aquarium.Status;
+
+        try
+        {
+            aquarium.Status = AquariumStatus.Active;
+            await _aquariumService.SaveAsync(aquarium, cancellationToken).ConfigureAwait(false);
+            await LoadProfilesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (IOException)
+        {
+            aquarium.Status = previousStatus;
+            ShowError("Could not restore profile. Please check disk space and permissions.");
+        }
+    }
+
+    /// <summary>
+    /// Permanently deletes an aquarium profile and its associated data (FR-032, FR-033).
+    /// Called by code-behind after confirmation dialog.
+    /// </summary>
+    public async Task DeleteProfileAsync(Aquarium aquarium, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _aquariumService.DeleteAsync(aquarium.Id, cancellationToken).ConfigureAwait(false);
+            Profiles.Remove(aquarium);
+            HasProfiles = Profiles.Count > 0;
+        }
+        catch (IOException)
+        {
+            ShowError("Could not delete profile. Please check disk permissions.");
+        }
     }
 
     // ========================================================================
@@ -466,15 +614,22 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
             }).ToList(),
         };
 
-        if (NewThumbnailSourcePath is not null)
+        try
         {
-            aquarium.ThumbnailPath = await _aquariumService
-                .SaveThumbnailAsync(aquarium.Id, NewThumbnailSourcePath, cancellationToken)
-                .ConfigureAwait(false);
-        }
+            if (NewThumbnailSourcePath is not null)
+            {
+                aquarium.ThumbnailPath = await _aquariumService
+                    .SaveThumbnailAsync(aquarium.Id, NewThumbnailSourcePath, cancellationToken)
+                    .ConfigureAwait(false);
+            }
 
-        await _aquariumService.SaveAsync(aquarium, cancellationToken).ConfigureAwait(false);
-        await LoadProfilesAsync(cancellationToken).ConfigureAwait(false);
+            await _aquariumService.SaveAsync(aquarium, cancellationToken).ConfigureAwait(false);
+            await LoadProfilesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (IOException)
+        {
+            ShowError("Could not save profile. Please check disk space and permissions.");
+        }
     }
 
     /// <summary>
@@ -552,12 +707,12 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
 
     private void OnArchiveProfile(Aquarium? aquarium)
     {
-        // Implemented in US5 (Phase 7).
+        // Confirmation dialog handled by code-behind, which calls ArchiveProfileAsync.
     }
 
     private void OnRestoreProfile(Aquarium? aquarium)
     {
-        // Implemented in US5 (Phase 7).
+        // Code-behind calls RestoreProfileAsync directly.
     }
 
     private void OnDeleteProfile(Aquarium? aquarium)

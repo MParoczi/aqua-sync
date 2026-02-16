@@ -99,6 +99,28 @@
             </NavigationViewItem>
         </NavigationView.FooterMenuItems>
 
-        <Frame x:Name="ContentFrame" />
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Archived read-only banner (FR-030) -->
+            <InfoBar
+                Grid.Row="0"
+                Title="This aquarium is archived (read-only)"
+                Message="Restore to make changes."
+                IsOpen="{x:Bind ViewModel.IsReadOnly, Mode=OneWay}"
+                Severity="Warning"
+                IsClosable="False">
+                <InfoBar.ActionButton>
+                    <Button
+                        Content="Restore"
+                        Click="RestoreBanner_Click" />
+                </InfoBar.ActionButton>
+            </InfoBar>
+
+            <Frame Grid.Row="1" x:Name="ContentFrame" />
+        </Grid>
     </NavigationView>
 </Page>

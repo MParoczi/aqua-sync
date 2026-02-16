@@ -15,6 +15,7 @@
     <Grid Padding="32">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -25,9 +26,23 @@
             Style="{StaticResource TitleLargeTextBlockStyle}"
             Margin="0,0,0,24" />
 
+        <!-- Notifications (FR-039) -->
+        <StackPanel Grid.Row="1" Spacing="4">
+            <InfoBar
+                Title="{x:Bind ViewModel.NotificationMessage, Mode=OneWay}"
+                IsOpen="{x:Bind ViewModel.IsNotificationOpen, Mode=OneWay}"
+                Severity="Success"
+                IsClosable="True" />
+            <InfoBar
+                Title="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                IsOpen="{x:Bind ViewModel.IsErrorOpen, Mode=OneWay}"
+                Severity="Error"
+                IsClosable="True" />
+        </StackPanel>
+
         <!-- Loading indicator -->
         <ProgressRing
-            Grid.Row="1"
+            Grid.Row="2"
             IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
             Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
             HorizontalAlignment="Center"
@@ -36,7 +51,7 @@
         <!-- Empty state (FR-003) -->
         <StackPanel
             x:Name="EmptyStatePanel"
-            Grid.Row="1"
+            Grid.Row="2"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Spacing="16"
@@ -65,7 +80,7 @@
         <!-- Aquarium grid (FR-001, FR-006) -->
         <GridView
             x:Name="AquariumGrid"
-            Grid.Row="1"
+            Grid.Row="2"
             ItemsSource="{x:Bind ViewModel.Profiles, Mode=OneWay}"
             IsItemClickEnabled="True"
             ItemClick="AquariumGrid_ItemClick"

@@ -32,6 +32,11 @@ public sealed class SettingsViewModel : ViewModelBase
     // --- State ---
     private bool _hasAquarium;
     private bool _isReadOnly;
+    private bool _isSaving;
+    private string _notificationMessage = string.Empty;
+    private bool _isNotificationOpen;
+    private string _errorMessage = string.Empty;
+    private bool _isErrorOpen;
 
     // --- Substrate entry form ---
     private bool _isAddingSubstrate;
@@ -85,6 +90,65 @@ public sealed class SettingsViewModel : ViewModelBase
     {
         get => _isReadOnly;
         private set => SetProperty(ref _isReadOnly, value);
+    }
+
+    public bool IsSaving
+    {
+        get => _isSaving;
+        private set => SetProperty(ref _isSaving, value);
+    }
+
+    public string NotificationMessage
+    {
+        get => _notificationMessage;
+        private set => SetProperty(ref _notificationMessage, value);
+    }
+
+    public bool IsNotificationOpen
+    {
+        get => _isNotificationOpen;
+        private set => SetProperty(ref _isNotificationOpen, value);
+    }
+
+    /// <summary>
+    /// Shows a success notification that auto-dismisses after 3 seconds (FR-039).
+    /// </summary>
+    public void ShowNotification(string message)
+    {
+        NotificationMessage = message;
+        IsNotificationOpen = true;
+        _ = AutoDismissNotificationAsync();
+    }
+
+    private async Task AutoDismissNotificationAsync()
+    {
+        await Task.Delay(3000);
+        IsNotificationOpen = false;
+    }
+
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        private set => SetProperty(ref _errorMessage, value);
+    }
+
+    public bool IsErrorOpen
+    {
+        get => _isErrorOpen;
+        private set => SetProperty(ref _isErrorOpen, value);
+    }
+
+    private void ShowError(string message)
+    {
+        ErrorMessage = message;
+        IsErrorOpen = true;
+        _ = AutoDismissErrorAsync();
+    }
+
+    private async Task AutoDismissErrorAsync()
+    {
+        await Task.Delay(5000);
+        IsErrorOpen = false;
     }
 
     // ========================================================================
@@ -305,27 +369,41 @@ public sealed class SettingsViewModel : ViewModelBase
             return;
         }
 
-        // Update editable fields (FR-016)
-        aquarium.Name = EditName.Trim();
-        aquarium.Description = string.IsNullOrWhiteSpace(EditNotes) ? null : EditNotes.Trim();
+        IsSaving = true;
 
-        // Update thumbnail if changed
-        if (EditThumbnailSourcePath is not null)
+        try
         {
-            aquarium.ThumbnailPath = await _aquariumService
-                .SaveThumbnailAsync(aquarium.Id, EditThumbnailSourcePath)
-                .ConfigureAwait(false);
-            EditThumbnailSourcePath = null;
+            // Update editable fields (FR-016)
+            aquarium.Name = EditName.Trim();
+            aquarium.Description = string.IsNullOrWhiteSpace(EditNotes) ? null : EditNotes.Trim();
+
+            // Update thumbnail if changed
+            if (EditThumbnailSourcePath is not null)
+            {
+                aquarium.ThumbnailPath = await _aquariumService
+                    .SaveThumbnailAsync(aquarium.Id, EditThumbnailSourcePath)
+                    .ConfigureAwait(false);
+                EditThumbnailSourcePath = null;
+            }
+
+            // Update substrates
+            aquarium.Substrates = Substrates.Select((s, i) =>
+            {
+                s.DisplayOrder = i;
+                return s;
+            }).ToList();
+
+            await _aquariumService.SaveAsync(aquarium).ConfigureAwait(false);
+            ShowNotification("Profile saved");
         }
-
-        // Update substrates
-        aquarium.Substrates = Substrates.Select((s, i) =>
+        catch (IOException)
         {
-            s.DisplayOrder = i;
-            return s;
-        }).ToList();
-
-        await _aquariumService.SaveAsync(aquarium).ConfigureAwait(false);
+            ShowError("Could not save profile. Please check disk space and permissions.");
+        }
+        finally
+        {
+            IsSaving = false;
+        }
     }
 
     // --- Substrate entry form helpers (FR-018, FR-020, FR-021) ---

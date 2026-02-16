@@ -84,6 +84,25 @@ public sealed class ShellViewModel : ViewModelBase
         IsReadOnly = _aquariumContext.IsReadOnly;
     }
 
+    /// <summary>
+    /// Restores the current archived aquarium to active status (FR-031).
+    /// Updates the context and hides the read-only banner.
+    /// </summary>
+    public async Task RestoreCurrentAquariumAsync(CancellationToken cancellationToken = default)
+    {
+        var aquarium = _aquariumContext.CurrentAquarium;
+        if (aquarium is null)
+        {
+            return;
+        }
+
+        aquarium.Status = AquariumStatus.Active;
+        await _aquariumService.SaveAsync(aquarium, cancellationToken).ConfigureAwait(false);
+
+        _aquariumContext.SetCurrentAquarium(aquarium);
+        IsReadOnly = _aquariumContext.IsReadOnly;
+    }
+
     private void OnGoBack()
     {
         _aquariumContext.Clear();

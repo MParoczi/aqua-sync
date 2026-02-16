@@ -107,6 +107,7 @@ public sealed partial class AquariumSelectorPage : Page
         {
             await ViewModel.SaveNewProfileAsync();
             ViewModel.ResetCreationForm();
+            ViewModel.ShowNotification("Aquarium profile created");
         }
         finally
         {
@@ -240,27 +241,69 @@ public sealed partial class AquariumSelectorPage : Page
         }
     }
 
-    private void ArchiveMenuItem_Click(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Shows confirmation dialog then archives the profile (FR-028).
+    /// </summary>
+    private async void ArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is MenuFlyoutItem { Tag: Aquarium aquarium })
+        if (sender is not MenuFlyoutItem { Tag: Aquarium aquarium })
         {
-            ViewModel.ArchiveProfileCommand.Execute(aquarium);
+            return;
+        }
+
+        var dialog = new ContentDialog
+        {
+            Title = "Archive Aquarium",
+            Content = "This aquarium will be archived. You can restore it later. Archive?",
+            PrimaryButtonText = "Archive",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = XamlRoot,
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await ViewModel.ArchiveProfileAsync(aquarium);
+            ViewModel.ShowNotification($"\"{aquarium.Name}\" archived");
         }
     }
 
-    private void RestoreMenuItem_Click(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Restores an archived profile back to active (FR-031).
+    /// </summary>
+    private async void RestoreMenuItem_Click(object sender, RoutedEventArgs e)
     {
         if (sender is MenuFlyoutItem { Tag: Aquarium aquarium })
         {
-            ViewModel.RestoreProfileCommand.Execute(aquarium);
+            await ViewModel.RestoreProfileAsync(aquarium);
+            ViewModel.ShowNotification($"\"{aquarium.Name}\" restored");
         }
     }
 
-    private void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Shows destructive confirmation dialog then permanently deletes the profile (FR-032, FR-033).
+    /// </summary>
+    private async void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is MenuFlyoutItem { Tag: Aquarium aquarium })
+        if (sender is not MenuFlyoutItem { Tag: Aquarium aquarium })
         {
-            ViewModel.DeleteProfileCommand.Execute(aquarium);
+            return;
+        }
+
+        var dialog = new ContentDialog
+        {
+            Title = "Delete Aquarium",
+            Content = $"Permanently delete \"{aquarium.Name}\"? This will remove all profile data, substrates, and photos. This action cannot be undone.",
+            PrimaryButtonText = "Delete",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = XamlRoot,
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await ViewModel.DeleteProfileAsync(aquarium);
+            ViewModel.ShowNotification($"\"{aquarium.Name}\" deleted");
         }
     }
 }

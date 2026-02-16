@@ -1,5 +1,6 @@
 using AquaSync.App.Contracts.Services;
 using AquaSync.App.ViewModels;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 
@@ -57,6 +58,14 @@ public sealed partial class ShellPage : Page
 
         var mainWindow = App.GetService<MainWindow>();
         mainWindow.ContentFrame.Navigate(typeof(AquariumSelectorPage));
+    }
+
+    /// <summary>
+    /// Restores the archived aquarium from the read-only banner (FR-031).
+    /// </summary>
+    private async void RestoreBanner_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.RestoreCurrentAquariumAsync();
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)

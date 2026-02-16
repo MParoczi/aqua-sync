@@ -17,6 +17,18 @@
                 Text="Settings"
                 Style="{StaticResource TitleTextBlockStyle}" />
 
+            <!-- Notifications (FR-039) -->
+            <InfoBar
+                Title="{x:Bind ViewModel.NotificationMessage, Mode=OneWay}"
+                IsOpen="{x:Bind ViewModel.IsNotificationOpen, Mode=OneWay}"
+                Severity="Success"
+                IsClosable="True" />
+            <InfoBar
+                Title="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                IsOpen="{x:Bind ViewModel.IsErrorOpen, Mode=OneWay}"
+                Severity="Error"
+                IsClosable="True" />
+
             <!-- Global settings section (FR-027 — placeholder for future app-wide settings) -->
             <StackPanel Spacing="8">
                 <TextBlock
@@ -133,11 +145,19 @@
                             Visibility="Collapsed" />
                     </StackPanel>
 
-                    <Button
-                        Content="Save Changes"
-                        Style="{StaticResource AccentButtonStyle}"
-                        Click="SaveProfile_Click"
-                        Visibility="{x:Bind ViewModel.IsReadOnly, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}" />
+                    <StackPanel Orientation="Horizontal" Spacing="12"
+                              Visibility="{x:Bind ViewModel.IsReadOnly, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
+                        <Button
+                            Content="Save Changes"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="SaveProfile_Click" />
+                        <ProgressRing
+                            IsActive="{x:Bind ViewModel.IsSaving, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.IsSaving, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+                            Width="24"
+                            Height="24"
+                            VerticalAlignment="Center" />
+                    </StackPanel>
                 </StackPanel>
 
                 <!-- Substrates section (FR-018, FR-019, FR-020) -->

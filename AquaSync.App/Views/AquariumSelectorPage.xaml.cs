@@ -187,6 +187,43 @@ public sealed partial class AquariumSelectorPage : Page
     }
 
     // ========================================================================
+    // Substrate entry handlers (FR-018, FR-020, FR-021)
+    // ========================================================================
+
+    private void ShowSubstrateForm_Click(object sender, RoutedEventArgs e) =>
+        ViewModel.ShowSubstrateFormCommand.Execute(null);
+
+    private void SaveSubstrateEntry_Click(object sender, RoutedEventArgs e) =>
+        ViewModel.SaveSubstrateEntryCommand.Execute(null);
+
+    private void CancelSubstrateEntry_Click(object sender, RoutedEventArgs e) =>
+        ViewModel.CancelSubstrateEntryCommand.Execute(null);
+
+    private void RemoveSubstrate_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: SubstrateEntry entry })
+        {
+            ViewModel.RemoveSubstrateCommand.Execute(entry);
+        }
+    }
+
+    private void MoveSubstrateUp_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: SubstrateEntry entry })
+        {
+            ViewModel.MoveSubstrateUpCommand.Execute(entry);
+        }
+    }
+
+    private void MoveSubstrateDown_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: SubstrateEntry entry })
+        {
+            ViewModel.MoveSubstrateDownCommand.Execute(entry);
+        }
+    }
+
+    // ========================================================================
     // Context menu handlers (FR-007)
     // ========================================================================
 

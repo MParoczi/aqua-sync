@@ -45,6 +45,16 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     // --- Discard confirmation ---
     private bool _showDiscardConfirmation;
 
+    // --- Substrate entry form ---
+    private bool _isAddingSubstrate;
+    private string _entryBrand = string.Empty;
+    private string _entryProductName = string.Empty;
+    private int _entryTypeIndex = -1;
+    private double _entryLayerDepth = double.NaN;
+    private DateTimeOffset? _entryDateAdded;
+    private string _entryNotes = string.Empty;
+    private string _substrateEntryError = string.Empty;
+
     public AquariumSelectorViewModel(IAquariumService aquariumService)
     {
         _aquariumService = aquariumService;
@@ -53,6 +63,13 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         ArchiveProfileCommand = new RelayCommand<Aquarium>(OnArchiveProfile);
         RestoreProfileCommand = new RelayCommand<Aquarium>(OnRestoreProfile);
         DeleteProfileCommand = new RelayCommand<Aquarium>(OnDeleteProfile);
+
+        ShowSubstrateFormCommand = new RelayCommand(OnShowSubstrateForm);
+        SaveSubstrateEntryCommand = new RelayCommand(OnSaveSubstrateEntry);
+        CancelSubstrateEntryCommand = new RelayCommand(OnCancelSubstrateEntry);
+        RemoveSubstrateCommand = new RelayCommand<SubstrateEntry>(OnRemoveSubstrate);
+        MoveSubstrateUpCommand = new RelayCommand<SubstrateEntry>(OnMoveSubstrateUp);
+        MoveSubstrateDownCommand = new RelayCommand<SubstrateEntry>(OnMoveSubstrateDown);
 
         ResetCreationForm();
     }
@@ -83,6 +100,14 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     public IRelayCommand<Aquarium> ArchiveProfileCommand { get; }
     public IRelayCommand<Aquarium> RestoreProfileCommand { get; }
     public IRelayCommand<Aquarium> DeleteProfileCommand { get; }
+
+    // Substrate entry commands (FR-020, FR-021)
+    public IRelayCommand ShowSubstrateFormCommand { get; }
+    public IRelayCommand SaveSubstrateEntryCommand { get; }
+    public IRelayCommand CancelSubstrateEntryCommand { get; }
+    public IRelayCommand<SubstrateEntry> RemoveSubstrateCommand { get; }
+    public IRelayCommand<SubstrateEntry> MoveSubstrateUpCommand { get; }
+    public IRelayCommand<SubstrateEntry> MoveSubstrateDownCommand { get; }
 
     // ========================================================================
     // Creation form properties (FR-008)
@@ -136,7 +161,13 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     public bool IsDimensionCentimeters
     {
         get => _isDimensionCentimeters;
-        set => SetProperty(ref _isDimensionCentimeters, value);
+        set
+        {
+            if (SetProperty(ref _isDimensionCentimeters, value))
+            {
+                OnPropertyChanged(nameof(DimensionUnitLabel));
+            }
+        }
     }
 
     public int NewAquariumTypeIndex
@@ -176,6 +207,68 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     }
 
     public bool HasThumbnailPreview => ThumbnailPreview is not null;
+
+    // ========================================================================
+    // Substrate entry form properties (FR-018, FR-019, FR-020)
+    // ========================================================================
+
+    public IReadOnlyList<SubstrateType> SubstrateTypes { get; } =
+        Enum.GetValues<SubstrateType>();
+
+    public ObservableCollection<SubstrateEntry> NewSubstrates { get; } = [];
+
+    /// <summary>
+    /// Dimension unit label derived from the creation form toggle (FR-019).
+    /// </summary>
+    public string DimensionUnitLabel => IsDimensionCentimeters ? "cm" : "in";
+
+    public bool IsAddingSubstrate
+    {
+        get => _isAddingSubstrate;
+        private set => SetProperty(ref _isAddingSubstrate, value);
+    }
+
+    public string EntryBrand
+    {
+        get => _entryBrand;
+        set => SetProperty(ref _entryBrand, value);
+    }
+
+    public string EntryProductName
+    {
+        get => _entryProductName;
+        set => SetProperty(ref _entryProductName, value);
+    }
+
+    public int EntryTypeIndex
+    {
+        get => _entryTypeIndex;
+        set => SetProperty(ref _entryTypeIndex, value);
+    }
+
+    public double EntryLayerDepth
+    {
+        get => _entryLayerDepth;
+        set => SetProperty(ref _entryLayerDepth, value);
+    }
+
+    public DateTimeOffset? EntryDateAdded
+    {
+        get => _entryDateAdded;
+        set => SetProperty(ref _entryDateAdded, value);
+    }
+
+    public string EntryNotes
+    {
+        get => _entryNotes;
+        set => SetProperty(ref _entryNotes, value);
+    }
+
+    public string SubstrateEntryError
+    {
+        get => _substrateEntryError;
+        private set => SetProperty(ref _substrateEntryError, value);
+    }
 
     // ========================================================================
     // Validation error properties (FR-014)
@@ -233,7 +326,8 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         !double.IsNaN(NewWidth) ||
         !double.IsNaN(NewHeight) ||
         !string.IsNullOrEmpty(NewNotes) ||
-        NewThumbnailSourcePath is not null;
+        NewThumbnailSourcePath is not null ||
+        NewSubstrates.Count > 0;
 
     // ========================================================================
     // Grid methods
@@ -365,6 +459,11 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
             Description = string.IsNullOrWhiteSpace(NewNotes) ? null : NewNotes.Trim(),
             Status = AquariumStatus.Active,
             CreatedAt = DateTimeOffset.UtcNow,
+            Substrates = NewSubstrates.Select((s, i) =>
+            {
+                s.DisplayOrder = i;
+                return s;
+            }).ToList(),
         };
 
         if (NewThumbnailSourcePath is not null)
@@ -412,6 +511,8 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         NewSetupDate = DateTimeOffset.Now;
         NewNotes = string.Empty;
         ClearThumbnailPreview();
+        NewSubstrates.Clear();
+        ResetSubstrateEntryForm();
 
         // Clear validation state
         NameError = string.Empty;
@@ -462,5 +563,98 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     private void OnDeleteProfile(Aquarium? aquarium)
     {
         // Implemented in US6 (Phase 8).
+    }
+
+    // --- Substrate entry form helpers (FR-018, FR-020, FR-021) ---
+
+    private void OnShowSubstrateForm()
+    {
+        ResetSubstrateEntryForm();
+        IsAddingSubstrate = true;
+    }
+
+    private void OnSaveSubstrateEntry()
+    {
+        if (!ValidateSubstrateEntry())
+        {
+            return;
+        }
+
+        var entry = new SubstrateEntry
+        {
+            Id = Guid.NewGuid(),
+            Brand = EntryBrand.Trim(),
+            ProductName = EntryProductName.Trim(),
+            Type = SubstrateTypes[EntryTypeIndex],
+            LayerDepth = EntryLayerDepth,
+            DateAdded = new DateTimeOffset(EntryDateAdded!.Value.Date, TimeSpan.Zero),
+            Notes = string.IsNullOrWhiteSpace(EntryNotes) ? null : EntryNotes.Trim(),
+            DisplayOrder = NewSubstrates.Count,
+        };
+
+        NewSubstrates.Add(entry);
+        ResetSubstrateEntryForm();
+        IsAddingSubstrate = false;
+    }
+
+    private void OnCancelSubstrateEntry()
+    {
+        ResetSubstrateEntryForm();
+        IsAddingSubstrate = false;
+    }
+
+    private void OnRemoveSubstrate(SubstrateEntry? entry)
+    {
+        if (entry is not null)
+        {
+            NewSubstrates.Remove(entry);
+        }
+    }
+
+    private void OnMoveSubstrateUp(SubstrateEntry? entry)
+    {
+        if (entry is null) return;
+        var index = NewSubstrates.IndexOf(entry);
+        if (index > 0)
+        {
+            NewSubstrates.Move(index, index - 1);
+        }
+    }
+
+    private void OnMoveSubstrateDown(SubstrateEntry? entry)
+    {
+        if (entry is null) return;
+        var index = NewSubstrates.IndexOf(entry);
+        if (index >= 0 && index < NewSubstrates.Count - 1)
+        {
+            NewSubstrates.Move(index, index + 1);
+        }
+    }
+
+    private bool ValidateSubstrateEntry()
+    {
+        if (string.IsNullOrWhiteSpace(EntryBrand) ||
+            string.IsNullOrWhiteSpace(EntryProductName) ||
+            EntryTypeIndex < 0 || EntryTypeIndex >= SubstrateTypes.Count ||
+            double.IsNaN(EntryLayerDepth) || EntryLayerDepth <= 0 ||
+            EntryDateAdded is null)
+        {
+            SubstrateEntryError = "All fields except notes are required";
+            return false;
+        }
+
+        SubstrateEntryError = string.Empty;
+        return true;
+    }
+
+    private void ResetSubstrateEntryForm()
+    {
+        EntryBrand = string.Empty;
+        EntryProductName = string.Empty;
+        EntryTypeIndex = -1;
+        EntryLayerDepth = double.NaN;
+        EntryDateAdded = DateTimeOffset.Now;
+        EntryNotes = string.Empty;
+        SubstrateEntryError = string.Empty;
     }
 }

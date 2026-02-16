@@ -9,6 +9,7 @@
         <converters:NullToDefaultImageConverter x:Key="NullToDefaultImageConverter" />
         <converters:AquariumStatusToOpacityConverter x:Key="StatusToOpacityConverter" />
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+        <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibility" />
     </Page.Resources>
 
     <Grid Padding="32">
@@ -207,5 +208,196 @@
                 </DataTemplate>
             </GridView.ItemTemplate>
         </GridView>
+
+        <!-- Profile creation dialog (FR-008, FR-013, FR-014) -->
+        <ContentDialog
+            x:Name="CreateProfileDialog"
+            Title="New Aquarium"
+            PrimaryButtonText="Save"
+            CloseButtonText="Cancel"
+            DefaultButton="Primary"
+            PrimaryButtonClick="CreateProfileDialog_PrimaryButtonClick"
+            Closing="CreateProfileDialog_Closing">
+
+            <ScrollViewer
+                VerticalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Disabled"
+                MaxHeight="520"
+                Padding="0,0,16,0">
+
+                <StackPanel Spacing="16" MinWidth="400">
+
+                    <!-- Name (VR-001) -->
+                    <StackPanel Spacing="4">
+                        <TextBox
+                            Header="Name"
+                            Text="{x:Bind ViewModel.NewName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            MaxLength="100"
+                            PlaceholderText="e.g. Living Room Tank" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.NameError, Mode=OneWay}"
+                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Visibility="{x:Bind ViewModel.NameError, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibility}}" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.DuplicateNameWarning, Mode=OneWay}"
+                            Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Visibility="{x:Bind ViewModel.DuplicateNameWarning, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibility}}" />
+                    </StackPanel>
+
+                    <!-- Volume with unit toggle (FR-008, FR-009, FR-015, VR-002) -->
+                    <StackPanel Spacing="4">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <NumberBox
+                                Grid.Column="0"
+                                Header="Volume"
+                                Value="{x:Bind ViewModel.NewVolume, Mode=TwoWay}"
+                                Minimum="0"
+                                SpinButtonPlacementMode="Compact"
+                                PlaceholderText="0" />
+                            <ToggleSwitch
+                                Grid.Column="1"
+                                IsOn="{x:Bind ViewModel.IsVolumeLiters, Mode=TwoWay}"
+                                OnContent="Liters"
+                                OffContent="Gallons"
+                                VerticalAlignment="Bottom"
+                                Margin="0,0,0,2" />
+                        </Grid>
+                        <TextBlock
+                            Text="{x:Bind ViewModel.VolumeError, Mode=OneWay}"
+                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Visibility="{x:Bind ViewModel.VolumeError, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibility}}" />
+                    </StackPanel>
+
+                    <!-- Dimensions with unit toggle (FR-008, FR-010, FR-015, VR-003/4/5) -->
+                    <StackPanel Spacing="4">
+                        <TextBlock
+                            Text="Dimensions"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <Grid ColumnSpacing="8" RowSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <NumberBox
+                                Grid.Column="0"
+                                Header="Length"
+                                Value="{x:Bind ViewModel.NewLength, Mode=TwoWay}"
+                                Minimum="0"
+                                PlaceholderText="0" />
+                            <NumberBox
+                                Grid.Column="1"
+                                Header="Width"
+                                Value="{x:Bind ViewModel.NewWidth, Mode=TwoWay}"
+                                Minimum="0"
+                                PlaceholderText="0" />
+                            <NumberBox
+                                Grid.Column="2"
+                                Header="Height"
+                                Value="{x:Bind ViewModel.NewHeight, Mode=TwoWay}"
+                                Minimum="0"
+                                PlaceholderText="0" />
+                        </Grid>
+                        <ToggleSwitch
+                            IsOn="{x:Bind ViewModel.IsDimensionCentimeters, Mode=TwoWay}"
+                            OnContent="Centimeters"
+                            OffContent="Inches" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.DimensionError, Mode=OneWay}"
+                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Visibility="{x:Bind ViewModel.DimensionError, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibility}}" />
+                    </StackPanel>
+
+                    <!-- Aquarium type (VR-006) -->
+                    <StackPanel Spacing="4">
+                        <ComboBox
+                            Header="Aquarium Type"
+                            ItemsSource="{x:Bind ViewModel.AquariumTypes}"
+                            SelectedIndex="{x:Bind ViewModel.NewAquariumTypeIndex, Mode=TwoWay}"
+                            HorizontalAlignment="Stretch"
+                            PlaceholderText="Select a type" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.TypeError, Mode=OneWay}"
+                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Visibility="{x:Bind ViewModel.TypeError, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibility}}" />
+                    </StackPanel>
+
+                    <!-- Setup date (VR-007) -->
+                    <StackPanel Spacing="4">
+                        <CalendarDatePicker
+                            Header="Setup Date"
+                            Date="{x:Bind ViewModel.NewSetupDate, Mode=TwoWay}"
+                            HorizontalAlignment="Stretch"
+                            PlaceholderText="Select a date" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.DateError, Mode=OneWay}"
+                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Visibility="{x:Bind ViewModel.DateError, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibility}}" />
+                    </StackPanel>
+
+                    <!-- Notes (optional) -->
+                    <TextBox
+                        Header="Notes"
+                        Text="{x:Bind ViewModel.NewNotes, Mode=TwoWay}"
+                        AcceptsReturn="True"
+                        TextWrapping="Wrap"
+                        MaxLength="2000"
+                        Height="100"
+                        PlaceholderText="Optional notes about this aquarium" />
+
+                    <!-- Thumbnail photo (FR-012) -->
+                    <StackPanel Spacing="8">
+                        <TextBlock
+                            Text="Thumbnail Photo"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <Image
+                            Source="{x:Bind ViewModel.ThumbnailPreview, Mode=OneWay}"
+                            MaxHeight="160"
+                            HorizontalAlignment="Left"
+                            Stretch="Uniform"
+                            Visibility="{x:Bind ViewModel.HasThumbnailPreview, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button
+                                Content="Browse..."
+                                Click="BrowsePhoto_Click" />
+                            <Button
+                                Content="Clear"
+                                Click="ClearPhoto_Click"
+                                Visibility="{x:Bind ViewModel.HasThumbnailPreview, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                        <TextBlock
+                            x:Name="PhotoErrorText"
+                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Visibility="Collapsed" />
+                    </StackPanel>
+
+                    <!-- Discard confirmation (FR-014) -->
+                    <InfoBar
+                        Title="Discard changes?"
+                        Message="You have unsaved data. Are you sure you want to discard?"
+                        IsOpen="{x:Bind ViewModel.ShowDiscardConfirmation, Mode=OneWay}"
+                        Severity="Warning"
+                        IsClosable="False">
+                        <InfoBar.ActionButton>
+                            <Button
+                                Content="Discard"
+                                Click="ConfirmDiscard_Click" />
+                        </InfoBar.ActionButton>
+                    </InfoBar>
+
+                </StackPanel>
+            </ScrollViewer>
+        </ContentDialog>
     </Grid>
 </Page>

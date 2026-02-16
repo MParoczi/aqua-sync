@@ -3,9 +3,9 @@ using AquaSync.Eheim.Devices.Enums;
 namespace AquaSync.Eheim.Devices;
 
 /// <summary>
-/// Interface for an EHEIM professionel 5e filter device.
-/// All observable properties are backed by BehaviorSubject — new subscribers receive the latest value immediately.
-/// Flow rates are always normalized to metric (L/h). Frequencies are in Hz.
+///     Interface for an EHEIM professionel 5e filter device.
+///     All observable properties are backed by BehaviorSubject — new subscribers receive the latest value immediately.
+///     Flow rates are always normalized to metric (L/h). Frequencies are in Hz.
 /// </summary>
 public interface IEheimFilter : IEheimDevice
 {

@@ -1,126 +1,126 @@
 <Page
-    x:Class="AquaSync.App.Views.ShellPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="using:AquaSync.App.Converters">
+  x:Class="AquaSync.App.Views.ShellPage"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:converters="using:AquaSync.App.Converters">
 
-    <Page.Resources>
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
-    </Page.Resources>
+  <Page.Resources>
+    <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+  </Page.Resources>
 
-    <NavigationView
-        x:Name="NavigationViewControl"
-        IsBackButtonVisible="Visible"
-        IsBackEnabled="True"
-        IsSettingsVisible="False"
-        SelectionChanged="OnSelectionChanged"
-        BackRequested="OnBackRequested">
+  <NavigationView
+    x:Name="NavigationViewControl"
+    IsBackButtonVisible="Visible"
+    IsBackEnabled="True"
+    IsSettingsVisible="False"
+    SelectionChanged="OnSelectionChanged"
+    BackRequested="OnBackRequested">
 
-        <!-- Shell header showing aquarium name, type, and read-only badge (FR-023) -->
-        <NavigationView.Header>
-            <Grid Padding="0,4,0,0">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                    <TextBlock
-                        Text="{x:Bind ViewModel.AquariumName, Mode=OneWay}"
-                        Style="{StaticResource TitleTextBlockStyle}" />
-                    <TextBlock
-                        Text="{x:Bind ViewModel.AquariumTypeDisplay, Mode=OneWay}"
-                        Style="{StaticResource SubtitleTextBlockStyle}"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        VerticalAlignment="Center" />
-                    <Border
-                        Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
-                        CornerRadius="4"
-                        Padding="8,4"
-                        VerticalAlignment="Center"
-                        Visibility="{x:Bind ViewModel.IsReadOnly, Mode=OneWay, Converter={StaticResource BoolToVisibility}}">
-                        <TextBlock
-                            Text="Read-only"
-                            Style="{StaticResource CaptionTextBlockStyle}"
-                            FontWeight="SemiBold" />
-                    </Border>
-                </StackPanel>
-            </Grid>
-        </NavigationView.Header>
+    <!-- Shell header showing aquarium name, type, and read-only badge (FR-023) -->
+    <NavigationView.Header>
+      <Grid Padding="0,4,0,0">
+        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+          <TextBlock
+            Text="{x:Bind ViewModel.AquariumName, Mode=OneWay}"
+            Style="{StaticResource TitleTextBlockStyle}" />
+          <TextBlock
+            Text="{x:Bind ViewModel.AquariumTypeDisplay, Mode=OneWay}"
+            Style="{StaticResource SubtitleTextBlockStyle}"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            VerticalAlignment="Center" />
+          <Border
+            Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+            CornerRadius="4"
+            Padding="8,4"
+            VerticalAlignment="Center"
+            Visibility="{x:Bind ViewModel.IsReadOnly, Mode=OneWay, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock
+              Text="Read-only"
+              Style="{StaticResource CaptionTextBlockStyle}"
+              FontWeight="SemiBold" />
+          </Border>
+        </StackPanel>
+      </Grid>
+    </NavigationView.Header>
 
-        <NavigationView.MenuItems>
-            <NavigationViewItem Content="Dashboard" Tag="AquaSync.App.ViewModels.DashboardViewModel">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE80F;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItem Content="Lamps" Tag="AquaSync.App.ViewModels.LampsViewModel">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE7E8;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItem Content="Filters" Tag="AquaSync.App.ViewModels.FiltersViewModel">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE71D;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItem Content="Other Equipment" Tag="AquaSync.App.ViewModels.OtherEquipmentViewModel">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE950;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItem Content="Water Parameters" Tag="AquaSync.App.ViewModels.WaterParametersViewModel">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE9D9;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItem Content="Maintenance" Tag="AquaSync.App.ViewModels.MaintenanceViewModel">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE90F;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItem Content="Gallery" Tag="AquaSync.App.ViewModels.GalleryViewModel">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE8B9;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItem Content="Fertilizers" Tag="AquaSync.App.ViewModels.FertilizersViewModel">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE945;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItem Content="Plants" Tag="AquaSync.App.ViewModels.PlantsViewModel">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE8BE;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-        </NavigationView.MenuItems>
+    <NavigationView.MenuItems>
+      <NavigationViewItem Content="Dashboard" Tag="AquaSync.App.ViewModels.DashboardViewModel">
+        <NavigationViewItem.Icon>
+          <FontIcon Glyph="&#xE80F;" />
+        </NavigationViewItem.Icon>
+      </NavigationViewItem>
+      <NavigationViewItem Content="Lamps" Tag="AquaSync.App.ViewModels.LampsViewModel">
+        <NavigationViewItem.Icon>
+          <FontIcon Glyph="&#xE7E8;" />
+        </NavigationViewItem.Icon>
+      </NavigationViewItem>
+      <NavigationViewItem Content="Filters" Tag="AquaSync.App.ViewModels.FiltersViewModel">
+        <NavigationViewItem.Icon>
+          <FontIcon Glyph="&#xE71D;" />
+        </NavigationViewItem.Icon>
+      </NavigationViewItem>
+      <NavigationViewItem Content="Other Equipment" Tag="AquaSync.App.ViewModels.OtherEquipmentViewModel">
+        <NavigationViewItem.Icon>
+          <FontIcon Glyph="&#xE950;" />
+        </NavigationViewItem.Icon>
+      </NavigationViewItem>
+      <NavigationViewItem Content="Water Parameters" Tag="AquaSync.App.ViewModels.WaterParametersViewModel">
+        <NavigationViewItem.Icon>
+          <FontIcon Glyph="&#xE9D9;" />
+        </NavigationViewItem.Icon>
+      </NavigationViewItem>
+      <NavigationViewItem Content="Maintenance" Tag="AquaSync.App.ViewModels.MaintenanceViewModel">
+        <NavigationViewItem.Icon>
+          <FontIcon Glyph="&#xE90F;" />
+        </NavigationViewItem.Icon>
+      </NavigationViewItem>
+      <NavigationViewItem Content="Gallery" Tag="AquaSync.App.ViewModels.GalleryViewModel">
+        <NavigationViewItem.Icon>
+          <FontIcon Glyph="&#xE8B9;" />
+        </NavigationViewItem.Icon>
+      </NavigationViewItem>
+      <NavigationViewItem Content="Fertilizers" Tag="AquaSync.App.ViewModels.FertilizersViewModel">
+        <NavigationViewItem.Icon>
+          <FontIcon Glyph="&#xE945;" />
+        </NavigationViewItem.Icon>
+      </NavigationViewItem>
+      <NavigationViewItem Content="Plants" Tag="AquaSync.App.ViewModels.PlantsViewModel">
+        <NavigationViewItem.Icon>
+          <FontIcon Glyph="&#xE8BE;" />
+        </NavigationViewItem.Icon>
+      </NavigationViewItem>
+    </NavigationView.MenuItems>
 
-        <NavigationView.FooterMenuItems>
-            <NavigationViewItem Content="Settings" Tag="AquaSync.App.ViewModels.SettingsViewModel">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE713;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-        </NavigationView.FooterMenuItems>
+    <NavigationView.FooterMenuItems>
+      <NavigationViewItem Content="Settings" Tag="AquaSync.App.ViewModels.SettingsViewModel">
+        <NavigationViewItem.Icon>
+          <FontIcon Glyph="&#xE713;" />
+        </NavigationViewItem.Icon>
+      </NavigationViewItem>
+    </NavigationView.FooterMenuItems>
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
 
-            <!-- Archived read-only banner (FR-030) -->
-            <InfoBar
-                Grid.Row="0"
-                Title="This aquarium is archived (read-only)"
-                Message="Restore to make changes."
-                IsOpen="{x:Bind ViewModel.IsReadOnly, Mode=OneWay}"
-                Severity="Warning"
-                IsClosable="False">
-                <InfoBar.ActionButton>
-                    <Button
-                        Content="Restore"
-                        Click="RestoreBanner_Click" />
-                </InfoBar.ActionButton>
-            </InfoBar>
+      <!-- Archived read-only banner (FR-030) -->
+      <InfoBar
+        Grid.Row="0"
+        Title="This aquarium is archived (read-only)"
+        Message="Restore to make changes."
+        IsOpen="{x:Bind ViewModel.IsReadOnly, Mode=OneWay}"
+        Severity="Warning"
+        IsClosable="False">
+        <InfoBar.ActionButton>
+          <Button
+            Content="Restore"
+            Click="RestoreBanner_Click" />
+        </InfoBar.ActionButton>
+      </InfoBar>
 
-            <Frame Grid.Row="1" x:Name="ContentFrame" />
-        </Grid>
-    </NavigationView>
+      <Frame Grid.Row="1" x:Name="ContentFrame" />
+    </Grid>
+  </NavigationView>
 </Page>

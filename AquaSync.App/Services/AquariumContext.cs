@@ -4,7 +4,7 @@ using AquaSync.App.Models;
 namespace AquaSync.App.Services;
 
 /// <summary>
-/// Holds the currently selected aquarium for the active management shell session.
+///     Holds the currently selected aquarium for the active management shell session.
 /// </summary>
 public sealed class AquariumContext : IAquariumContext
 {

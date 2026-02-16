@@ -4,8 +4,8 @@ using Microsoft.UI.Xaml.Media.Imaging;
 namespace AquaSync.App.Converters;
 
 /// <summary>
-/// Returns a BitmapImage for the thumbnail path. Falls back to the bundled default
-/// aquarium graphic when the path is null or the file is missing (FR-038).
+///     Returns a BitmapImage for the thumbnail path. Falls back to the bundled default
+///     aquarium graphic when the path is null or the file is missing (FR-038).
 /// </summary>
 public sealed class NullToDefaultImageConverter : IValueConverter
 {
@@ -20,10 +20,7 @@ public sealed class NullToDefaultImageConverter : IValueConverter
                 "AquaSync");
             var fullPath = Path.Combine(rootPath, thumbnailPath);
 
-            if (File.Exists(fullPath))
-            {
-                return new BitmapImage(new Uri(fullPath));
-            }
+            if (File.Exists(fullPath)) return new BitmapImage(new Uri(fullPath));
         }
 
         return new BitmapImage(s_defaultAssetUri);

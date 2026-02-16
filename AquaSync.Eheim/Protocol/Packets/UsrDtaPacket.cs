@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace AquaSync.Eheim.Protocol.Packets;
 
 /// <summary>
-/// Represents a USRDTA message containing device metadata and user configuration.
+///     Represents a USRDTA message containing device metadata and user configuration.
 /// </summary>
 internal sealed record UsrDtaPacket
 {

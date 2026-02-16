@@ -1,20 +1,19 @@
+using System.ComponentModel;
+using Windows.Storage.Pickers;
 using AquaSync.App.Models;
 using AquaSync.App.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Windows.Storage.Pickers;
 using WinRT.Interop;
 
 namespace AquaSync.App.Views;
 
 /// <summary>
-/// Launch screen where the user selects an aquarium profile from a grid of cards.
+///     Launch screen where the user selects an aquarium profile from a grid of cards.
 /// </summary>
 public sealed partial class AquariumSelectorPage : Page
 {
     private bool _forceCloseDialog;
-
-    public AquariumSelectorViewModel ViewModel { get; }
 
     public AquariumSelectorPage()
     {
@@ -26,20 +25,19 @@ public sealed partial class AquariumSelectorPage : Page
         ViewModel.PropertyChanged += ViewModel_PropertyChanged;
     }
 
+    public AquariumSelectorViewModel ViewModel { get; }
+
     private async void AquariumSelectorPage_Loaded(object sender, RoutedEventArgs e)
     {
         await ViewModel.LoadProfilesAsync();
     }
 
     /// <summary>
-    /// Toggle between empty state and grid based on HasProfiles.
+    ///     Toggle between empty state and grid based on HasProfiles.
     /// </summary>
-    private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(ViewModel.HasProfiles) or nameof(ViewModel.IsLoading))
-        {
-            UpdateVisualState();
-        }
+        if (e.PropertyName is nameof(ViewModel.HasProfiles) or nameof(ViewModel.IsLoading)) UpdateVisualState();
     }
 
     private void UpdateVisualState()
@@ -62,7 +60,7 @@ public sealed partial class AquariumSelectorPage : Page
     }
 
     /// <summary>
-    /// Navigates to the management shell when a profile card is clicked (FR-022).
+    ///     Navigates to the management shell when a profile card is clicked (FR-022).
     /// </summary>
     private void AquariumGrid_ItemClick(object sender, ItemClickEventArgs e)
     {
@@ -78,7 +76,7 @@ public sealed partial class AquariumSelectorPage : Page
     // ========================================================================
 
     /// <summary>
-    /// Opens the creation dialog from the "Add Aquarium" card or empty state button.
+    ///     Opens the creation dialog from the "Add Aquarium" card or empty state button.
     /// </summary>
     private async void AddAquariumCard_Click(object sender, RoutedEventArgs e)
     {
@@ -90,7 +88,7 @@ public sealed partial class AquariumSelectorPage : Page
     }
 
     /// <summary>
-    /// Validates and saves the new profile when the user clicks "Save" (FR-034, FR-035).
+    ///     Validates and saves the new profile when the user clicks "Save" (FR-034, FR-035).
     /// </summary>
     private async void CreateProfileDialog_PrimaryButtonClick(
         ContentDialog sender,
@@ -116,7 +114,7 @@ public sealed partial class AquariumSelectorPage : Page
     }
 
     /// <summary>
-    /// Intercepts cancel to show discard confirmation when unsaved data exists (FR-014).
+    ///     Intercepts cancel to show discard confirmation when unsaved data exists (FR-014).
     /// </summary>
     private void CreateProfileDialog_Closing(
         ContentDialog sender,
@@ -132,7 +130,7 @@ public sealed partial class AquariumSelectorPage : Page
     }
 
     /// <summary>
-    /// Confirms discarding unsaved changes and closes the dialog.
+    ///     Confirms discarding unsaved changes and closes the dialog.
     /// </summary>
     private void ConfirmDiscard_Click(object sender, RoutedEventArgs e)
     {
@@ -143,8 +141,8 @@ public sealed partial class AquariumSelectorPage : Page
     }
 
     /// <summary>
-    /// Opens a file picker for thumbnail photo selection (FR-012).
-    /// Validates format and 10 MB size limit.
+    ///     Opens a file picker for thumbnail photo selection (FR-012).
+    ///     Validates format and 10 MB size limit.
     /// </summary>
     private async void BrowsePhoto_Click(object sender, RoutedEventArgs e)
     {
@@ -161,10 +159,7 @@ public sealed partial class AquariumSelectorPage : Page
         InitializeWithWindow.Initialize(picker, hwnd);
 
         var file = await picker.PickSingleFileAsync();
-        if (file is null)
-        {
-            return;
-        }
+        if (file is null) return;
 
         var properties = await file.GetBasicPropertiesAsync();
         if (properties.Size > 10 * 1024 * 1024)
@@ -179,7 +174,7 @@ public sealed partial class AquariumSelectorPage : Page
     }
 
     /// <summary>
-    /// Clears the selected thumbnail photo.
+    ///     Clears the selected thumbnail photo.
     /// </summary>
     private void ClearPhoto_Click(object sender, RoutedEventArgs e)
     {
@@ -191,37 +186,34 @@ public sealed partial class AquariumSelectorPage : Page
     // Substrate entry handlers (FR-018, FR-020, FR-021)
     // ========================================================================
 
-    private void ShowSubstrateForm_Click(object sender, RoutedEventArgs e) =>
+    private void ShowSubstrateForm_Click(object sender, RoutedEventArgs e)
+    {
         ViewModel.ShowSubstrateFormCommand.Execute(null);
+    }
 
-    private void SaveSubstrateEntry_Click(object sender, RoutedEventArgs e) =>
+    private void SaveSubstrateEntry_Click(object sender, RoutedEventArgs e)
+    {
         ViewModel.SaveSubstrateEntryCommand.Execute(null);
+    }
 
-    private void CancelSubstrateEntry_Click(object sender, RoutedEventArgs e) =>
+    private void CancelSubstrateEntry_Click(object sender, RoutedEventArgs e)
+    {
         ViewModel.CancelSubstrateEntryCommand.Execute(null);
+    }
 
     private void RemoveSubstrate_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button { Tag: SubstrateEntry entry })
-        {
-            ViewModel.RemoveSubstrateCommand.Execute(entry);
-        }
+        if (sender is Button { Tag: SubstrateEntry entry }) ViewModel.RemoveSubstrateCommand.Execute(entry);
     }
 
     private void MoveSubstrateUp_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button { Tag: SubstrateEntry entry })
-        {
-            ViewModel.MoveSubstrateUpCommand.Execute(entry);
-        }
+        if (sender is Button { Tag: SubstrateEntry entry }) ViewModel.MoveSubstrateUpCommand.Execute(entry);
     }
 
     private void MoveSubstrateDown_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button { Tag: SubstrateEntry entry })
-        {
-            ViewModel.MoveSubstrateDownCommand.Execute(entry);
-        }
+        if (sender is Button { Tag: SubstrateEntry entry }) ViewModel.MoveSubstrateDownCommand.Execute(entry);
     }
 
     // ========================================================================
@@ -229,12 +221,12 @@ public sealed partial class AquariumSelectorPage : Page
     // ========================================================================
 
     /// <summary>
-    /// Toggles Archive/Restore menu items based on the card's aquarium status.
+    ///     Toggles Archive/Restore menu items based on the card's aquarium status.
     /// </summary>
     private void CardMenuFlyout_Opening(object sender, object e)
     {
         if (sender is MenuFlyout flyout && flyout.Items.Count >= 2
-            && flyout.Items[0].Tag is Aquarium aquarium)
+                                        && flyout.Items[0].Tag is Aquarium aquarium)
         {
             flyout.Items[0].Visibility = aquarium.IsArchived ? Visibility.Collapsed : Visibility.Visible;
             flyout.Items[1].Visibility = aquarium.IsArchived ? Visibility.Visible : Visibility.Collapsed;
@@ -242,14 +234,11 @@ public sealed partial class AquariumSelectorPage : Page
     }
 
     /// <summary>
-    /// Shows confirmation dialog then archives the profile (FR-028).
+    ///     Shows confirmation dialog then archives the profile (FR-028).
     /// </summary>
     private async void ArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not MenuFlyoutItem { Tag: Aquarium aquarium })
-        {
-            return;
-        }
+        if (sender is not MenuFlyoutItem { Tag: Aquarium aquarium }) return;
 
         var dialog = new ContentDialog
         {
@@ -258,7 +247,7 @@ public sealed partial class AquariumSelectorPage : Page
             PrimaryButtonText = "Archive",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Close,
-            XamlRoot = XamlRoot,
+            XamlRoot = XamlRoot
         };
 
         if (await dialog.ShowAsync() == ContentDialogResult.Primary)
@@ -269,7 +258,7 @@ public sealed partial class AquariumSelectorPage : Page
     }
 
     /// <summary>
-    /// Restores an archived profile back to active (FR-031).
+    ///     Restores an archived profile back to active (FR-031).
     /// </summary>
     private async void RestoreMenuItem_Click(object sender, RoutedEventArgs e)
     {
@@ -281,14 +270,11 @@ public sealed partial class AquariumSelectorPage : Page
     }
 
     /// <summary>
-    /// Shows destructive confirmation dialog then permanently deletes the profile (FR-032, FR-033).
+    ///     Shows destructive confirmation dialog then permanently deletes the profile (FR-032, FR-033).
     /// </summary>
     private async void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not MenuFlyoutItem { Tag: Aquarium aquarium })
-        {
-            return;
-        }
+        if (sender is not MenuFlyoutItem { Tag: Aquarium aquarium }) return;
 
         var dialog = new ContentDialog
         {
@@ -297,7 +283,7 @@ public sealed partial class AquariumSelectorPage : Page
             PrimaryButtonText = "Delete",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Close,
-            XamlRoot = XamlRoot,
+            XamlRoot = XamlRoot
         };
 
         if (await dialog.ShowAsync() == ContentDialogResult.Primary)

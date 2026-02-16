@@ -1,16 +1,16 @@
 namespace AquaSync.Chihiros.Protocol;
 
 /// <summary>
-/// Builds BLE command byte arrays for the Chihiros protocol.
-/// Command structure: [cmd_id, 1, param_count+5, msg_hi, msg_lo, mode, ...params, checksum]
+///     Builds BLE command byte arrays for the Chihiros protocol.
+///     Command structure: [cmd_id, 1, param_count+5, msg_hi, msg_lo, mode, ...params, checksum]
 /// </summary>
 internal static class CommandBuilder
 {
     private const byte Forbidden = 90;
 
     /// <summary>
-    /// Encode a raw command. Parameters are sanitized (0x5A replaced with 0x59).
-    /// If the checksum equals 0x5A, the message ID is bumped and encoding retried.
+    ///     Encode a raw command. Parameters are sanitized (0x5A replaced with 0x59).
+    ///     If the checksum equals 0x5A, the message ID is bumped and encoding retried.
     /// </summary>
     internal static byte[] Encode(byte commandId, byte mode, MessageId msgId, ReadOnlySpan<byte> parameters)
     {
@@ -24,12 +24,9 @@ internal static class CommandBuilder
         command[4] = msgId.Low;
         command[5] = mode;
 
-        for (int i = 0; i < parameters.Length; i++)
-        {
-            command[6 + i] = parameters[i] == Forbidden ? (byte)(Forbidden - 1) : parameters[i];
-        }
+        for (var i = 0; i < parameters.Length; i++) command[6 + i] = parameters[i] == Forbidden ? (byte)(Forbidden - 1) : parameters[i];
 
-        byte checksum = CalculateChecksum(command.AsSpan(0, command.Length - 1));
+        var checksum = CalculateChecksum(command.AsSpan(0, command.Length - 1));
 
         if (checksum == Forbidden)
         {
@@ -43,21 +40,18 @@ internal static class CommandBuilder
     }
 
     /// <summary>
-    /// XOR checksum of bytes from index 1 onward.
+    ///     XOR checksum of bytes from index 1 onward.
     /// </summary>
     private static byte CalculateChecksum(ReadOnlySpan<byte> command)
     {
-        byte checksum = command[1];
-        for (int i = 2; i < command.Length; i++)
-        {
-            checksum ^= command[i];
-        }
+        var checksum = command[1];
+        for (var i = 2; i < command.Length; i++) checksum ^= command[i];
         return checksum;
     }
 
     /// <summary>
-    /// Set brightness of a single color channel (manual mode).
-    /// Command ID: 90, Mode: 7, Parameters: [channelId, brightness]
+    ///     Set brightness of a single color channel (manual mode).
+    ///     Command ID: 90, Mode: 7, Parameters: [channelId, brightness]
     /// </summary>
     public static byte[] CreateManualBrightnessCommand(MessageId msgId, byte channelId, byte brightness)
     {
@@ -66,8 +60,8 @@ internal static class CommandBuilder
     }
 
     /// <summary>
-    /// Switch the device to auto mode.
-    /// Command ID: 90, Mode: 5, Parameters: [18, 255, 255]
+    ///     Switch the device to auto mode.
+    ///     Command ID: 90, Mode: 5, Parameters: [18, 255, 255]
     /// </summary>
     public static byte[] CreateSwitchToAutoModeCommand(MessageId msgId)
     {
@@ -76,8 +70,8 @@ internal static class CommandBuilder
     }
 
     /// <summary>
-    /// Set the current time on the device (required for auto mode scheduling).
-    /// Command ID: 90, Mode: 9, Parameters: [year-2000, month, weekday(1-7), hour, minute, second]
+    ///     Set the current time on the device (required for auto mode scheduling).
+    ///     Command ID: 90, Mode: 9, Parameters: [year-2000, month, weekday(1-7), hour, minute, second]
     /// </summary>
     public static byte[] CreateSetTimeCommand(MessageId msgId, DateTime now)
     {
@@ -94,9 +88,9 @@ internal static class CommandBuilder
     }
 
     /// <summary>
-    /// Add an auto-mode scheduling setting.
-    /// Command ID: 165, Mode: 25.
-    /// The protocol supports 3 brightness slots mapped to channels 0, 1, 2.
+    ///     Add an auto-mode scheduling setting.
+    ///     Command ID: 165, Mode: 25.
+    ///     The protocol supports 3 brightness slots mapped to channels 0, 1, 2.
     /// </summary>
     public static byte[] CreateAddAutoSettingCommand(
         MessageId msgId,
@@ -125,7 +119,7 @@ internal static class CommandBuilder
     }
 
     /// <summary>
-    /// Delete an auto-mode scheduling setting by sending brightness values of 255.
+    ///     Delete an auto-mode scheduling setting by sending brightness values of 255.
     /// </summary>
     public static byte[] CreateDeleteAutoSettingCommand(
         MessageId msgId,
@@ -138,8 +132,8 @@ internal static class CommandBuilder
     }
 
     /// <summary>
-    /// Reset all auto-mode settings.
-    /// Command ID: 90, Mode: 5, Parameters: [5, 255, 255]
+    ///     Reset all auto-mode settings.
+    ///     Command ID: 90, Mode: 5, Parameters: [5, 255, 255]
     /// </summary>
     public static byte[] CreateResetAutoSettingsCommand(MessageId msgId)
     {

@@ -3,7 +3,7 @@ using AquaSync.Chihiros.Devices;
 namespace AquaSync.Chihiros.Scheduling;
 
 /// <summary>
-/// Represents an auto-mode lighting schedule with per-channel brightness.
+///     Represents an auto-mode lighting schedule with per-channel brightness.
 /// </summary>
 /// <param name="Sunrise">Time the light begins turning on.</param>
 /// <param name="Sunset">Time the light begins turning off.</param>

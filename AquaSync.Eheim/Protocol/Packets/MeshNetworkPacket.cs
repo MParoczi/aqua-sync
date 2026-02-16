@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace AquaSync.Eheim.Protocol.Packets;
 
 /// <summary>
-/// Represents a MESH_NETWORK message containing all connected device MAC addresses.
+///     Represents a MESH_NETWORK message containing all connected device MAC addresses.
 /// </summary>
 internal sealed record MeshNetworkPacket
 {

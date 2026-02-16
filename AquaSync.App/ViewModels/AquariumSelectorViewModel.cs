@@ -7,64 +7,64 @@ using Microsoft.UI.Xaml.Media.Imaging;
 namespace AquaSync.App.ViewModels;
 
 /// <summary>
-/// ViewModel for the aquarium selector launch screen.
-/// Loads profiles, exposes sorted collection, and provides profile creation logic.
+///     ViewModel for the aquarium selector launch screen.
+///     Loads profiles, exposes sorted collection, and provides profile creation logic.
 /// </summary>
 public sealed class AquariumSelectorViewModel : ViewModelBase
 {
     private readonly IAquariumService _aquariumService;
-
-    // --- Grid state ---
-    private bool _isLoading;
-    private bool _hasProfiles;
-
-    // --- Creation form fields ---
-    private string _newName = string.Empty;
-    private double _newVolume = double.NaN;
-    private bool _isVolumeLiters = true;
-    private double _newLength = double.NaN;
-    private double _newWidth = double.NaN;
-    private double _newHeight = double.NaN;
-    private bool _isDimensionCentimeters = true;
-    private int _newAquariumTypeIndex = -1;
-    private DateTimeOffset? _newSetupDate;
-    private string _newNotes = string.Empty;
-    private string? _newThumbnailSourcePath;
-    private BitmapImage? _thumbnailPreview;
-
-    // --- Validation errors ---
-    private string _nameError = string.Empty;
-    private string _volumeError = string.Empty;
-    private string _dimensionError = string.Empty;
-    private string _typeError = string.Empty;
     private string _dateError = string.Empty;
+    private string _dimensionError = string.Empty;
 
     // --- Duplicate name warning ---
     private string _duplicateNameWarning = string.Empty;
-
-    // --- Discard confirmation ---
-    private bool _showDiscardConfirmation;
-
-    // --- Notification (FR-039) ---
-    private string _notificationMessage = string.Empty;
-    private bool _isNotificationOpen;
+    private string _entryBrand = string.Empty;
+    private DateTimeOffset? _entryDateAdded;
+    private double _entryLayerDepth = double.NaN;
+    private string _entryNotes = string.Empty;
+    private string _entryProductName = string.Empty;
+    private int _entryTypeIndex = -1;
 
     // --- Error notification ---
     private string _errorMessage = string.Empty;
-    private bool _isErrorOpen;
-
-    // --- Saving indicator (FR-040) ---
-    private bool _isSaving;
+    private bool _hasProfiles;
 
     // --- Substrate entry form ---
     private bool _isAddingSubstrate;
-    private string _entryBrand = string.Empty;
-    private string _entryProductName = string.Empty;
-    private int _entryTypeIndex = -1;
-    private double _entryLayerDepth = double.NaN;
-    private DateTimeOffset? _entryDateAdded;
-    private string _entryNotes = string.Empty;
+    private bool _isDimensionCentimeters = true;
+    private bool _isErrorOpen;
+
+    // --- Grid state ---
+    private bool _isLoading;
+    private bool _isNotificationOpen;
+
+    // --- Saving indicator (FR-040) ---
+    private bool _isSaving;
+    private bool _isVolumeLiters = true;
+
+    // --- Validation errors ---
+    private string _nameError = string.Empty;
+    private int _newAquariumTypeIndex = -1;
+    private double _newHeight = double.NaN;
+    private double _newLength = double.NaN;
+
+    // --- Creation form fields ---
+    private string _newName = string.Empty;
+    private string _newNotes = string.Empty;
+    private DateTimeOffset? _newSetupDate;
+    private string? _newThumbnailSourcePath;
+    private double _newVolume = double.NaN;
+    private double _newWidth = double.NaN;
+
+    // --- Notification (FR-039) ---
+    private string _notificationMessage = string.Empty;
+
+    // --- Discard confirmation ---
+    private bool _showDiscardConfirmation;
     private string _substrateEntryError = string.Empty;
+    private BitmapImage? _thumbnailPreview;
+    private string _typeError = string.Empty;
+    private string _volumeError = string.Empty;
 
     public AquariumSelectorViewModel(IAquariumService aquariumService)
     {
@@ -132,10 +132,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         get => _newName;
         set
         {
-            if (SetProperty(ref _newName, value))
-            {
-                CheckDuplicateName();
-            }
+            if (SetProperty(ref _newName, value)) CheckDuplicateName();
         }
     }
 
@@ -174,10 +171,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         get => _isDimensionCentimeters;
         set
         {
-            if (SetProperty(ref _isDimensionCentimeters, value))
-            {
-                OnPropertyChanged(nameof(DimensionUnitLabel));
-            }
+            if (SetProperty(ref _isDimensionCentimeters, value)) OnPropertyChanged(nameof(DimensionUnitLabel));
         }
     }
 
@@ -210,10 +204,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         get => _thumbnailPreview;
         private set
         {
-            if (SetProperty(ref _thumbnailPreview, value))
-            {
-                OnPropertyChanged(nameof(HasThumbnailPreview));
-            }
+            if (SetProperty(ref _thumbnailPreview, value)) OnPropertyChanged(nameof(HasThumbnailPreview));
         }
     }
 
@@ -229,7 +220,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     public ObservableCollection<SubstrateEntry> NewSubstrates { get; } = [];
 
     /// <summary>
-    /// Dimension unit label derived from the creation form toggle (FR-019).
+    ///     Dimension unit label derived from the creation form toggle (FR-019).
     /// </summary>
     public string DimensionUnitLabel => IsDimensionCentimeters ? "cm" : "in";
 
@@ -355,8 +346,31 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         private set => SetProperty(ref _isErrorOpen, value);
     }
 
+    // ========================================================================
+    // Saving indicator (FR-040)
+    // ========================================================================
+
+    public bool IsSaving
+    {
+        get => _isSaving;
+        private set => SetProperty(ref _isSaving, value);
+    }
+
     /// <summary>
-    /// Shows an error notification that auto-dismisses after 5 seconds.
+    ///     True when the user has entered data in the creation form.
+    /// </summary>
+    public bool HasUnsavedCreationData =>
+        !string.IsNullOrWhiteSpace(NewName) ||
+        !double.IsNaN(NewVolume) ||
+        !double.IsNaN(NewLength) ||
+        !double.IsNaN(NewWidth) ||
+        !double.IsNaN(NewHeight) ||
+        !string.IsNullOrEmpty(NewNotes) ||
+        NewThumbnailSourcePath is not null ||
+        NewSubstrates.Count > 0;
+
+    /// <summary>
+    ///     Shows an error notification that auto-dismisses after 5 seconds.
     /// </summary>
     public void ShowError(string message)
     {
@@ -371,18 +385,8 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         IsErrorOpen = false;
     }
 
-    // ========================================================================
-    // Saving indicator (FR-040)
-    // ========================================================================
-
-    public bool IsSaving
-    {
-        get => _isSaving;
-        private set => SetProperty(ref _isSaving, value);
-    }
-
     /// <summary>
-    /// Shows a success notification that auto-dismisses after 3 seconds (FR-039).
+    ///     Shows a success notification that auto-dismisses after 3 seconds (FR-039).
     /// </summary>
     public void ShowNotification(string message)
     {
@@ -396,19 +400,6 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         await Task.Delay(3000);
         IsNotificationOpen = false;
     }
-
-    /// <summary>
-    /// True when the user has entered data in the creation form.
-    /// </summary>
-    public bool HasUnsavedCreationData =>
-        !string.IsNullOrWhiteSpace(NewName) ||
-        !double.IsNaN(NewVolume) ||
-        !double.IsNaN(NewLength) ||
-        !double.IsNaN(NewWidth) ||
-        !double.IsNaN(NewHeight) ||
-        !string.IsNullOrEmpty(NewNotes) ||
-        NewThumbnailSourcePath is not null ||
-        NewSubstrates.Count > 0;
 
     // ========================================================================
     // Grid methods
@@ -428,10 +419,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
 
             Profiles.Clear();
 
-            foreach (var aquarium in sorted)
-            {
-                Profiles.Add(aquarium);
-            }
+            foreach (var aquarium in sorted) Profiles.Add(aquarium);
         }
         catch (IOException)
         {
@@ -450,8 +438,8 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     // ========================================================================
 
     /// <summary>
-    /// Sets aquarium status to Archived and refreshes the grid (FR-028).
-    /// Called by code-behind after confirmation dialog.
+    ///     Sets aquarium status to Archived and refreshes the grid (FR-028).
+    ///     Called by code-behind after confirmation dialog.
     /// </summary>
     public async Task ArchiveProfileAsync(Aquarium aquarium, CancellationToken cancellationToken = default)
     {
@@ -471,7 +459,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Sets aquarium status to Active and refreshes the grid (FR-031).
+    ///     Sets aquarium status to Active and refreshes the grid (FR-031).
     /// </summary>
     public async Task RestoreProfileAsync(Aquarium aquarium, CancellationToken cancellationToken = default)
     {
@@ -491,8 +479,8 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Permanently deletes an aquarium profile and its associated data (FR-032, FR-033).
-    /// Called by code-behind after confirmation dialog.
+    ///     Permanently deletes an aquarium profile and its associated data (FR-032, FR-033).
+    ///     Called by code-behind after confirmation dialog.
     /// </summary>
     public async Task DeleteProfileAsync(Aquarium aquarium, CancellationToken cancellationToken = default)
     {
@@ -513,8 +501,8 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     // ========================================================================
 
     /// <summary>
-    /// Validates all creation form fields. Returns true if valid.
-    /// Sets error properties for inline indicators (FR-014).
+    ///     Validates all creation form fields. Returns true if valid.
+    ///     Sets error properties for inline indicators (FR-014).
     /// </summary>
     public bool ValidateCreationForm()
     {
@@ -586,7 +574,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Creates and saves a new aquarium profile, then refreshes the grid.
+    ///     Creates and saves a new aquarium profile, then refreshes the grid.
     /// </summary>
     public async Task SaveNewProfileAsync(CancellationToken cancellationToken = default)
     {
@@ -611,17 +599,15 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
             {
                 s.DisplayOrder = i;
                 return s;
-            }).ToList(),
+            }).ToList()
         };
 
         try
         {
             if (NewThumbnailSourcePath is not null)
-            {
                 aquarium.ThumbnailPath = await _aquariumService
                     .SaveThumbnailAsync(aquarium.Id, NewThumbnailSourcePath, cancellationToken)
                     .ConfigureAwait(false);
-            }
 
             await _aquariumService.SaveAsync(aquarium, cancellationToken).ConfigureAwait(false);
             await LoadProfilesAsync(cancellationToken).ConfigureAwait(false);
@@ -633,7 +619,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Sets the thumbnail preview from a picked file path.
+    ///     Sets the thumbnail preview from a picked file path.
     /// </summary>
     public void SetThumbnailPreview(string sourceFilePath)
     {
@@ -642,7 +628,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Clears the thumbnail selection.
+    ///     Clears the thumbnail selection.
     /// </summary>
     public void ClearThumbnailPreview()
     {
@@ -651,7 +637,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Resets all creation form fields to defaults (FR-008).
+    ///     Resets all creation form fields to defaults (FR-008).
     /// </summary>
     public void ResetCreationForm()
     {
@@ -730,10 +716,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
 
     private void OnSaveSubstrateEntry()
     {
-        if (!ValidateSubstrateEntry())
-        {
-            return;
-        }
+        if (!ValidateSubstrateEntry()) return;
 
         var entry = new SubstrateEntry
         {
@@ -744,7 +727,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
             LayerDepth = EntryLayerDepth,
             DateAdded = new DateTimeOffset(EntryDateAdded!.Value.Date, TimeSpan.Zero),
             Notes = string.IsNullOrWhiteSpace(EntryNotes) ? null : EntryNotes.Trim(),
-            DisplayOrder = NewSubstrates.Count,
+            DisplayOrder = NewSubstrates.Count
         };
 
         NewSubstrates.Add(entry);
@@ -760,30 +743,21 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
 
     private void OnRemoveSubstrate(SubstrateEntry? entry)
     {
-        if (entry is not null)
-        {
-            NewSubstrates.Remove(entry);
-        }
+        if (entry is not null) NewSubstrates.Remove(entry);
     }
 
     private void OnMoveSubstrateUp(SubstrateEntry? entry)
     {
         if (entry is null) return;
         var index = NewSubstrates.IndexOf(entry);
-        if (index > 0)
-        {
-            NewSubstrates.Move(index, index - 1);
-        }
+        if (index > 0) NewSubstrates.Move(index, index - 1);
     }
 
     private void OnMoveSubstrateDown(SubstrateEntry? entry)
     {
         if (entry is null) return;
         var index = NewSubstrates.IndexOf(entry);
-        if (index >= 0 && index < NewSubstrates.Count - 1)
-        {
-            NewSubstrates.Move(index, index + 1);
-        }
+        if (index >= 0 && index < NewSubstrates.Count - 1) NewSubstrates.Move(index, index + 1);
     }
 
     private bool ValidateSubstrateEntry()

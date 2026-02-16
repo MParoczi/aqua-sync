@@ -4,8 +4,8 @@ using Microsoft.UI.Xaml.Data;
 namespace AquaSync.App.Converters;
 
 /// <summary>
-/// Converts a string to Visibility. Non-empty = Visible, null/empty = Collapsed.
-/// Used to show/hide inline validation error TextBlocks (FR-014).
+///     Converts a string to Visibility. Non-empty = Visible, null/empty = Collapsed.
+///     Used to show/hide inline validation error TextBlocks (FR-014).
 /// </summary>
 public sealed class StringNotEmptyToVisibilityConverter : IValueConverter
 {

@@ -4,8 +4,8 @@ using Zeroconf;
 namespace AquaSync.Eheim.Discovery;
 
 /// <summary>
-/// Discovers EHEIM Digital hubs on the local network using mDNS (Zeroconf).
-/// Scans for the "_http._tcp.local." service type and filters for EHEIM devices.
+///     Discovers EHEIM Digital hubs on the local network using mDNS (Zeroconf).
+///     Scans for the "_http._tcp.local." service type and filters for EHEIM devices.
 /// </summary>
 public sealed class EheimDiscoveryService : IEheimDiscoveryService
 {
@@ -20,7 +20,7 @@ public sealed class EheimDiscoveryService : IEheimDiscoveryService
             {
                 var responses = await ZeroconfResolver.ResolveAsync(
                     ServiceType,
-                    scanTime: timeout,
+                    timeout,
                     cancellationToken: ct);
 
                 foreach (var host in responses)
@@ -29,9 +29,9 @@ public sealed class EheimDiscoveryService : IEheimDiscoveryService
                         continue;
 
                     observer.OnNext(new DiscoveredHub(
-                        Host: host.DisplayName,
-                        IpAddress: host.IPAddress,
-                        Name: host.DisplayName));
+                        host.DisplayName,
+                        host.IPAddress,
+                        host.DisplayName));
                 }
             }
             catch (OperationCanceledException)

@@ -1,20 +1,18 @@
+using Windows.Storage.Pickers;
 using AquaSync.App.Models;
 using AquaSync.App.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Windows.Storage.Pickers;
 using WinRT.Interop;
 
 namespace AquaSync.App.Views;
 
 /// <summary>
-/// Settings page with dual-scope layout: global settings and aquarium-scoped
-/// profile editing with substrate management (FR-016, FR-017, FR-027).
+///     Settings page with dual-scope layout: global settings and aquarium-scoped
+///     profile editing with substrate management (FR-016, FR-017, FR-027).
 /// </summary>
 public sealed partial class SettingsPage : Page
 {
-    public SettingsViewModel ViewModel { get; }
-
     public SettingsPage()
     {
         ViewModel = App.GetService<SettingsViewModel>();
@@ -23,6 +21,8 @@ public sealed partial class SettingsPage : Page
 
         Loaded += SettingsPage_Loaded;
     }
+
+    public SettingsViewModel ViewModel { get; }
 
     private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
     {
@@ -33,8 +33,10 @@ public sealed partial class SettingsPage : Page
     // Profile editing handlers (FR-016)
     // ========================================================================
 
-    private void SaveProfile_Click(object sender, RoutedEventArgs e) =>
+    private void SaveProfile_Click(object sender, RoutedEventArgs e)
+    {
         ViewModel.SaveProfileCommand.Execute(null);
+    }
 
     private async void BrowsePhoto_Click(object sender, RoutedEventArgs e)
     {
@@ -51,10 +53,7 @@ public sealed partial class SettingsPage : Page
         InitializeWithWindow.Initialize(picker, hwnd);
 
         var file = await picker.PickSingleFileAsync();
-        if (file is null)
-        {
-            return;
-        }
+        if (file is null) return;
 
         var properties = await file.GetBasicPropertiesAsync();
         if (properties.Size > 10 * 1024 * 1024)
@@ -78,36 +77,33 @@ public sealed partial class SettingsPage : Page
     // Substrate entry handlers (FR-018, FR-020, FR-021)
     // ========================================================================
 
-    private void ShowSubstrateForm_Click(object sender, RoutedEventArgs e) =>
+    private void ShowSubstrateForm_Click(object sender, RoutedEventArgs e)
+    {
         ViewModel.ShowSubstrateFormCommand.Execute(null);
+    }
 
-    private void SaveSubstrateEntry_Click(object sender, RoutedEventArgs e) =>
+    private void SaveSubstrateEntry_Click(object sender, RoutedEventArgs e)
+    {
         ViewModel.SaveSubstrateEntryCommand.Execute(null);
+    }
 
-    private void CancelSubstrateEntry_Click(object sender, RoutedEventArgs e) =>
+    private void CancelSubstrateEntry_Click(object sender, RoutedEventArgs e)
+    {
         ViewModel.CancelSubstrateEntryCommand.Execute(null);
+    }
 
     private void RemoveSubstrate_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button { Tag: SubstrateEntry entry })
-        {
-            ViewModel.RemoveSubstrateCommand.Execute(entry);
-        }
+        if (sender is Button { Tag: SubstrateEntry entry }) ViewModel.RemoveSubstrateCommand.Execute(entry);
     }
 
     private void MoveSubstrateUp_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button { Tag: SubstrateEntry entry })
-        {
-            ViewModel.MoveSubstrateUpCommand.Execute(entry);
-        }
+        if (sender is Button { Tag: SubstrateEntry entry }) ViewModel.MoveSubstrateUpCommand.Execute(entry);
     }
 
     private void MoveSubstrateDown_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button { Tag: SubstrateEntry entry })
-        {
-            ViewModel.MoveSubstrateDownCommand.Execute(entry);
-        }
+        if (sender is Button { Tag: SubstrateEntry entry }) ViewModel.MoveSubstrateDownCommand.Execute(entry);
     }
 }

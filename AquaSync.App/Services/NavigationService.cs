@@ -6,7 +6,7 @@ using Microsoft.UI.Xaml.Navigation;
 namespace AquaSync.App.Services;
 
 /// <summary>
-/// Implements Frame-based navigation for the ShellPage's content area.
+///     Implements Frame-based navigation for the ShellPage's content area.
 /// </summary>
 public sealed class NavigationService : INavigationService
 {
@@ -38,60 +38,40 @@ public sealed class NavigationService : INavigationService
     {
         var pageType = _pageService.GetPageType(pageKey);
 
-        if (Frame is null)
-        {
-            return false;
-        }
+        if (Frame is null) return false;
 
         if (Frame.Content?.GetType() == pageType
             && (parameter is null || parameter.Equals(_lastParameterUsed)))
-        {
             return false;
-        }
 
         Frame.Tag = clearNavigation;
         var navigated = Frame.Navigate(pageType, parameter);
 
-        if (navigated)
-        {
-            _lastParameterUsed = parameter;
-        }
+        if (navigated) _lastParameterUsed = parameter;
 
         return navigated;
     }
 
     public bool GoBack()
     {
-        if (!CanGoBack)
-        {
-            return false;
-        }
+        if (!CanGoBack) return false;
 
         var vmBeforeNavigation = _frame?.GetPageViewModel();
         _frame?.GoBack();
 
-        if (vmBeforeNavigation is INavigationAware navigationAware)
-        {
-            navigationAware.OnNavigatedFrom();
-        }
+        if (vmBeforeNavigation is INavigationAware navigationAware) navigationAware.OnNavigatedFrom();
 
         return true;
     }
 
     private void RegisterFrameEvents()
     {
-        if (_frame is not null)
-        {
-            _frame.Navigated += OnNavigated;
-        }
+        if (_frame is not null) _frame.Navigated += OnNavigated;
     }
 
     private void UnregisterFrameEvents()
     {
-        if (_frame is not null)
-        {
-            _frame.Navigated -= OnNavigated;
-        }
+        if (_frame is not null) _frame.Navigated -= OnNavigated;
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)
@@ -99,15 +79,9 @@ public sealed class NavigationService : INavigationService
         if (sender is Frame frame)
         {
             var clearNavigation = frame.Tag is true;
-            if (clearNavigation)
-            {
-                frame.BackStack.Clear();
-            }
+            if (clearNavigation) frame.BackStack.Clear();
 
-            if (frame.GetPageViewModel() is INavigationAware navigationAware)
-            {
-                navigationAware.OnNavigatedTo(e.Parameter);
-            }
+            if (frame.GetPageViewModel() is INavigationAware navigationAware) navigationAware.OnNavigatedTo(e.Parameter);
 
             Navigated?.Invoke(sender, e);
         }

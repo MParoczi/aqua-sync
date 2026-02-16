@@ -12,27 +12,20 @@ using AquaSync.Eheim.Transport;
 namespace AquaSync.Eheim;
 
 /// <summary>
-/// Connects to an EHEIM Digital hub via WebSocket, discovers devices, and routes messages.
+///     Connects to an EHEIM Digital hub via WebSocket, discovers devices, and routes messages.
 /// </summary>
 public sealed class EheimHub : IEheimHub
 {
-    private readonly IEheimTransport _transport;
-    private readonly Uri _endpoint;
-    private readonly ConcurrentDictionary<string, EheimDevice> _devices = new();
     private readonly Subject<IEheimDevice> _deviceDiscovered = new();
-    private IDisposable? _messageSubscription;
+    private readonly ConcurrentDictionary<string, EheimDevice> _devices = new();
+    private readonly Uri _endpoint;
+    private readonly ConcurrentDictionary<string, int> _pendingFilterVersions = new();
 
     // Temporary storage: we may receive FILTER_DATA before USRDTA for a device,
     // or vice versa. We need both to fully construct an EheimFilter.
     private readonly ConcurrentDictionary<string, UsrDtaPacket> _pendingUsrDta = new();
-    private readonly ConcurrentDictionary<string, int> _pendingFilterVersions = new();
-
-    public bool IsConnected => _transport.IsConnected;
-
-    public IObservable<IEheimDevice> DeviceDiscovered => _deviceDiscovered.AsObservable();
-
-    public IReadOnlyDictionary<string, IEheimDevice> Devices =>
-        _devices.ToDictionary(kv => kv.Key, kv => (IEheimDevice)kv.Value);
+    private readonly IEheimTransport _transport;
+    private IDisposable? _messageSubscription;
 
     public EheimHub(string host = "eheimdigital.local")
         : this(new EheimWebSocketTransport(), host)
@@ -44,6 +37,13 @@ public sealed class EheimHub : IEheimHub
         _transport = transport;
         _endpoint = new Uri($"ws://{host}/ws");
     }
+
+    public bool IsConnected => _transport.IsConnected;
+
+    public IObservable<IEheimDevice> DeviceDiscovered => _deviceDiscovered.AsObservable();
+
+    public IReadOnlyDictionary<string, IEheimDevice> Devices =>
+        _devices.ToDictionary(kv => kv.Key, kv => (IEheimDevice)kv.Value);
 
     public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
@@ -64,10 +64,7 @@ public sealed class EheimHub : IEheimHub
     public async Task RefreshAsync(CancellationToken cancellationToken = default)
     {
         await _transport.SendAsync(PacketBuilder.GetUsrDta("ALL"), cancellationToken).ConfigureAwait(false);
-        foreach (var device in _devices.Values)
-        {
-            await device.RequestUpdateAsync(cancellationToken).ConfigureAwait(false);
-        }
+        foreach (var device in _devices.Values) await device.RequestUpdateAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async ValueTask DisposeAsync()
@@ -101,10 +98,7 @@ public sealed class EheimHub : IEheimHub
 
             default:
                 // Route to the device if known
-                if (_devices.TryGetValue(from, out var device))
-                {
-                    device.UpdateFromMessage(message);
-                }
+                if (_devices.TryGetValue(from, out var device)) device.UpdateFromMessage(message);
                 break;
         }
     }
@@ -115,13 +109,9 @@ public sealed class EheimHub : IEheimHub
         if (packet is null) return;
 
         foreach (var mac in packet.ClientList)
-        {
             if (!_devices.ContainsKey(mac) && !_pendingUsrDta.ContainsKey(mac))
-            {
                 // Request metadata for unknown devices
                 _ = _transport.SendAsync(PacketBuilder.GetUsrDta(mac));
-            }
-        }
     }
 
     private void HandleUsrDta(JsonNode message)
@@ -147,10 +137,7 @@ public sealed class EheimHub : IEheimHub
             _ = _transport.SendAsync(PacketBuilder.GetFilterData(mac));
 
             // Also check if we already have filter version from a previous FILTER_DATA
-            if (_pendingFilterVersions.TryRemove(mac, out var filterVersion))
-            {
-                TryCreateFilter(mac, usrDta, filterVersion);
-            }
+            if (_pendingFilterVersions.TryRemove(mac, out var filterVersion)) TryCreateFilter(mac, usrDta, filterVersion);
         }
         // Other device types are not supported yet — silently ignore
     }
@@ -166,10 +153,7 @@ public sealed class EheimHub : IEheimHub
 
         // Device not yet created — extract filter version for pending creation
         var filterVersion = message["version"]?.GetValue<int>();
-        if (filterVersion.HasValue)
-        {
-            HandleFilterDataForDiscovery(from, filterVersion.Value);
-        }
+        if (filterVersion.HasValue) HandleFilterDataForDiscovery(from, filterVersion.Value);
     }
 
     private void HandleFilterDataForDiscovery(string mac, int filterVersion)
@@ -177,13 +161,9 @@ public sealed class EheimHub : IEheimHub
         if (_devices.ContainsKey(mac)) return;
 
         if (_pendingUsrDta.TryRemove(mac, out var usrDta))
-        {
             TryCreateFilter(mac, usrDta, filterVersion);
-        }
         else
-        {
             _pendingFilterVersions[mac] = filterVersion;
-        }
     }
 
     private void TryCreateFilter(string mac, UsrDtaPacket usrDta, int filterVersion)

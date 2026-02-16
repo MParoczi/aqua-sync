@@ -4,8 +4,8 @@ using Microsoft.UI.Xaml.Data;
 namespace AquaSync.App.Converters;
 
 /// <summary>
-/// Converts a boolean to Visibility. True = Visible, False = Collapsed.
-/// Pass any ConverterParameter to invert the logic.
+///     Converts a boolean to Visibility. True = Visible, False = Collapsed.
+///     Pass any ConverterParameter to invert the logic.
 /// </summary>
 public sealed class BoolToVisibilityConverter : IValueConverter
 {
@@ -14,10 +14,7 @@ public sealed class BoolToVisibilityConverter : IValueConverter
         var boolValue = value is true;
         var invert = parameter is not null;
 
-        if (invert)
-        {
-            boolValue = !boolValue;
-        }
+        if (invert) boolValue = !boolValue;
 
         return boolValue ? Visibility.Visible : Visibility.Collapsed;
     }

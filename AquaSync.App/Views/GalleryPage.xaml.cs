@@ -5,12 +5,12 @@ namespace AquaSync.App.Views;
 
 public sealed partial class GalleryPage : Page
 {
-    public GalleryViewModel ViewModel { get; }
-
     public GalleryPage()
     {
         ViewModel = App.GetService<GalleryViewModel>();
         InitializeComponent();
         DataContext = ViewModel;
     }
+
+    public GalleryViewModel ViewModel { get; }
 }

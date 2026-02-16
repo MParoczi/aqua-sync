@@ -4,7 +4,7 @@ using AquaSync.App.Models;
 namespace AquaSync.App.Services;
 
 /// <summary>
-/// Provides CRUD operations for aquarium profiles and manages associated gallery files.
+///     Provides CRUD operations for aquarium profiles and manages associated gallery files.
 /// </summary>
 public sealed class AquariumService : IAquariumService
 {
@@ -44,10 +44,7 @@ public sealed class AquariumService : IAquariumService
 
         var galleryPath = GetGalleryPath(id);
 
-        if (Directory.Exists(galleryPath))
-        {
-            Directory.Delete(galleryPath, recursive: true);
-        }
+        if (Directory.Exists(galleryPath)) Directory.Delete(galleryPath, true);
     }
 
     public async Task<string> SaveThumbnailAsync(Guid aquariumId, string sourceFilePath, CancellationToken cancellationToken = default)
@@ -62,7 +59,7 @@ public sealed class AquariumService : IAquariumService
         var targetFileName = ThumbnailPrefix + extension;
         var targetPath = Path.Combine(galleryPath, targetFileName);
 
-        await Task.Run(() => File.Copy(sourceFilePath, targetPath, overwrite: true), cancellationToken).ConfigureAwait(false);
+        await Task.Run(() => File.Copy(sourceFilePath, targetPath, true), cancellationToken).ConfigureAwait(false);
 
         // Return relative path for storage in the aquarium JSON.
         return Path.Combine(GalleryFolder, aquariumId.ToString(), targetFileName);
@@ -72,10 +69,7 @@ public sealed class AquariumService : IAquariumService
     {
         var galleryPath = GetGalleryPath(aquariumId);
 
-        if (Directory.Exists(galleryPath))
-        {
-            DeleteExistingThumbnails(galleryPath);
-        }
+        if (Directory.Exists(galleryPath)) DeleteExistingThumbnails(galleryPath);
 
         return Task.CompletedTask;
     }
@@ -87,9 +81,6 @@ public sealed class AquariumService : IAquariumService
 
     private static void DeleteExistingThumbnails(string galleryPath)
     {
-        foreach (var file in Directory.GetFiles(galleryPath, $"{ThumbnailPrefix}.*"))
-        {
-            File.Delete(file);
-        }
+        foreach (var file in Directory.GetFiles(galleryPath, $"{ThumbnailPrefix}.*")) File.Delete(file);
     }
 }

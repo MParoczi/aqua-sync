@@ -7,46 +7,46 @@ using Microsoft.UI.Xaml.Media.Imaging;
 namespace AquaSync.App.ViewModels;
 
 /// <summary>
-/// ViewModel for the Settings page. Provides dual-scope settings:
-/// global section (placeholder) and aquarium-scoped section for profile
-/// editing and substrate management (FR-016, FR-017, FR-027).
+///     ViewModel for the Settings page. Provides dual-scope settings:
+///     global section (placeholder) and aquarium-scoped section for profile
+///     editing and substrate management (FR-016, FR-017, FR-027).
 /// </summary>
 public sealed class SettingsViewModel : ViewModelBase
 {
-    private readonly IAquariumService _aquariumService;
     private readonly IAquariumContext _aquariumContext;
+    private readonly IAquariumService _aquariumService;
+    private string _aquariumTypeDisplay = string.Empty;
+    private string _dimensionsDisplay = string.Empty;
+    private string _dimensionUnitLabel = string.Empty;
 
     // --- Editable fields ---
     private string _editName = string.Empty;
     private string _editNotes = string.Empty;
-    private string? _editThumbnailSourcePath;
     private BitmapImage? _editThumbnailPreview;
-
-    // --- Locked field displays ---
-    private string _volumeDisplay = string.Empty;
-    private string _dimensionsDisplay = string.Empty;
-    private string _aquariumTypeDisplay = string.Empty;
-    private string _setupDateDisplay = string.Empty;
-    private string _dimensionUnitLabel = string.Empty;
+    private string? _editThumbnailSourcePath;
+    private string _entryBrand = string.Empty;
+    private DateTimeOffset? _entryDateAdded;
+    private double _entryLayerDepth = double.NaN;
+    private string _entryNotes = string.Empty;
+    private string _entryProductName = string.Empty;
+    private int _entryTypeIndex = -1;
+    private string _errorMessage = string.Empty;
 
     // --- State ---
     private bool _hasAquarium;
-    private bool _isReadOnly;
-    private bool _isSaving;
-    private string _notificationMessage = string.Empty;
-    private bool _isNotificationOpen;
-    private string _errorMessage = string.Empty;
-    private bool _isErrorOpen;
 
     // --- Substrate entry form ---
     private bool _isAddingSubstrate;
-    private string _entryBrand = string.Empty;
-    private string _entryProductName = string.Empty;
-    private int _entryTypeIndex = -1;
-    private double _entryLayerDepth = double.NaN;
-    private DateTimeOffset? _entryDateAdded;
-    private string _entryNotes = string.Empty;
+    private bool _isErrorOpen;
+    private bool _isNotificationOpen;
+    private bool _isReadOnly;
+    private bool _isSaving;
+    private string _notificationMessage = string.Empty;
+    private string _setupDateDisplay = string.Empty;
     private string _substrateEntryError = string.Empty;
+
+    // --- Locked field displays ---
+    private string _volumeDisplay = string.Empty;
 
     public SettingsViewModel(IAquariumService aquariumService, IAquariumContext aquariumContext)
     {
@@ -110,22 +110,6 @@ public sealed class SettingsViewModel : ViewModelBase
         private set => SetProperty(ref _isNotificationOpen, value);
     }
 
-    /// <summary>
-    /// Shows a success notification that auto-dismisses after 3 seconds (FR-039).
-    /// </summary>
-    public void ShowNotification(string message)
-    {
-        NotificationMessage = message;
-        IsNotificationOpen = true;
-        _ = AutoDismissNotificationAsync();
-    }
-
-    private async Task AutoDismissNotificationAsync()
-    {
-        await Task.Delay(3000);
-        IsNotificationOpen = false;
-    }
-
     public string ErrorMessage
     {
         get => _errorMessage;
@@ -136,19 +120,6 @@ public sealed class SettingsViewModel : ViewModelBase
     {
         get => _isErrorOpen;
         private set => SetProperty(ref _isErrorOpen, value);
-    }
-
-    private void ShowError(string message)
-    {
-        ErrorMessage = message;
-        IsErrorOpen = true;
-        _ = AutoDismissErrorAsync();
-    }
-
-    private async Task AutoDismissErrorAsync()
-    {
-        await Task.Delay(5000);
-        IsErrorOpen = false;
     }
 
     // ========================================================================
@@ -178,10 +149,7 @@ public sealed class SettingsViewModel : ViewModelBase
         get => _editThumbnailPreview;
         private set
         {
-            if (SetProperty(ref _editThumbnailPreview, value))
-            {
-                OnPropertyChanged(nameof(HasEditThumbnailPreview));
-            }
+            if (SetProperty(ref _editThumbnailPreview, value)) OnPropertyChanged(nameof(HasEditThumbnailPreview));
         }
     }
 
@@ -278,12 +246,41 @@ public sealed class SettingsViewModel : ViewModelBase
         private set => SetProperty(ref _substrateEntryError, value);
     }
 
+    /// <summary>
+    ///     Shows a success notification that auto-dismisses after 3 seconds (FR-039).
+    /// </summary>
+    public void ShowNotification(string message)
+    {
+        NotificationMessage = message;
+        IsNotificationOpen = true;
+        _ = AutoDismissNotificationAsync();
+    }
+
+    private async Task AutoDismissNotificationAsync()
+    {
+        await Task.Delay(3000);
+        IsNotificationOpen = false;
+    }
+
+    private void ShowError(string message)
+    {
+        ErrorMessage = message;
+        IsErrorOpen = true;
+        _ = AutoDismissErrorAsync();
+    }
+
+    private async Task AutoDismissErrorAsync()
+    {
+        await Task.Delay(5000);
+        IsErrorOpen = false;
+    }
+
     // ========================================================================
     // Initialization
     // ========================================================================
 
     /// <summary>
-    /// Loads the current aquarium data from context. Called on page Loaded.
+    ///     Loads the current aquarium data from context. Called on page Loaded.
     /// </summary>
     public void LoadFromContext()
     {
@@ -291,10 +288,7 @@ public sealed class SettingsViewModel : ViewModelBase
         HasAquarium = aquarium is not null;
         IsReadOnly = _aquariumContext.IsReadOnly;
 
-        if (aquarium is null)
-        {
-            return;
-        }
+        if (aquarium is null) return;
 
         // Editable fields
         EditName = aquarium.Name;
@@ -312,16 +306,13 @@ public sealed class SettingsViewModel : ViewModelBase
 
         // Substrates
         Substrates.Clear();
-        foreach (var entry in aquarium.Substrates.OrderBy(s => s.DisplayOrder))
-        {
-            Substrates.Add(entry);
-        }
+        foreach (var entry in aquarium.Substrates.OrderBy(s => s.DisplayOrder)) Substrates.Add(entry);
 
         ResetSubstrateEntryForm();
     }
 
     /// <summary>
-    /// Sets the thumbnail preview from a picked file path.
+    ///     Sets the thumbnail preview from a picked file path.
     /// </summary>
     public void SetThumbnailPreview(string sourceFilePath)
     {
@@ -330,7 +321,7 @@ public sealed class SettingsViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Clears the thumbnail selection (reverts to current saved thumbnail on next load).
+    ///     Clears the thumbnail selection (reverts to current saved thumbnail on next load).
     /// </summary>
     public void ClearThumbnailPreview()
     {
@@ -364,10 +355,7 @@ public sealed class SettingsViewModel : ViewModelBase
     private async void OnSaveProfile()
     {
         var aquarium = _aquariumContext.CurrentAquarium;
-        if (aquarium is null || IsReadOnly)
-        {
-            return;
-        }
+        if (aquarium is null || IsReadOnly) return;
 
         IsSaving = true;
 
@@ -416,10 +404,7 @@ public sealed class SettingsViewModel : ViewModelBase
 
     private void OnSaveSubstrateEntry()
     {
-        if (!ValidateSubstrateEntry())
-        {
-            return;
-        }
+        if (!ValidateSubstrateEntry()) return;
 
         var entry = new SubstrateEntry
         {
@@ -430,7 +415,7 @@ public sealed class SettingsViewModel : ViewModelBase
             LayerDepth = EntryLayerDepth,
             DateAdded = new DateTimeOffset(EntryDateAdded!.Value.Date, TimeSpan.Zero),
             Notes = string.IsNullOrWhiteSpace(EntryNotes) ? null : EntryNotes.Trim(),
-            DisplayOrder = Substrates.Count,
+            DisplayOrder = Substrates.Count
         };
 
         Substrates.Add(entry);
@@ -446,30 +431,21 @@ public sealed class SettingsViewModel : ViewModelBase
 
     private void OnRemoveSubstrate(SubstrateEntry? entry)
     {
-        if (entry is not null)
-        {
-            Substrates.Remove(entry);
-        }
+        if (entry is not null) Substrates.Remove(entry);
     }
 
     private void OnMoveSubstrateUp(SubstrateEntry? entry)
     {
         if (entry is null) return;
         var index = Substrates.IndexOf(entry);
-        if (index > 0)
-        {
-            Substrates.Move(index, index - 1);
-        }
+        if (index > 0) Substrates.Move(index, index - 1);
     }
 
     private void OnMoveSubstrateDown(SubstrateEntry? entry)
     {
         if (entry is null) return;
         var index = Substrates.IndexOf(entry);
-        if (index >= 0 && index < Substrates.Count - 1)
-        {
-            Substrates.Move(index, index + 1);
-        }
+        if (index >= 0 && index < Substrates.Count - 1) Substrates.Move(index, index + 1);
     }
 
     private bool ValidateSubstrateEntry()

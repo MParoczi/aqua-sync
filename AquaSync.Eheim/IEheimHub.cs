@@ -3,7 +3,7 @@ using AquaSync.Eheim.Devices;
 namespace AquaSync.Eheim;
 
 /// <summary>
-/// Manages the connection to an EHEIM Digital hub and exposes discovered devices.
+///     Manages the connection to an EHEIM Digital hub and exposes discovered devices.
 /// </summary>
 public interface IEheimHub : IAsyncDisposable
 {

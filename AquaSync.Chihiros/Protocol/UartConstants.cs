@@ -1,7 +1,7 @@
 namespace AquaSync.Chihiros.Protocol;
 
 /// <summary>
-/// Nordic UART Service UUIDs used by Chihiros BLE devices.
+///     Nordic UART Service UUIDs used by Chihiros BLE devices.
 /// </summary>
 internal static class UartConstants
 {

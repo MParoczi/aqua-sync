@@ -9,14 +9,14 @@ using AquaSync.Eheim.Exceptions;
 namespace AquaSync.Eheim.Transport;
 
 /// <summary>
-/// WebSocket transport that connects to an EHEIM hub and streams incoming JSON messages.
+///     WebSocket transport that connects to an EHEIM hub and streams incoming JSON messages.
 /// </summary>
 internal sealed class EheimWebSocketTransport : IEheimTransport
 {
-    private ClientWebSocket? _ws;
+    private readonly Subject<JsonNode> _messages = new();
     private CancellationTokenSource? _receiveCts;
     private Task? _receiveLoop;
-    private readonly Subject<JsonNode> _messages = new();
+    private ClientWebSocket? _ws;
 
     public bool IsConnected => _ws?.State == WebSocketState.Open;
 
@@ -40,13 +40,9 @@ internal sealed class EheimWebSocketTransport : IEheimTransport
 
     public async Task DisconnectAsync()
     {
-        if (_receiveCts is not null)
-        {
-            await _receiveCts.CancelAsync().ConfigureAwait(false);
-        }
+        if (_receiveCts is not null) await _receiveCts.CancelAsync().ConfigureAwait(false);
 
         if (_ws is { State: WebSocketState.Open })
-        {
             try
             {
                 await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None).ConfigureAwait(false);
@@ -55,12 +51,15 @@ internal sealed class EheimWebSocketTransport : IEheimTransport
             {
                 // Best-effort close
             }
-        }
 
         if (_receiveLoop is not null)
-        {
-            try { await _receiveLoop.ConfigureAwait(false); } catch (OperationCanceledException) { }
-        }
+            try
+            {
+                await _receiveLoop.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+            }
     }
 
     public async Task SendAsync(JsonObject message, CancellationToken cancellationToken = default)
@@ -114,8 +113,12 @@ internal sealed class EheimWebSocketTransport : IEheimTransport
                 EmitParsedMessages(text);
             }
         }
-        catch (OperationCanceledException) { }
-        catch (WebSocketException) { }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (WebSocketException)
+        {
+        }
     }
 
     private void EmitParsedMessages(string text)
@@ -126,10 +129,8 @@ internal sealed class EheimWebSocketTransport : IEheimTransport
             if (node is JsonArray array)
             {
                 foreach (var item in array)
-                {
                     if (item is not null)
                         _messages.OnNext(item);
-                }
             }
             else if (node is not null)
             {

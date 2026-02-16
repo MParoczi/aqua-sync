@@ -17,6 +17,13 @@ public interface IDataService
     Task SaveAsync<T>(string folderName, string fileName, T data) where T : class;
 
     /// <summary>
+    /// Reads and deserializes all JSON files in a folder.
+    /// Returns an empty list if the folder does not exist or contains no JSON files.
+    /// Files that fail deserialization are skipped.
+    /// </summary>
+    Task<IReadOnlyList<T>> ReadAllAsync<T>(string folderName) where T : class;
+
+    /// <summary>
     /// Deletes a JSON file if it exists.
     /// </summary>
     Task DeleteAsync(string folderName, string fileName);

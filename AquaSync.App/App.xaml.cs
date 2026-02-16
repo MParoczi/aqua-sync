@@ -26,6 +26,8 @@ public partial class App : Application
                 services.AddSingleton<IPageService, PageService>();
                 services.AddSingleton<INavigationService, NavigationService>();
                 services.AddSingleton<IDataService, DataService>();
+                services.AddSingleton<IAquariumService, AquariumService>();
+                services.AddSingleton<IAquariumContext, AquariumContext>();
 
                 // Main window
                 services.AddSingleton<MainWindow>();

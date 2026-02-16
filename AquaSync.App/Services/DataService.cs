@@ -49,6 +49,53 @@ public sealed class DataService : IDataService
         }
     }
 
+    public async Task<IReadOnlyList<T>> ReadAllAsync<T>(string folderName) where T : class
+    {
+        var folderPath = Path.Combine(_rootPath, folderName);
+
+        if (!Directory.Exists(folderPath))
+        {
+            return [];
+        }
+
+        var files = Directory.GetFiles(folderPath, "*.json");
+
+        if (files.Length == 0)
+        {
+            return [];
+        }
+
+        var results = new List<T>(files.Length);
+
+        await _lock.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            foreach (var filePath in files)
+            {
+                try
+                {
+                    await using var stream = File.OpenRead(filePath);
+                    var item = await JsonSerializer.DeserializeAsync<T>(stream, s_jsonOptions).ConfigureAwait(false);
+
+                    if (item is not null)
+                    {
+                        results.Add(item);
+                    }
+                }
+                catch (JsonException)
+                {
+                    // Skip files that fail deserialization (FR-037).
+                }
+            }
+        }
+        finally
+        {
+            _lock.Release();
+        }
+
+        return results;
+    }
+
     public async Task SaveAsync<T>(string folderName, string fileName, T data) where T : class
     {
         var filePath = GetFilePath(folderName, fileName);

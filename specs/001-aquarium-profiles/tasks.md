@@ -37,15 +37,15 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T008 Add `ReadAllAsync<T>(string folderName)` method signature to IDataService interface in AquaSync.App/Contracts/Services/IDataService.cs
-- [ ] T009 Implement `ReadAllAsync<T>` in DataService — enumerate all .json files in folder, deserialize each with existing JsonSerializerOptions, skip files that fail deserialization, use existing SemaphoreSlim lock, return `IReadOnlyList<T>` in AquaSync.App/Services/DataService.cs
-- [ ] T010 [P] Create IAquariumService interface with methods: GetAllAsync, GetByIdAsync, SaveAsync, DeleteAsync, SaveThumbnailAsync, DeleteThumbnailAsync per contracts/services.md in AquaSync.App/Contracts/Services/IAquariumService.cs
-- [ ] T011 [P] Create IAquariumContext interface with properties: CurrentAquarium, IsReadOnly and methods: SetCurrentAquarium, Clear per contracts/services.md in AquaSync.App/Contracts/Services/IAquariumContext.cs
-- [ ] T012 Implement AquariumService (sealed, singleton) — CRUD operations using IDataService with "aquariums" folder, thumbnail management under gallery/{id}/ folder, ordering by CreatedAt descending in AquaSync.App/Services/AquariumService.cs
-- [ ] T013 [P] Implement AquariumContext (sealed, singleton) — holds current Aquarium reference, computes IsReadOnly from AquariumStatus, implements SetCurrentAquarium and Clear in AquaSync.App/Services/AquariumContext.cs
-- [ ] T014 [P] Create NullToDefaultImageConverter (IValueConverter) — returns default aquarium asset path when ThumbnailPath is null, otherwise resolves full path from IDataService.GetDataFolderPath() in AquaSync.App/Converters/NullToDefaultImageConverter.cs
-- [ ] T015 [P] Create AquariumStatusToOpacityConverter (IValueConverter) — returns 0.5 for Archived status, 1.0 for Active in AquaSync.App/Converters/AquariumStatusToOpacityConverter.cs
-- [ ] T016 Register IAquariumService/AquariumService and IAquariumContext/AquariumContext as singletons in DI container in AquaSync.App/App.xaml.cs
+- [x] T008 Add `ReadAllAsync<T>(string folderName)` method signature to IDataService interface in AquaSync.App/Contracts/Services/IDataService.cs
+- [x] T009 Implement `ReadAllAsync<T>` in DataService — enumerate all .json files in folder, deserialize each with existing JsonSerializerOptions, skip files that fail deserialization, use existing SemaphoreSlim lock, return `IReadOnlyList<T>` in AquaSync.App/Services/DataService.cs
+- [x] T010 [P] Create IAquariumService interface with methods: GetAllAsync, GetByIdAsync, SaveAsync, DeleteAsync, SaveThumbnailAsync, DeleteThumbnailAsync per contracts/services.md in AquaSync.App/Contracts/Services/IAquariumService.cs
+- [x] T011 [P] Create IAquariumContext interface with properties: CurrentAquarium, IsReadOnly and methods: SetCurrentAquarium, Clear per contracts/services.md in AquaSync.App/Contracts/Services/IAquariumContext.cs
+- [x] T012 Implement AquariumService (sealed, singleton) — CRUD operations using IDataService with "aquariums" folder, thumbnail management under gallery/{id}/ folder, ordering by CreatedAt descending in AquaSync.App/Services/AquariumService.cs
+- [x] T013 [P] Implement AquariumContext (sealed, singleton) — holds current Aquarium reference, computes IsReadOnly from AquariumStatus, implements SetCurrentAquarium and Clear in AquaSync.App/Services/AquariumContext.cs
+- [x] T014 [P] Create NullToDefaultImageConverter (IValueConverter) — returns default aquarium asset path when ThumbnailPath is null, otherwise resolves full path from IDataService.GetDataFolderPath() in AquaSync.App/Converters/NullToDefaultImageConverter.cs
+- [x] T015 [P] Create AquariumStatusToOpacityConverter (IValueConverter) — returns 0.5 for Archived status, 1.0 for Active in AquaSync.App/Converters/AquariumStatusToOpacityConverter.cs
+- [x] T016 Register IAquariumService/AquariumService and IAquariumContext/AquariumContext as singletons in DI container in AquaSync.App/App.xaml.cs
 
 **Checkpoint**: Foundation ready — all services resolve via DI, `dotnet build` succeeds, `ReadAllAsync` returns empty list from non-existent aquariums folder.
 

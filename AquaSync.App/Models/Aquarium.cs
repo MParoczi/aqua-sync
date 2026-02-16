@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace AquaSync.App.Models;
 
 /// <summary>
@@ -82,4 +84,20 @@ public sealed class Aquarium
     /// Ordered collection of substrate and additive entries.
     /// </summary>
     public List<SubstrateEntry> Substrates { get; set; } = [];
+
+    // --- Display helpers (not serialized) ---
+
+    [JsonIgnore]
+    public string VolumeDisplay => VolumeUnit switch
+    {
+        VolumeUnit.Liters => $"{Volume:0.#} L",
+        VolumeUnit.Gallons => $"{Volume:0.#} gal",
+        _ => Volume.ToString("0.#"),
+    };
+
+    [JsonIgnore]
+    public string SetupDateDisplay => SetupDate.ToString("MMM d, yyyy");
+
+    [JsonIgnore]
+    public bool IsArchived => Status == AquariumStatus.Archived;
 }

@@ -62,12 +62,15 @@ public sealed partial class AquariumSelectorPage : Page
     }
 
     /// <summary>
-    /// Handles clicking a profile card in the grid.
-    /// Navigation to shell is implemented in US4 (Phase 5).
+    /// Navigates to the management shell when a profile card is clicked (FR-022).
     /// </summary>
     private void AquariumGrid_ItemClick(object sender, ItemClickEventArgs e)
     {
-        // Implemented in US4 (Phase 5) — navigate to ShellPage with aquarium context.
+        if (e.ClickedItem is Aquarium aquarium)
+        {
+            var mainWindow = App.GetService<MainWindow>();
+            mainWindow.ContentFrame.Navigate(typeof(ShellPage), aquarium.Id);
+        }
     }
 
     // ========================================================================

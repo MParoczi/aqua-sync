@@ -97,10 +97,10 @@
 
 ### Implementation
 
-- [ ] T023 [US4] Add card click navigation in AquariumSelectorPage code-behind — on ItemClick, distinguish "Add Aquarium" card (show creation dialog) from profile card (navigate MainWindow RootFrame to ShellPage passing Aquarium.Id as Guid parameter) in AquaSync.App/Views/AquariumSelectorPage.xaml.cs
-- [ ] T024 [P] [US4] Update ShellViewModel — inject IAquariumContext, add observable properties for AquariumName, AquariumType, IsReadOnly (from context), add InitializeAsync method to load aquarium by ID via IAquariumService and set IAquariumContext, add GoBackCommand to clear context and navigate RootFrame to AquariumSelectorPage in AquaSync.App/ViewModels/ShellViewModel.cs
-- [ ] T025 [US4] Update ShellPage XAML — add header area above or within NavigationView displaying aquarium name and type bound to ShellViewModel properties (FR-023), bind NavigationView BackButtonVisible and wire back button to ShellViewModel.GoBackCommand (FR-026) in AquaSync.App/Views/ShellPage.xaml
-- [ ] T026 [US4] Update ShellPage code-behind — override OnNavigatedTo to extract Guid parameter, call ShellViewModel.InitializeAsync with the ID, handle back navigation by navigating MainWindow RootFrame back to AquariumSelectorPage in AquaSync.App/Views/ShellPage.xaml.cs
+- [x] T023 [US4] Add card click navigation in AquariumSelectorPage code-behind — on ItemClick, distinguish "Add Aquarium" card (show creation dialog) from profile card (navigate MainWindow RootFrame to ShellPage passing Aquarium.Id as Guid parameter) in AquaSync.App/Views/AquariumSelectorPage.xaml.cs
+- [x] T024 [P] [US4] Update ShellViewModel — inject IAquariumContext, add observable properties for AquariumName, AquariumType, IsReadOnly (from context), add InitializeAsync method to load aquarium by ID via IAquariumService and set IAquariumContext, add GoBackCommand to clear context and navigate RootFrame to AquariumSelectorPage in AquaSync.App/ViewModels/ShellViewModel.cs
+- [x] T025 [US4] Update ShellPage XAML — add header area above or within NavigationView displaying aquarium name and type bound to ShellViewModel properties (FR-023), bind NavigationView BackButtonVisible and wire back button to ShellViewModel.GoBackCommand (FR-026) in AquaSync.App/Views/ShellPage.xaml
+- [x] T026 [US4] Update ShellPage code-behind — override OnNavigatedTo to extract Guid parameter, call ShellViewModel.InitializeAsync with the ID, handle back navigation by navigating MainWindow RootFrame back to AquariumSelectorPage in AquaSync.App/Views/ShellPage.xaml.cs
 
 **Checkpoint**: Card click navigates to shell with correct aquarium context. Header shows name and type. Sidebar navigation works between pages. Back button returns to selector grid which refreshes its profile list.
 

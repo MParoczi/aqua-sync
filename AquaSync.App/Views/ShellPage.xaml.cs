@@ -7,6 +7,7 @@ namespace AquaSync.App.Views;
 
 /// <summary>
 /// The main application shell containing NavigationView sidebar and content Frame.
+/// Receives an aquarium ID parameter and initializes the aquarium context.
 /// </summary>
 public sealed partial class ShellPage : Page
 {
@@ -25,6 +26,19 @@ public sealed partial class ShellPage : Page
         navigationService.NavigateTo(typeof(DashboardViewModel).FullName!, clearNavigation: true);
     }
 
+    /// <summary>
+    /// Extracts the aquarium ID parameter and initializes the context (FR-022, FR-025).
+    /// </summary>
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+
+        if (e.Parameter is Guid aquariumId)
+        {
+            await ViewModel.InitializeAsync(aquariumId);
+        }
+    }
+
     private void OnSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (args.SelectedItemContainer is NavigationViewItem item && item.Tag is string pageKey)
@@ -33,15 +47,20 @@ public sealed partial class ShellPage : Page
         }
     }
 
+    /// <summary>
+    /// Navigates back to the aquarium selector grid (FR-026).
+    /// Clears the aquarium context and navigates the MainWindow RootFrame.
+    /// </summary>
     private void OnBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
     {
-        App.GetService<INavigationService>().GoBack();
+        ViewModel.GoBackCommand.Execute(null);
+
+        var mainWindow = App.GetService<MainWindow>();
+        mainWindow.ContentFrame.Navigate(typeof(AquariumSelectorPage));
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)
     {
-        ViewModel.IsBackEnabled = App.GetService<INavigationService>().CanGoBack;
-
         if (e.SourcePageType is not null)
         {
             var pageKey = App.GetService<IPageService>().GetPageKey(e.SourcePageType);

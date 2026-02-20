@@ -50,7 +50,7 @@ public sealed class SettingsService : ISettingsService
             _ => ElementTheme.Default
         };
 
-        _mainWindow.SetTheme(theme);
+        _mainWindow.DispatcherQueue.TryEnqueue(() => _mainWindow.SetTheme(theme));
     }
 
     public Task ExportDataAsync(string destinationPath, CancellationToken cancellationToken = default)

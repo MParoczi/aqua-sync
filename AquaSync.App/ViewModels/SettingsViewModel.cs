@@ -39,6 +39,7 @@ public sealed class SettingsViewModel : ViewModelBase
     // --- Global settings ---
     private VolumeUnit _selectedVolumeUnit;
     private DimensionUnit _selectedDimensionUnit;
+    private AppTheme _selectedTheme;
 
     // --- Substrate entry form ---
     private bool _isAddingSubstrate;
@@ -157,6 +158,20 @@ public sealed class SettingsViewModel : ViewModelBase
             {
                 _settingsService.Settings.DefaultDimensionUnit = value;
                 _ = _settingsService.SaveAsync();
+            }
+        }
+    }
+
+    public AppTheme SelectedTheme
+    {
+        get => _selectedTheme;
+        set
+        {
+            if (SetProperty(ref _selectedTheme, value))
+            {
+                _settingsService.Settings.Theme = value;
+                _ = _settingsService.SaveAsync();
+                _settingsService.ApplyTheme();
             }
         }
     }
@@ -381,6 +396,9 @@ public sealed class SettingsViewModel : ViewModelBase
 
         _selectedDimensionUnit = _settingsService.Settings.DefaultDimensionUnit;
         OnPropertyChanged(nameof(SelectedDimensionUnit));
+
+        _selectedTheme = _settingsService.Settings.Theme;
+        OnPropertyChanged(nameof(SelectedTheme));
     }
 
     // ========================================================================

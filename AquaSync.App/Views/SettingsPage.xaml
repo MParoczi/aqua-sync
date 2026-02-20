@@ -80,6 +80,20 @@
         </StackPanel>
       </StackPanel>
 
+      <!-- Theme section (US2) -->
+      <StackPanel Spacing="4">
+        <TextBlock
+          Text="Theme"
+          Style="{StaticResource SubtitleTextBlockStyle}" />
+        <RadioButtons
+          x:Name="ThemeRadioButtons"
+          SelectionChanged="ThemeRadioButtons_SelectionChanged">
+          <RadioButton Content="Follow system theme" />
+          <RadioButton Content="Always light" />
+          <RadioButton Content="Always dark" />
+        </RadioButtons>
+      </StackPanel>
+
       <!-- Aquarium-scoped section (FR-027) — visible when an aquarium is active -->
       <StackPanel
         Spacing="16"

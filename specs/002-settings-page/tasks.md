@@ -67,9 +67,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Implement `ApplyTheme()` in `SettingsService` in `AquaSync.App/Services/SettingsService.cs`: map `AppTheme.System`→`ElementTheme.Default`, `AppTheme.Light`→`ElementTheme.Light`, `AppTheme.Dark`→`ElementTheme.Dark`, call `MainWindow.SetTheme()` on the UI thread via `DispatcherQueue`
-- [ ] T017 [US2] Add `SelectedTheme` property to `SettingsViewModel` in `AquaSync.App/ViewModels/SettingsViewModel.cs`: bind to `ISettingsService.Settings.Theme`, on change update settings, call `SaveAsync()` and `ApplyTheme()` immediately
-- [ ] T018 [US2] Add "Theme" section UI to `SettingsPage.xaml` with three RadioButtons ("Follow system theme", "Always light", "Always dark") bound to ViewModel's `SelectedTheme` property, add selection changed handler in `AquaSync.App/Views/SettingsPage.xaml` and `AquaSync.App/Views/SettingsPage.xaml.cs`
+- [x] T016 [US2] Implement `ApplyTheme()` in `SettingsService` in `AquaSync.App/Services/SettingsService.cs`: map `AppTheme.System`→`ElementTheme.Default`, `AppTheme.Light`→`ElementTheme.Light`, `AppTheme.Dark`→`ElementTheme.Dark`, call `MainWindow.SetTheme()` on the UI thread via `DispatcherQueue`
+- [x] T017 [US2] Add `SelectedTheme` property to `SettingsViewModel` in `AquaSync.App/ViewModels/SettingsViewModel.cs`: bind to `ISettingsService.Settings.Theme`, on change update settings, call `SaveAsync()` and `ApplyTheme()` immediately
+- [x] T018 [US2] Add "Theme" section UI to `SettingsPage.xaml` with three RadioButtons ("Follow system theme", "Always light", "Always dark") bound to ViewModel's `SelectedTheme` property, add selection changed handler in `AquaSync.App/Views/SettingsPage.xaml` and `AquaSync.App/Views/SettingsPage.xaml.cs`
 
 **Checkpoint**: Theme switching works immediately. Selection persists across app restarts. "Follow system theme" tracks OS changes.
 

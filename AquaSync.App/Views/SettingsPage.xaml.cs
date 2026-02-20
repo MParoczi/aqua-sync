@@ -30,18 +30,32 @@ public sealed partial class SettingsPage : Page
         ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         ViewModel.LoadFromContext();
         SyncUnitRadioButtons();
+        SyncThemeRadioButtons();
     }
 
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(ViewModel.SelectedVolumeUnit) or nameof(ViewModel.SelectedDimensionUnit))
-            SyncUnitRadioButtons();
+        switch (e.PropertyName)
+        {
+            case nameof(ViewModel.SelectedVolumeUnit):
+            case nameof(ViewModel.SelectedDimensionUnit):
+                SyncUnitRadioButtons();
+                break;
+            case nameof(ViewModel.SelectedTheme):
+                SyncThemeRadioButtons();
+                break;
+        }
     }
 
     private void SyncUnitRadioButtons()
     {
         VolumeUnitRadioButtons.SelectedIndex = (int)ViewModel.SelectedVolumeUnit;
         DimensionUnitRadioButtons.SelectedIndex = (int)ViewModel.SelectedDimensionUnit;
+    }
+
+    private void SyncThemeRadioButtons()
+    {
+        ThemeRadioButtons.SelectedIndex = (int)ViewModel.SelectedTheme;
     }
 
     // ========================================================================
@@ -58,6 +72,16 @@ public sealed partial class SettingsPage : Page
     {
         if (DimensionUnitRadioButtons.SelectedIndex >= 0)
             ViewModel.SelectedDimensionUnit = (DimensionUnit)DimensionUnitRadioButtons.SelectedIndex;
+    }
+
+    // ========================================================================
+    // Theme selection handler (US2)
+    // ========================================================================
+
+    private void ThemeRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ThemeRadioButtons.SelectedIndex >= 0)
+            ViewModel.SelectedTheme = (AppTheme)ThemeRadioButtons.SelectedIndex;
     }
 
     // ========================================================================

@@ -13,9 +13,29 @@
   <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel Padding="36,24" Spacing="24" MaxWidth="700">
 
+      <!-- Back button for standalone mode (accessed from AquariumSelectorPage) -->
+      <StackPanel
+        Orientation="Horizontal"
+        Spacing="12"
+        Visibility="{x:Bind ViewModel.HasAquarium, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
+        <Button
+          x:Name="BackButton"
+          ToolTipService.ToolTip="Back"
+          Click="BackButton_Click">
+          <FontIcon
+            Glyph="&#xE72B;"
+            FontFamily="{ThemeResource SymbolThemeFontFamily}" />
+        </Button>
+        <TextBlock
+          Text="Settings"
+          Style="{StaticResource TitleTextBlockStyle}"
+          VerticalAlignment="Center" />
+      </StackPanel>
+
       <TextBlock
         Text="Settings"
-        Style="{StaticResource TitleTextBlockStyle}" />
+        Style="{StaticResource TitleTextBlockStyle}"
+        Visibility="{x:Bind ViewModel.HasAquarium, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
 
       <!-- Notifications (FR-039) -->
       <InfoBar

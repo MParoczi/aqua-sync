@@ -28,6 +28,7 @@ public partial class App : Application
                 services.AddSingleton<IDataService, DataService>();
                 services.AddSingleton<IAquariumService, AquariumService>();
                 services.AddSingleton<IAquariumContext, AquariumContext>();
+                services.AddSingleton<ISettingsService, SettingsService>();
 
                 // Main window
                 services.AddSingleton<MainWindow>();
@@ -73,8 +74,12 @@ public partial class App : Application
         return service;
     }
 
-    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
+        var settingsService = GetService<ISettingsService>();
+        await settingsService.InitializeAsync();
+        settingsService.ApplyTheme();
+
         var mainWindow = GetService<MainWindow>();
         mainWindow.Activate();
     }

@@ -60,6 +60,15 @@ public sealed partial class AquariumSelectorPage : Page
     }
 
     /// <summary>
+    ///     Navigates to the Settings page via the root frame (gear icon).
+    /// </summary>
+    private void SettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var mainWindow = App.GetService<MainWindow>();
+        mainWindow.ContentFrame.Navigate(typeof(SettingsPage));
+    }
+
+    /// <summary>
     ///     Navigates to the management shell when a profile card is clicked (FR-022).
     /// </summary>
     private void AquariumGrid_ItemClick(object sender, ItemClickEventArgs e)

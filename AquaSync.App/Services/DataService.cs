@@ -1,5 +1,6 @@
 using System.Text.Json;
 using AquaSync.App.Contracts.Services;
+using AquaSync.App.Models;
 
 namespace AquaSync.App.Services;
 
@@ -20,11 +21,35 @@ public sealed class DataService : IDataService
 
     public DataService()
     {
-        _rootPath = Path.Combine(
+        var defaultRoot = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "AquaSync");
 
-        Directory.CreateDirectory(_rootPath);
+        Directory.CreateDirectory(defaultRoot);
+
+        var redirectPath = Path.Combine(defaultRoot, "data-folder-redirect.json");
+        if (File.Exists(redirectPath))
+        {
+            try
+            {
+                var json = File.ReadAllText(redirectPath);
+                var redirect = JsonSerializer.Deserialize<DataFolderRedirect>(json, s_jsonOptions);
+                if (redirect?.CustomDataFolderPath is not null
+                    && Directory.Exists(redirect.CustomDataFolderPath))
+                {
+                    _rootPath = redirect.CustomDataFolderPath;
+                    return;
+                }
+            }
+            catch (JsonException)
+            {
+                // Corrupt redirect file — fall back to default.
+            }
+
+            HasRedirectFallback = true;
+        }
+
+        _rootPath = defaultRoot;
     }
 
     public bool HasRedirectFallback { get; private set; }

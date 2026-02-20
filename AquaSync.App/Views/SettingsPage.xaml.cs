@@ -30,6 +30,19 @@ public sealed partial class SettingsPage : Page
     }
 
     // ========================================================================
+    // Back navigation for standalone mode (FR-001)
+    // ========================================================================
+
+    /// <summary>
+    ///     Navigates back to AquariumSelectorPage when in standalone mode.
+    /// </summary>
+    private void BackButton_Click(object sender, RoutedEventArgs e)
+    {
+        var mainWindow = App.GetService<MainWindow>();
+        mainWindow.ContentFrame.Navigate(typeof(AquariumSelectorPage));
+    }
+
+    // ========================================================================
     // Profile editing handlers (FR-016)
     // ========================================================================
 

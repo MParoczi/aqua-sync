@@ -51,9 +51,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Add global settings properties to `SettingsViewModel` in `AquaSync.App/ViewModels/SettingsViewModel.cs`: inject `ISettingsService`, add `SelectedVolumeUnit` and `SelectedDimensionUnit` properties (bound to `ISettingsService.Settings`), auto-save on change via `ISettingsService.SaveAsync()`, add `LoadGlobalSettings()` method called from `LoadFromContext()`
-- [ ] T014 [US1] Replace the "General" placeholder section in `SettingsPage.xaml` with a "Default Units" section containing volume unit RadioButtons (Liters/Gallons) and dimension unit RadioButtons (Centimeters/Inches) bound to ViewModel properties, add selection changed handlers in `AquaSync.App/Views/SettingsPage.xaml` and `AquaSync.App/Views/SettingsPage.xaml.cs`
-- [ ] T015 [P] [US1] Inject `ISettingsService` into `AquariumSelectorViewModel` constructor in `AquaSync.App/ViewModels/AquariumSelectorViewModel.cs`, update `ResetCreationForm()` to use `_settingsService.Settings.DefaultVolumeUnit` and `_settingsService.Settings.DefaultDimensionUnit` instead of hardcoded `true` for `IsVolumeLiters`/`IsDimensionCentimeters`
+- [x] T013 [US1] Add global settings properties to `SettingsViewModel` in `AquaSync.App/ViewModels/SettingsViewModel.cs`: inject `ISettingsService`, add `SelectedVolumeUnit` and `SelectedDimensionUnit` properties (bound to `ISettingsService.Settings`), auto-save on change via `ISettingsService.SaveAsync()`, add `LoadGlobalSettings()` method called from `LoadFromContext()`
+- [x] T014 [US1] Replace the "General" placeholder section in `SettingsPage.xaml` with a "Default Units" section containing volume unit RadioButtons (Liters/Gallons) and dimension unit RadioButtons (Centimeters/Inches) bound to ViewModel properties, add selection changed handlers in `AquaSync.App/Views/SettingsPage.xaml` and `AquaSync.App/Views/SettingsPage.xaml.cs`
+- [x] T015 [P] [US1] Inject `ISettingsService` into `AquariumSelectorViewModel` constructor in `AquaSync.App/ViewModels/AquariumSelectorViewModel.cs`, update `ResetCreationForm()` to use `_settingsService.Settings.DefaultVolumeUnit` and `_settingsService.Settings.DefaultDimensionUnit` instead of hardcoded `true` for `IsVolumeLiters`/`IsDimensionCentimeters`
 
 **Checkpoint**: Default UOM preferences work end-to-end. Settings persist across restarts. New aquarium profiles use the configured defaults.
 

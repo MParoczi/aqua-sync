@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Windows.Storage.Pickers;
 using AquaSync.App.Models;
 using AquaSync.App.ViewModels;
@@ -26,7 +27,37 @@ public sealed partial class SettingsPage : Page
 
     private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
     {
+        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         ViewModel.LoadFromContext();
+        SyncUnitRadioButtons();
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ViewModel.SelectedVolumeUnit) or nameof(ViewModel.SelectedDimensionUnit))
+            SyncUnitRadioButtons();
+    }
+
+    private void SyncUnitRadioButtons()
+    {
+        VolumeUnitRadioButtons.SelectedIndex = (int)ViewModel.SelectedVolumeUnit;
+        DimensionUnitRadioButtons.SelectedIndex = (int)ViewModel.SelectedDimensionUnit;
+    }
+
+    // ========================================================================
+    // Default unit selection handlers (US1)
+    // ========================================================================
+
+    private void VolumeUnitRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (VolumeUnitRadioButtons.SelectedIndex >= 0)
+            ViewModel.SelectedVolumeUnit = (VolumeUnit)VolumeUnitRadioButtons.SelectedIndex;
+    }
+
+    private void DimensionUnitRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (DimensionUnitRadioButtons.SelectedIndex >= 0)
+            ViewModel.SelectedDimensionUnit = (DimensionUnit)DimensionUnitRadioButtons.SelectedIndex;
     }
 
     // ========================================================================

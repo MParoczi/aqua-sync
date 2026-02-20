@@ -15,6 +15,7 @@ public sealed class SettingsViewModel : ViewModelBase
 {
     private readonly IAquariumContext _aquariumContext;
     private readonly IAquariumService _aquariumService;
+    private readonly ISettingsService _settingsService;
     private string _aquariumTypeDisplay = string.Empty;
     private string _dimensionsDisplay = string.Empty;
     private string _dimensionUnitLabel = string.Empty;
@@ -35,6 +36,10 @@ public sealed class SettingsViewModel : ViewModelBase
     // --- State ---
     private bool _hasAquarium;
 
+    // --- Global settings ---
+    private VolumeUnit _selectedVolumeUnit;
+    private DimensionUnit _selectedDimensionUnit;
+
     // --- Substrate entry form ---
     private bool _isAddingSubstrate;
     private bool _isErrorOpen;
@@ -48,10 +53,14 @@ public sealed class SettingsViewModel : ViewModelBase
     // --- Locked field displays ---
     private string _volumeDisplay = string.Empty;
 
-    public SettingsViewModel(IAquariumService aquariumService, IAquariumContext aquariumContext)
+    public SettingsViewModel(
+        IAquariumService aquariumService,
+        IAquariumContext aquariumContext,
+        ISettingsService settingsService)
     {
         _aquariumService = aquariumService;
         _aquariumContext = aquariumContext;
+        _settingsService = settingsService;
 
         SaveProfileCommand = new RelayCommand(OnSaveProfile);
 
@@ -120,6 +129,36 @@ public sealed class SettingsViewModel : ViewModelBase
     {
         get => _isErrorOpen;
         private set => SetProperty(ref _isErrorOpen, value);
+    }
+
+    // ========================================================================
+    // Global settings properties (US1)
+    // ========================================================================
+
+    public VolumeUnit SelectedVolumeUnit
+    {
+        get => _selectedVolumeUnit;
+        set
+        {
+            if (SetProperty(ref _selectedVolumeUnit, value))
+            {
+                _settingsService.Settings.DefaultVolumeUnit = value;
+                _ = _settingsService.SaveAsync();
+            }
+        }
+    }
+
+    public DimensionUnit SelectedDimensionUnit
+    {
+        get => _selectedDimensionUnit;
+        set
+        {
+            if (SetProperty(ref _selectedDimensionUnit, value))
+            {
+                _settingsService.Settings.DefaultDimensionUnit = value;
+                _ = _settingsService.SaveAsync();
+            }
+        }
     }
 
     // ========================================================================
@@ -284,6 +323,8 @@ public sealed class SettingsViewModel : ViewModelBase
     /// </summary>
     public void LoadFromContext()
     {
+        LoadGlobalSettings();
+
         var aquarium = _aquariumContext.CurrentAquarium;
         HasAquarium = aquarium is not null;
         IsReadOnly = _aquariumContext.IsReadOnly;
@@ -327,6 +368,19 @@ public sealed class SettingsViewModel : ViewModelBase
     {
         EditThumbnailSourcePath = null;
         EditThumbnailPreview = null;
+    }
+
+    // ========================================================================
+    // Global settings helpers
+    // ========================================================================
+
+    private void LoadGlobalSettings()
+    {
+        _selectedVolumeUnit = _settingsService.Settings.DefaultVolumeUnit;
+        OnPropertyChanged(nameof(SelectedVolumeUnit));
+
+        _selectedDimensionUnit = _settingsService.Settings.DefaultDimensionUnit;
+        OnPropertyChanged(nameof(SelectedDimensionUnit));
     }
 
     // ========================================================================

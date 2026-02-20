@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 namespace AquaSync.Eheim.Transport;
 
 /// <summary>
-/// Abstraction over the WebSocket connection to an EHEIM hub.
+///     Abstraction over the WebSocket connection to an EHEIM hub.
 /// </summary>
 internal interface IEheimTransport : IAsyncDisposable
 {

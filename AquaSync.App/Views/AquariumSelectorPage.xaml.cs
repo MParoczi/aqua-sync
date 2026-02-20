@@ -1,19 +1,295 @@
+using System.ComponentModel;
+using Windows.Storage.Pickers;
+using AquaSync.App.Models;
 using AquaSync.App.ViewModels;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using WinRT.Interop;
 
 namespace AquaSync.App.Views;
 
 /// <summary>
-/// Launch screen where the user selects an aquarium profile.
+///     Launch screen where the user selects an aquarium profile from a grid of cards.
 /// </summary>
 public sealed partial class AquariumSelectorPage : Page
 {
-    public AquariumSelectorViewModel ViewModel { get; }
+    private bool _forceCloseDialog;
 
     public AquariumSelectorPage()
     {
         ViewModel = App.GetService<AquariumSelectorViewModel>();
         InitializeComponent();
         DataContext = ViewModel;
+
+        Loaded += AquariumSelectorPage_Loaded;
+        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+    }
+
+    public AquariumSelectorViewModel ViewModel { get; }
+
+    private async void AquariumSelectorPage_Loaded(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.LoadProfilesAsync();
+    }
+
+    /// <summary>
+    ///     Toggle between empty state and grid based on HasProfiles.
+    /// </summary>
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ViewModel.HasProfiles) or nameof(ViewModel.IsLoading)) UpdateVisualState();
+    }
+
+    private void UpdateVisualState()
+    {
+        if (ViewModel.IsLoading)
+        {
+            EmptyStatePanel.Visibility = Visibility.Collapsed;
+            AquariumGrid.Visibility = Visibility.Collapsed;
+        }
+        else if (ViewModel.HasProfiles)
+        {
+            EmptyStatePanel.Visibility = Visibility.Collapsed;
+            AquariumGrid.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            EmptyStatePanel.Visibility = Visibility.Visible;
+            AquariumGrid.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    /// <summary>
+    ///     Navigates to the management shell when a profile card is clicked (FR-022).
+    /// </summary>
+    private void AquariumGrid_ItemClick(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is Aquarium aquarium)
+        {
+            var mainWindow = App.GetService<MainWindow>();
+            mainWindow.ContentFrame.Navigate(typeof(ShellPage), aquarium.Id);
+        }
+    }
+
+    // ========================================================================
+    // Creation dialog (FR-008, FR-012, FR-013, FR-014)
+    // ========================================================================
+
+    /// <summary>
+    ///     Opens the creation dialog from the "Add Aquarium" card or empty state button.
+    /// </summary>
+    private async void AddAquariumCard_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ResetCreationForm();
+        _forceCloseDialog = false;
+
+        CreateProfileDialog.XamlRoot = XamlRoot;
+        await CreateProfileDialog.ShowAsync();
+    }
+
+    /// <summary>
+    ///     Validates and saves the new profile when the user clicks "Save" (FR-034, FR-035).
+    /// </summary>
+    private async void CreateProfileDialog_PrimaryButtonClick(
+        ContentDialog sender,
+        ContentDialogButtonClickEventArgs args)
+    {
+        if (!ViewModel.ValidateCreationForm())
+        {
+            args.Cancel = true;
+            return;
+        }
+
+        var deferral = args.GetDeferral();
+        try
+        {
+            await ViewModel.SaveNewProfileAsync();
+            ViewModel.ResetCreationForm();
+            ViewModel.ShowNotification("Aquarium profile created");
+        }
+        finally
+        {
+            deferral.Complete();
+        }
+    }
+
+    /// <summary>
+    ///     Intercepts cancel to show discard confirmation when unsaved data exists (FR-014).
+    /// </summary>
+    private void CreateProfileDialog_Closing(
+        ContentDialog sender,
+        ContentDialogClosingEventArgs args)
+    {
+        if (args.Result == ContentDialogResult.None
+            && ViewModel.HasUnsavedCreationData
+            && !_forceCloseDialog)
+        {
+            args.Cancel = true;
+            ViewModel.ShowDiscardConfirmation = true;
+        }
+    }
+
+    /// <summary>
+    ///     Confirms discarding unsaved changes and closes the dialog.
+    /// </summary>
+    private void ConfirmDiscard_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ResetCreationForm();
+        _forceCloseDialog = true;
+        CreateProfileDialog.Hide();
+        _forceCloseDialog = false;
+    }
+
+    /// <summary>
+    ///     Opens a file picker for thumbnail photo selection (FR-012).
+    ///     Validates format and 10 MB size limit.
+    /// </summary>
+    private async void BrowsePhoto_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FileOpenPicker();
+        picker.FileTypeFilter.Add(".jpg");
+        picker.FileTypeFilter.Add(".jpeg");
+        picker.FileTypeFilter.Add(".png");
+        picker.FileTypeFilter.Add(".bmp");
+        picker.FileTypeFilter.Add(".gif");
+        picker.FileTypeFilter.Add(".webp");
+
+        var mainWindow = App.GetService<MainWindow>();
+        var hwnd = WindowNative.GetWindowHandle(mainWindow);
+        InitializeWithWindow.Initialize(picker, hwnd);
+
+        var file = await picker.PickSingleFileAsync();
+        if (file is null) return;
+
+        var properties = await file.GetBasicPropertiesAsync();
+        if (properties.Size > 10 * 1024 * 1024)
+        {
+            PhotoErrorText.Text = "File must be under 10 MB";
+            PhotoErrorText.Visibility = Visibility.Visible;
+            return;
+        }
+
+        PhotoErrorText.Visibility = Visibility.Collapsed;
+        ViewModel.SetThumbnailPreview(file.Path);
+    }
+
+    /// <summary>
+    ///     Clears the selected thumbnail photo.
+    /// </summary>
+    private void ClearPhoto_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ClearThumbnailPreview();
+        PhotoErrorText.Visibility = Visibility.Collapsed;
+    }
+
+    // ========================================================================
+    // Substrate entry handlers (FR-018, FR-020, FR-021)
+    // ========================================================================
+
+    private void ShowSubstrateForm_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ShowSubstrateFormCommand.Execute(null);
+    }
+
+    private void SaveSubstrateEntry_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SaveSubstrateEntryCommand.Execute(null);
+    }
+
+    private void CancelSubstrateEntry_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.CancelSubstrateEntryCommand.Execute(null);
+    }
+
+    private void RemoveSubstrate_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: SubstrateEntry entry }) ViewModel.RemoveSubstrateCommand.Execute(entry);
+    }
+
+    private void MoveSubstrateUp_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: SubstrateEntry entry }) ViewModel.MoveSubstrateUpCommand.Execute(entry);
+    }
+
+    private void MoveSubstrateDown_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: SubstrateEntry entry }) ViewModel.MoveSubstrateDownCommand.Execute(entry);
+    }
+
+    // ========================================================================
+    // Context menu handlers (FR-007)
+    // ========================================================================
+
+    /// <summary>
+    ///     Toggles Archive/Restore menu items based on the card's aquarium status.
+    /// </summary>
+    private void CardMenuFlyout_Opening(object sender, object e)
+    {
+        if (sender is MenuFlyout flyout && flyout.Items.Count >= 2
+                                        && flyout.Items[0].Tag is Aquarium aquarium)
+        {
+            flyout.Items[0].Visibility = aquarium.IsArchived ? Visibility.Collapsed : Visibility.Visible;
+            flyout.Items[1].Visibility = aquarium.IsArchived ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
+    /// <summary>
+    ///     Shows confirmation dialog then archives the profile (FR-028).
+    /// </summary>
+    private async void ArchiveMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuFlyoutItem { Tag: Aquarium aquarium }) return;
+
+        var dialog = new ContentDialog
+        {
+            Title = "Archive Aquarium",
+            Content = "This aquarium will be archived. You can restore it later. Archive?",
+            PrimaryButtonText = "Archive",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = XamlRoot
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await ViewModel.ArchiveProfileAsync(aquarium);
+            ViewModel.ShowNotification($"\"{aquarium.Name}\" archived");
+        }
+    }
+
+    /// <summary>
+    ///     Restores an archived profile back to active (FR-031).
+    /// </summary>
+    private async void RestoreMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem { Tag: Aquarium aquarium })
+        {
+            await ViewModel.RestoreProfileAsync(aquarium);
+            ViewModel.ShowNotification($"\"{aquarium.Name}\" restored");
+        }
+    }
+
+    /// <summary>
+    ///     Shows destructive confirmation dialog then permanently deletes the profile (FR-032, FR-033).
+    /// </summary>
+    private async void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuFlyoutItem { Tag: Aquarium aquarium }) return;
+
+        var dialog = new ContentDialog
+        {
+            Title = "Delete Aquarium",
+            Content = $"Permanently delete \"{aquarium.Name}\"? This will remove all profile data, substrates, and photos. This action cannot be undone.",
+            PrimaryButtonText = "Delete",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = XamlRoot
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await ViewModel.DeleteProfileAsync(aquarium);
+            ViewModel.ShowNotification($"\"{aquarium.Name}\" deleted");
+        }
     }
 }

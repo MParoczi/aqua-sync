@@ -15,16 +15,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.*" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.*" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.*" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.*" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.*"/>
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.*"/>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.*"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.*"/>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.*"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AquaSync.Chihiros\AquaSync.Chihiros.csproj" />
-    <ProjectReference Include="..\AquaSync.Eheim\AquaSync.Eheim.csproj" />
+    <ProjectReference Include="..\AquaSync.Chihiros\AquaSync.Chihiros.csproj"/>
+    <ProjectReference Include="..\AquaSync.Eheim\AquaSync.Eheim.csproj"/>
   </ItemGroup>
 
 </Project>

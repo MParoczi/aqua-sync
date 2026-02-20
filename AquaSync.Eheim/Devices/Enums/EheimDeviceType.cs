@@ -1,8 +1,8 @@
 namespace AquaSync.Eheim.Devices.Enums;
 
 /// <summary>
-/// EHEIM Digital device type identifiers.
-/// Corresponds to the "version" field in USRDTA packets.
+///     EHEIM Digital device type identifiers.
+///     Corresponds to the "version" field in USRDTA packets.
 /// </summary>
 internal enum EheimDeviceType
 {

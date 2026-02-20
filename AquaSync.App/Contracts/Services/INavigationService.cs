@@ -4,15 +4,14 @@ using Microsoft.UI.Xaml.Navigation;
 namespace AquaSync.App.Contracts.Services;
 
 /// <summary>
-/// Provides Frame-based page navigation within the ShellPage.
+///     Provides Frame-based page navigation within the ShellPage.
 /// </summary>
 public interface INavigationService
 {
-    event NavigatedEventHandler? Navigated;
-
     bool CanGoBack { get; }
 
     Frame? Frame { get; set; }
+    event NavigatedEventHandler? Navigated;
 
     bool NavigateTo(string pageKey, object? parameter = null, bool clearNavigation = false);
 

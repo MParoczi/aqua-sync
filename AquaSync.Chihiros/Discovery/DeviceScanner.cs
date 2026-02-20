@@ -1,18 +1,18 @@
 using System.Collections.Concurrent;
+using Windows.Devices.Bluetooth.Advertisement;
 using AquaSync.Chihiros.Devices;
 using AquaSync.Chihiros.Protocol;
-using Windows.Devices.Bluetooth.Advertisement;
 
 namespace AquaSync.Chihiros.Discovery;
 
 /// <summary>
-/// Scans for Chihiros BLE devices using <see cref="BluetoothLEAdvertisementWatcher"/>.
+///     Scans for Chihiros BLE devices using <see cref="BluetoothLEAdvertisementWatcher" />.
 /// </summary>
 public sealed class DeviceScanner : IDeviceScanner
 {
     /// <summary>
-    /// Scan for Chihiros devices for the given duration.
-    /// Devices are reported via <paramref name="progress"/> as they are found and returned as a list when complete.
+    ///     Scan for Chihiros devices for the given duration.
+    ///     Devices are reported via <paramref name="progress" /> as they are found and returned as a list when complete.
     /// </summary>
     public async Task<IReadOnlyList<DiscoveredDevice>> ScanAsync(
         TimeSpan timeout,
@@ -41,10 +41,7 @@ public sealed class DeviceScanner : IDeviceScanner
 
             var device = new DiscoveredDevice(address, name, args.RawSignalStrengthInDBm, profile);
 
-            if (discovered.TryAdd(address, device))
-            {
-                progress?.Report(device);
-            }
+            if (discovered.TryAdd(address, device)) progress?.Report(device);
         };
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -67,8 +64,8 @@ public sealed class DeviceScanner : IDeviceScanner
     }
 
     /// <summary>
-    /// Scan without the UART service UUID filter, matching devices by known BLE name prefixes instead.
-    /// Useful when devices do not advertise service UUIDs in their advertisement packets.
+    ///     Scan without the UART service UUID filter, matching devices by known BLE name prefixes instead.
+    ///     Useful when devices do not advertise service UUIDs in their advertisement packets.
     /// </summary>
     public async Task<IReadOnlyList<DiscoveredDevice>> ScanByNameAsync(
         TimeSpan timeout,
@@ -96,10 +93,7 @@ public sealed class DeviceScanner : IDeviceScanner
             var address = args.BluetoothAddress;
             var device = new DiscoveredDevice(address, name, args.RawSignalStrengthInDBm, profile);
 
-            if (discovered.TryAdd(address, device))
-            {
-                progress?.Report(device);
-            }
+            if (discovered.TryAdd(address, device)) progress?.Report(device);
         };
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);

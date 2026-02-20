@@ -3,7 +3,7 @@ using AquaSync.Chihiros.Scheduling;
 namespace AquaSync.Chihiros.Devices;
 
 /// <summary>
-/// Interface for controlling a Chihiros BLE LED device.
+///     Interface for controlling a Chihiros BLE LED device.
 /// </summary>
 public interface IChihirosDevice : IAsyncDisposable
 {

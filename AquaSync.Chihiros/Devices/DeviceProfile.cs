@@ -1,7 +1,7 @@
 namespace AquaSync.Chihiros.Devices;
 
 /// <summary>
-/// Describes a Chihiros device model: its name, BLE name codes, and color channel layout.
+///     Describes a Chihiros device model: its name, BLE name codes, and color channel layout.
 /// </summary>
 public sealed record DeviceProfile(
     string ModelName,

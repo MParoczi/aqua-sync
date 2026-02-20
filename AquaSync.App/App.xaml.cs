@@ -9,7 +9,7 @@ using Microsoft.UI.Xaml;
 namespace AquaSync.App;
 
 /// <summary>
-/// Entry point for the AquaSync application. Configures DI and launches the main window.
+///     Entry point for the AquaSync application. Configures DI and launches the main window.
 /// </summary>
 public partial class App : Application
 {
@@ -26,6 +26,8 @@ public partial class App : Application
                 services.AddSingleton<IPageService, PageService>();
                 services.AddSingleton<INavigationService, NavigationService>();
                 services.AddSingleton<IDataService, DataService>();
+                services.AddSingleton<IAquariumService, AquariumService>();
+                services.AddSingleton<IAquariumContext, AquariumContext>();
 
                 // Main window
                 services.AddSingleton<MainWindow>();
@@ -62,14 +64,11 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Gets a registered service from the DI container.
+    ///     Gets a registered service from the DI container.
     /// </summary>
     public static T GetService<T>() where T : class
     {
-        if ((Current as App)!._host.Services.GetService<T>() is not { } service)
-        {
-            throw new ArgumentException($"Service of type {typeof(T)} is not registered.");
-        }
+        if ((Current as App)!._host.Services.GetService<T>() is not { } service) throw new ArgumentException($"Service of type {typeof(T)} is not registered.");
 
         return service;
     }

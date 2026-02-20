@@ -1,7 +1,7 @@
 namespace AquaSync.Eheim.Protocol.Packets;
 
 /// <summary>
-/// Known WebSocket message "title" values used by the EHEIM protocol.
+///     Known WebSocket message "title" values used by the EHEIM protocol.
 /// </summary>
 internal static class MessageTitle
 {

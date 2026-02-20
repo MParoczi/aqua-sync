@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace AquaSync.Eheim.Protocol.Packets;
 
 /// <summary>
-/// Represents a FILTER_DATA message from a professionel 5e filter.
+///     Represents a FILTER_DATA message from a professionel 5e filter.
 /// </summary>
 internal sealed record FilterDataPacket
 {

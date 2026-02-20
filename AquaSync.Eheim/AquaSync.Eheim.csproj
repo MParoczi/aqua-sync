@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Reactive" Version="6.*" />
-    <PackageReference Include="Zeroconf" Version="3.*" />
+    <PackageReference Include="System.Reactive" Version="6.*"/>
+    <PackageReference Include="Zeroconf" Version="3.*"/>
   </ItemGroup>
 
 </Project>

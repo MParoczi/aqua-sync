@@ -12,37 +12,44 @@ using AquaSync.Eheim.Transport;
 namespace AquaSync.Eheim.Devices;
 
 /// <summary>
-/// EHEIM professionel 5e filter device.
-/// Exposes per-property BehaviorSubject observables and read-modify-write command methods.
+///     EHEIM professionel 5e filter device.
+///     Exposes per-property BehaviorSubject observables and read-modify-write command methods.
 /// </summary>
 internal sealed class EheimFilter : EheimDevice, IEheimFilter
 {
-    private FilterDataPacket? _filterData;
-
-    // State observables
-    private readonly BehaviorSubject<bool> _isActive = new(false);
-    private readonly BehaviorSubject<double> _currentSpeed = new(0);
-    private readonly BehaviorSubject<FilterMode> _filterMode = new(Enums.FilterMode.Manual);
-    private readonly BehaviorSubject<double> _serviceHours = new(0);
-    private readonly BehaviorSubject<TimeSpan> _operatingTime = new(TimeSpan.Zero);
-
-    // Manual mode
-    private readonly BehaviorSubject<double> _manualSpeed = new(0);
-
     // Constant flow mode
     private readonly BehaviorSubject<int> _constantFlowIndex = new(0);
+    private readonly BehaviorSubject<double> _currentSpeed = new(0);
 
     // Bio mode
     private readonly BehaviorSubject<int> _daySpeed = new(0);
-    private readonly BehaviorSubject<int> _nightSpeed = new(0);
     private readonly BehaviorSubject<TimeOnly> _dayStartTime = new(TimeOnly.MinValue);
-    private readonly BehaviorSubject<TimeOnly> _nightStartTime = new(TimeOnly.MinValue);
+    private readonly BehaviorSubject<FilterMode> _filterMode = new(Enums.FilterMode.Manual);
 
     // Pulse mode
     private readonly BehaviorSubject<int> _highPulseSpeed = new(0);
-    private readonly BehaviorSubject<int> _lowPulseSpeed = new(0);
     private readonly BehaviorSubject<TimeSpan> _highPulseTime = new(TimeSpan.Zero);
+
+    // State observables
+    private readonly BehaviorSubject<bool> _isActive = new(false);
+    private readonly BehaviorSubject<int> _lowPulseSpeed = new(0);
     private readonly BehaviorSubject<TimeSpan> _lowPulseTime = new(TimeSpan.Zero);
+
+    // Manual mode
+    private readonly BehaviorSubject<double> _manualSpeed = new(0);
+    private readonly BehaviorSubject<int> _nightSpeed = new(0);
+    private readonly BehaviorSubject<TimeOnly> _nightStartTime = new(TimeOnly.MinValue);
+    private readonly BehaviorSubject<TimeSpan> _operatingTime = new(TimeSpan.Zero);
+    private readonly BehaviorSubject<double> _serviceHours = new(0);
+    private FilterDataPacket? _filterData;
+
+    internal EheimFilter(IEheimTransport transport, UsrDtaPacket usrDta, int filterVersion, string tankConfig)
+        : base(transport, usrDta, FlowRateTable.ResolveFilterModel(filterVersion, tankConfig).ToString())
+    {
+        FilterModel = FlowRateTable.ResolveFilterModel(filterVersion, tankConfig);
+        AvailableManualSpeeds = FlowRateTable.GetManualSpeeds(filterVersion);
+        AvailableFlowRates = FlowRateTable.GetFlowRates(filterVersion);
+    }
 
     public EheimFilterModel FilterModel { get; }
     public IReadOnlyList<double> AvailableManualSpeeds { get; }
@@ -65,50 +72,6 @@ internal sealed class EheimFilter : EheimDevice, IEheimFilter
     public IObservable<TimeSpan> HighPulseTime => _highPulseTime.AsObservable();
     public IObservable<TimeSpan> LowPulseTime => _lowPulseTime.AsObservable();
 
-    internal EheimFilter(IEheimTransport transport, UsrDtaPacket usrDta, int filterVersion, string tankConfig)
-        : base(transport, usrDta, FlowRateTable.ResolveFilterModel(filterVersion, tankConfig).ToString())
-    {
-        FilterModel = FlowRateTable.ResolveFilterModel(filterVersion, tankConfig);
-        AvailableManualSpeeds = FlowRateTable.GetManualSpeeds(filterVersion);
-        AvailableFlowRates = FlowRateTable.GetFlowRates(filterVersion);
-    }
-
-    internal override void UpdateFromMessage(JsonNode message)
-    {
-        var title = message["title"]?.GetValue<string>();
-        if (title != MessageTitle.FilterData) return;
-
-        var packet = message.Deserialize<FilterDataPacket>();
-        if (packet is null) return;
-
-        _filterData = packet;
-        PushState(packet);
-    }
-
-    internal override async Task RequestUpdateAsync(CancellationToken cancellationToken)
-    {
-        await Transport.SendAsync(PacketBuilder.GetFilterData(MacAddress), cancellationToken).ConfigureAwait(false);
-    }
-
-    private void PushState(FilterDataPacket p)
-    {
-        _isActive.OnNext(p.FilterActive != 0);
-        _currentSpeed.OnNext(p.Freq / 100.0);
-        _filterMode.OnNext((Enums.FilterMode)(p.PumpMode & 0xFF));
-        _serviceHours.OnNext(p.ServiceHour);
-        _operatingTime.OnNext(TimeSpan.FromMinutes(p.RunTime));
-        _manualSpeed.OnNext(p.FreqSoll / 100.0);
-        _constantFlowIndex.OnNext(p.SollStep);
-        _daySpeed.OnNext(p.NmDfsSollDay);
-        _nightSpeed.OnNext(p.NmDfsSollNight);
-        _dayStartTime.OnNext(MinutesToTimeOnly(p.EndTimeNightMode));
-        _nightStartTime.OnNext(MinutesToTimeOnly(p.StartTimeNightMode));
-        _highPulseSpeed.OnNext(p.PmDfsSollHigh);
-        _lowPulseSpeed.OnNext(p.PmDfsSollLow);
-        _highPulseTime.OnNext(TimeSpan.FromSeconds(p.PmTimeHigh));
-        _lowPulseTime.OnNext(TimeSpan.FromSeconds(p.PmTimeLow));
-    }
-
     // --- Commands (read-modify-write) ---
 
     public async Task SetActiveAsync(bool active, CancellationToken cancellationToken = default)
@@ -116,7 +79,7 @@ internal sealed class EheimFilter : EheimDevice, IEheimFilter
         await Transport.SendAsync(PacketBuilder.SetFilterPump(MacAddress, active), cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task SetFilterModeAsync(Enums.FilterMode mode, CancellationToken cancellationToken = default)
+    public async Task SetFilterModeAsync(FilterMode mode, CancellationToken cancellationToken = default)
     {
         var data = EnsureFilterData();
         switch (mode)
@@ -229,6 +192,42 @@ internal sealed class EheimFilter : EheimDevice, IEheimFilter
                 data.PmTimeHigh, (int)duration.TotalSeconds), cancellationToken).ConfigureAwait(false);
     }
 
+    internal override void UpdateFromMessage(JsonNode message)
+    {
+        var title = message["title"]?.GetValue<string>();
+        if (title != MessageTitle.FilterData) return;
+
+        var packet = message.Deserialize<FilterDataPacket>();
+        if (packet is null) return;
+
+        _filterData = packet;
+        PushState(packet);
+    }
+
+    internal override async Task RequestUpdateAsync(CancellationToken cancellationToken)
+    {
+        await Transport.SendAsync(PacketBuilder.GetFilterData(MacAddress), cancellationToken).ConfigureAwait(false);
+    }
+
+    private void PushState(FilterDataPacket p)
+    {
+        _isActive.OnNext(p.FilterActive != 0);
+        _currentSpeed.OnNext(p.Freq / 100.0);
+        _filterMode.OnNext((FilterMode)(p.PumpMode & 0xFF));
+        _serviceHours.OnNext(p.ServiceHour);
+        _operatingTime.OnNext(TimeSpan.FromMinutes(p.RunTime));
+        _manualSpeed.OnNext(p.FreqSoll / 100.0);
+        _constantFlowIndex.OnNext(p.SollStep);
+        _daySpeed.OnNext(p.NmDfsSollDay);
+        _nightSpeed.OnNext(p.NmDfsSollNight);
+        _dayStartTime.OnNext(MinutesToTimeOnly(p.EndTimeNightMode));
+        _nightStartTime.OnNext(MinutesToTimeOnly(p.StartTimeNightMode));
+        _highPulseSpeed.OnNext(p.PmDfsSollHigh);
+        _lowPulseSpeed.OnNext(p.PmDfsSollLow);
+        _highPulseTime.OnNext(TimeSpan.FromSeconds(p.PmTimeHigh));
+        _lowPulseTime.OnNext(TimeSpan.FromSeconds(p.PmTimeLow));
+    }
+
     // --- Helpers ---
 
     private async Task SendBioModeAsync(FilterDataPacket data, CancellationToken cancellationToken)
@@ -247,8 +246,12 @@ internal sealed class EheimFilter : EheimDevice, IEheimFilter
     }
 
     private static TimeOnly MinutesToTimeOnly(int minutesFromMidnight)
-        => TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(minutesFromMidnight));
+    {
+        return TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(minutesFromMidnight));
+    }
 
     private static int TimeOnlyToMinutes(TimeOnly time)
-        => time.Hour * 60 + time.Minute;
+    {
+        return time.Hour * 60 + time.Minute;
+    }
 }

@@ -1,7 +1,7 @@
 namespace AquaSync.Eheim.Devices;
 
 /// <summary>
-/// Common interface for all EHEIM Digital devices.
+///     Common interface for all EHEIM Digital devices.
 /// </summary>
 public interface IEheimDevice
 {

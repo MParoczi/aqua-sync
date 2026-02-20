@@ -5,12 +5,12 @@ namespace AquaSync.App.Views;
 
 public sealed partial class LampsPage : Page
 {
-    public LampsViewModel ViewModel { get; }
-
     public LampsPage()
     {
         ViewModel = App.GetService<LampsViewModel>();
         InitializeComponent();
         DataContext = ViewModel;
     }
+
+    public LampsViewModel ViewModel { get; }
 }

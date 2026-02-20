@@ -1,8 +1,8 @@
 namespace AquaSync.Eheim.Devices.Enums;
 
 /// <summary>
-/// EHEIM professionel 5e filter model variants.
-/// Values correspond to the "version" field in FILTER_DATA packets.
+///     EHEIM professionel 5e filter model variants.
+///     Values correspond to the "version" field in FILTER_DATA packets.
 /// </summary>
 public enum EheimFilterModel
 {

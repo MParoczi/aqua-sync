@@ -2,7 +2,8 @@
 
 A .NET 10 class library for controlling Chihiros aquarium LED lights over Bluetooth Low Energy. Built on WinRT BLE APIs with no external dependencies.
 
-This library is a clean-room port of the [chihiros-led-control](https://github.com/TheMicDiet/chihiros-led-control) Python project's reverse-engineered BLE protocol. It provides device discovery, connection management, manual brightness control, and auto-mode scheduling for 15 known Chihiros LED models.
+This library is a clean-room port of the [chihiros-led-control](https://github.com/TheMicDiet/chihiros-led-control) Python project's reverse-engineered BLE
+protocol. It provides device discovery, connection management, manual brightness control, and auto-mode scheduling for 15 known Chihiros LED models.
 
 ## Requirements
 
@@ -20,13 +21,13 @@ Add a project reference from your WinUI 3 (or any Windows Desktop) application:
 
 ## Namespaces
 
-| Namespace | Purpose |
-|---|---|
-| `AquaSync.Chihiros.Discovery` | BLE scanning and device detection |
-| `AquaSync.Chihiros.Devices` | Device profiles, connection, and control |
-| `AquaSync.Chihiros.Scheduling` | Auto-mode lighting schedules |
-| `AquaSync.Chihiros.Protocol` | Low-level BLE command encoding (normally not used directly) |
-| `AquaSync.Chihiros.Exceptions` | Exception types thrown by the library |
+| Namespace                      | Purpose                                                     |
+|--------------------------------|-------------------------------------------------------------|
+| `AquaSync.Chihiros.Discovery`  | BLE scanning and device detection                           |
+| `AquaSync.Chihiros.Devices`    | Device profiles, connection, and control                    |
+| `AquaSync.Chihiros.Scheduling` | Auto-mode lighting schedules                                |
+| `AquaSync.Chihiros.Protocol`   | Low-level BLE command encoding (normally not used directly) |
+| `AquaSync.Chihiros.Exceptions` | Exception types thrown by the library                       |
 
 ---
 
@@ -75,7 +76,8 @@ foreach (var d in devices)
 
 ### Scan by Known Name Prefix
 
-An alternative method skips the UUID filter and instead matches BLE local names against all known Chihiros model codes. This is useful when a device does not advertise the UART service UUID in its packets:
+An alternative method skips the UUID filter and instead matches BLE local names against all known Chihiros model codes. This is useful when a device does not
+advertise the UART service UUID in its packets:
 
 ```csharp
 var devices = await scanner.ScanByNameAsync(TimeSpan.FromSeconds(10));
@@ -115,29 +117,30 @@ Every Chihiros model is described by a `DeviceProfile` that declares its name, B
 
 ### Auto-Detection
 
-When a device is discovered via scanning, `MatchedProfile` is automatically populated if the BLE name matches a known model code. The matching uses **longest-prefix-first** comparison, so `DYWPRO30` correctly matches the WRGB II Pro profile rather than a shorter prefix.
+When a device is discovered via scanning, `MatchedProfile` is automatically populated if the BLE name matches a known model code. The matching uses *
+*longest-prefix-first** comparison, so `DYWPRO30` correctly matches the WRGB II Pro profile rather than a shorter prefix.
 
 ### Known Profiles
 
 Access any profile via the `DeviceProfiles` static class:
 
-| Property | Model | Channels |
-|---|---|---|
-| `DeviceProfiles.AII` | A II | White |
-| `DeviceProfiles.CII` | C II | White |
-| `DeviceProfiles.ZLightTiny` | Z Light TINY | White, Warm |
-| `DeviceProfiles.TinyTerrariumEgg` | Tiny Terrarium Egg | Red, Green |
-| `DeviceProfiles.CIIRGB` | C II RGB | Red, Green, Blue |
-| `DeviceProfiles.WRGBII` | WRGB II | Red, Green, Blue |
-| `DeviceProfiles.WRGBIISlim` | WRGB II Slim | Red, Green, Blue |
-| `DeviceProfiles.WRGBIIPro` | WRGB II Pro | Red, Green, Blue, White |
-| `DeviceProfiles.UniversalWRGB` | Universal WRGB | Red, Green, Blue, White |
-| `DeviceProfiles.Commander1` | Commander 1 | White (ambiguous — override as needed) |
-| `DeviceProfiles.Commander4` | Commander 4 | White (ambiguous — override as needed) |
-| `DeviceProfiles.GenericWhite` | Generic White | White |
-| `DeviceProfiles.GenericRGB` | Generic RGB | Red, Green, Blue |
-| `DeviceProfiles.GenericWRGB` | Generic WRGB | Red, Green, Blue, White |
-| `DeviceProfiles.Fallback` | Fallback | White |
+| Property                          | Model              | Channels                               |
+|-----------------------------------|--------------------|----------------------------------------|
+| `DeviceProfiles.AII`              | A II               | White                                  |
+| `DeviceProfiles.CII`              | C II               | White                                  |
+| `DeviceProfiles.ZLightTiny`       | Z Light TINY       | White, Warm                            |
+| `DeviceProfiles.TinyTerrariumEgg` | Tiny Terrarium Egg | Red, Green                             |
+| `DeviceProfiles.CIIRGB`           | C II RGB           | Red, Green, Blue                       |
+| `DeviceProfiles.WRGBII`           | WRGB II            | Red, Green, Blue                       |
+| `DeviceProfiles.WRGBIISlim`       | WRGB II Slim       | Red, Green, Blue                       |
+| `DeviceProfiles.WRGBIIPro`        | WRGB II Pro        | Red, Green, Blue, White                |
+| `DeviceProfiles.UniversalWRGB`    | Universal WRGB     | Red, Green, Blue, White                |
+| `DeviceProfiles.Commander1`       | Commander 1        | White (ambiguous — override as needed) |
+| `DeviceProfiles.Commander4`       | Commander 4        | White (ambiguous — override as needed) |
+| `DeviceProfiles.GenericWhite`     | Generic White      | White                                  |
+| `DeviceProfiles.GenericRGB`       | Generic RGB        | Red, Green, Blue                       |
+| `DeviceProfiles.GenericWRGB`      | Generic WRGB       | Red, Green, Blue, White                |
+| `DeviceProfiles.Fallback`         | Fallback           | White                                  |
 
 ### Iterating All Profiles
 
@@ -159,7 +162,8 @@ Returns `null` if no known profile matches.
 
 ### Overriding the Profile
 
-Commander 1, Commander 4, and unknown devices are ambiguous — the hardware could be white-only, RGB, or WRGB. Let the user pick, then pass the chosen profile to `ChihirosDevice`:
+Commander 1, Commander 4, and unknown devices are ambiguous — the hardware could be white-only, RGB, or WRGB. Let the user pick, then pass the chosen profile to
+`ChihirosDevice`:
 
 ```csharp
 // User selected "WRGB" from a dropdown
@@ -197,7 +201,8 @@ foreach (var mapping in DeviceProfiles.WRGBIIPro.Channels)
 //   White -> protocol channel 3
 ```
 
-You generally do not need to work with `ChannelMapping` directly — `ChihirosDevice` resolves the mapping internally when you pass a `ColorChannel` to `SetBrightnessAsync`.
+You generally do not need to work with `ChannelMapping` directly — `ChihirosDevice` resolves the mapping internally when you pass a `ColorChannel` to
+`SetBrightnessAsync`.
 
 ---
 
@@ -422,9 +427,11 @@ await device.ResetSchedulesAsync();
 
 ### Scheduling Limitation: WRGB White Channel
 
-The Chihiros BLE protocol only supports **3 brightness slots** in scheduling commands, mapped to protocol channels 0, 1, and 2. On WRGB devices (like WRGB II Pro and Universal WRGB), the white channel is protocol channel 3 and **cannot be included in schedules**.
+The Chihiros BLE protocol only supports **3 brightness slots** in scheduling commands, mapped to protocol channels 0, 1, and 2. On WRGB devices (like WRGB II
+Pro and Universal WRGB), the white channel is protocol channel 3 and **cannot be included in schedules**.
 
-If you include `ColorChannel.White` in a schedule's `ChannelBrightness` for a WRGB device, it will be silently ignored during schedule creation. White brightness on WRGB devices can only be controlled in manual mode via `SetBrightnessAsync`.
+If you include `ColorChannel.White` in a schedule's `ChannelBrightness` for a WRGB device, it will be silently ignored during schedule creation. White
+brightness on WRGB devices can only be controlled in manual mode via `SetBrightnessAsync`.
 
 ---
 
@@ -434,13 +441,13 @@ The library throws on first failure with no internal retries. The calling applic
 
 ### Exception Types
 
-| Exception | When |
-|---|---|
-| `DeviceNotFoundException` | `ConnectAsync` cannot find a device at the given BLE address |
-| `CharacteristicMissingException` | The device is found but the UART service or its RX/TX characteristics are missing |
-| `DeviceConnectionException` | A BLE write fails, notification subscription fails, or a command is sent while disconnected |
-| `ArgumentException` | A `ColorChannel` is passed that the device profile does not support |
-| `ObjectDisposedException` | An operation is attempted after the device has been disposed |
+| Exception                        | When                                                                                        |
+|----------------------------------|---------------------------------------------------------------------------------------------|
+| `DeviceNotFoundException`        | `ConnectAsync` cannot find a device at the given BLE address                                |
+| `CharacteristicMissingException` | The device is found but the UART service or its RX/TX characteristics are missing           |
+| `DeviceConnectionException`      | A BLE write fails, notification subscription fails, or a command is sent while disconnected |
+| `ArgumentException`              | A `ColorChannel` is passed that the device profile does not support                         |
+| `ObjectDisposedException`        | An operation is attempted after the device has been disposed                                |
 
 ### Recommended Pattern
 

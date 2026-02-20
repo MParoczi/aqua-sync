@@ -6,12 +6,12 @@ using Microsoft.UI.Xaml.Controls;
 namespace AquaSync.App.Services;
 
 /// <summary>
-/// Maintains a bidirectional mapping between ViewModel type names and Page types.
+///     Maintains a bidirectional mapping between ViewModel type names and Page types.
 /// </summary>
 public sealed class PageService : IPageService
 {
-    private readonly Dictionary<string, Type> _pages = [];
     private readonly Dictionary<Type, string> _keys = [];
+    private readonly Dictionary<string, Type> _pages = [];
 
     public PageService()
     {
@@ -29,20 +29,14 @@ public sealed class PageService : IPageService
 
     public Type GetPageType(string key)
     {
-        if (!_pages.TryGetValue(key, out var pageType))
-        {
-            throw new ArgumentException($"Page not found for key '{key}'. Did you forget to call Configure?");
-        }
+        if (!_pages.TryGetValue(key, out var pageType)) throw new ArgumentException($"Page not found for key '{key}'. Did you forget to call Configure?");
 
         return pageType;
     }
 
     public string GetPageKey(Type pageType)
     {
-        if (!_keys.TryGetValue(pageType, out var key))
-        {
-            throw new ArgumentException($"Key not found for page type '{pageType.FullName}'.");
-        }
+        if (!_keys.TryGetValue(pageType, out var key)) throw new ArgumentException($"Key not found for page type '{pageType.FullName}'.");
 
         return key;
     }

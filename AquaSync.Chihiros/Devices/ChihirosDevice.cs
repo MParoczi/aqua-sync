@@ -1,14 +1,14 @@
-using AquaSync.Chihiros.Exceptions;
-using AquaSync.Chihiros.Protocol;
-using AquaSync.Chihiros.Scheduling;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Storage.Streams;
+using AquaSync.Chihiros.Exceptions;
+using AquaSync.Chihiros.Protocol;
+using AquaSync.Chihiros.Scheduling;
 
 namespace AquaSync.Chihiros.Devices;
 
 /// <summary>
-/// Controls a Chihiros BLE LED device via WinRT Bluetooth LE APIs.
+///     Controls a Chihiros BLE LED device via WinRT Bluetooth LE APIs.
 /// </summary>
 public sealed class ChihirosDevice : IChihirosDevice
 {
@@ -16,10 +16,10 @@ public sealed class ChihirosDevice : IChihirosDevice
     private readonly SemaphoreSlim _commandLock = new(1, 1);
 
     private BluetoothLEDevice? _bleDevice;
+    private bool _disposed;
+    private MessageId _messageId = new();
     private GattCharacteristic? _rxCharacteristic;
     private GattCharacteristic? _txCharacteristic;
-    private MessageId _messageId = new();
-    private bool _disposed;
 
     public ChihirosDevice(ulong bluetoothAddress, string name, DeviceProfile profile)
     {
@@ -84,7 +84,7 @@ public sealed class ChihirosDevice : IChihirosDevice
 
         // Subscribe to notifications from TX
         var notifyStatus = await _txCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
-            GattClientCharacteristicConfigurationDescriptorValue.Notify)
+                GattClientCharacteristicConfigurationDescriptorValue.Notify)
             .AsTask(cancellationToken).ConfigureAwait(false);
 
         if (notifyStatus != GattCommunicationStatus.Success)
@@ -104,7 +104,7 @@ public sealed class ChihirosDevice : IChihirosDevice
             try
             {
                 await _txCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
-                    GattClientCharacteristicConfigurationDescriptorValue.None)
+                        GattClientCharacteristicConfigurationDescriptorValue.None)
                     .AsTask().ConfigureAwait(false);
             }
             catch
@@ -137,18 +137,12 @@ public sealed class ChihirosDevice : IChihirosDevice
 
     public async Task TurnOnAsync(CancellationToken cancellationToken = default)
     {
-        foreach (var mapping in Profile.Channels)
-        {
-            await SetBrightnessAsync(mapping.Channel, 100, cancellationToken).ConfigureAwait(false);
-        }
+        foreach (var mapping in Profile.Channels) await SetBrightnessAsync(mapping.Channel, 100, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task TurnOffAsync(CancellationToken cancellationToken = default)
     {
-        foreach (var mapping in Profile.Channels)
-        {
-            await SetBrightnessAsync(mapping.Channel, 0, cancellationToken).ConfigureAwait(false);
-        }
+        foreach (var mapping in Profile.Channels) await SetBrightnessAsync(mapping.Channel, 0, cancellationToken).ConfigureAwait(false);
     }
 
     // --- Auto mode ---
@@ -221,17 +215,15 @@ public sealed class ChihirosDevice : IChihirosDevice
     private ChannelMapping FindChannelMapping(ColorChannel channel)
     {
         foreach (var mapping in Profile.Channels)
-        {
             if (mapping.Channel == channel)
                 return mapping;
-        }
         throw new ArgumentException($"Color channel '{channel}' is not supported by device profile '{Profile.ModelName}'.", nameof(channel));
     }
 
     /// <summary>
-    /// Map per-channel brightness from a <see cref="LightSchedule"/> to the 3-byte protocol format.
-    /// Protocol slots correspond to channel IDs 0, 1, 2. Channels not present default to 255 (off/unused).
-    /// Note: channel 3 (white on WRGB) cannot be set via scheduling due to a protocol limitation.
+    ///     Map per-channel brightness from a <see cref="LightSchedule" /> to the 3-byte protocol format.
+    ///     Protocol slots correspond to channel IDs 0, 1, 2. Channels not present default to 255 (off/unused).
+    ///     Note: channel 3 (white on WRGB) cannot be set via scheduling due to a protocol limitation.
     /// </summary>
     private (byte Slot0, byte Slot1, byte Slot2) MapScheduleBrightness(LightSchedule schedule)
     {
@@ -282,10 +274,7 @@ public sealed class ChihirosDevice : IChihirosDevice
 
     private void OnConnectionStatusChanged(BluetoothLEDevice sender, object args)
     {
-        if (sender.ConnectionStatus == BluetoothConnectionStatus.Disconnected)
-        {
-            Disconnected?.Invoke(this, "BLE connection lost.");
-        }
+        if (sender.ConnectionStatus == BluetoothConnectionStatus.Disconnected) Disconnected?.Invoke(this, "BLE connection lost.");
     }
 
     private void OnTxValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)

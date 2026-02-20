@@ -1,6 +1,7 @@
 # AquaSync.Eheim
 
-A .NET 10 class library for controlling EHEIM Digital aquarium equipment over a local network. Communicates with the EHEIM hub via WebSocket and exposes a reactive, observable-based API built on `System.Reactive`.
+A .NET 10 class library for controlling EHEIM Digital aquarium equipment over a local network. Communicates with the EHEIM hub via WebSocket and exposes a
+reactive, observable-based API built on `System.Reactive`.
 
 Currently supports the **EHEIM professionel 5e** filter (models 350, 450, 600T, 700).
 
@@ -40,10 +41,10 @@ dotnet add reference ../AquaSync.Eheim/AquaSync.Eheim.csproj
 
 The library depends on two NuGet packages (restored automatically):
 
-| Package | Purpose |
-|---|---|
+| Package           | Purpose                                               |
+|-------------------|-------------------------------------------------------|
 | `System.Reactive` | `BehaviorSubject<T>`, `IObservable<T>` infrastructure |
-| `Zeroconf` | mDNS/Zeroconf network discovery |
+| `Zeroconf`        | mDNS/Zeroconf network discovery                       |
 
 ---
 
@@ -146,11 +147,11 @@ discovery.Scan(TimeSpan.FromSeconds(5)).Subscribe(
 
 The `DiscoveredHub` record contains:
 
-| Property | Type | Description |
-|---|---|---|
-| `Host` | `string` | mDNS hostname (e.g., `eheimdigital`) |
+| Property    | Type     | Description                                |
+|-------------|----------|--------------------------------------------|
+| `Host`      | `string` | mDNS hostname (e.g., `eheimdigital`)       |
 | `IpAddress` | `string` | Resolved IP address (e.g., `192.168.1.50`) |
-| `Name` | `string` | Display name of the hub |
+| `Name`      | `string` | Display name of the hub                    |
 
 You can then pass `IpAddress` or `Host` to the `EheimHub` constructor.
 
@@ -177,6 +178,7 @@ await hub.ConnectAsync(cts.Token);
 ```
 
 Once connected, the hub automatically:
+
 1. Sends a `GET_USRDTA` broadcast to discover all devices on the mesh.
 2. Receives `MESH_NETWORK` and `USRDTA` responses.
 3. For each filter device, requests `FILTER_DATA` to determine the model.
@@ -210,14 +212,14 @@ foreach (var (mac, device) in hub.Devices)
 
 Every device exposes these properties:
 
-| Property | Type | Description |
-|---|---|---|
-| `MacAddress` | `string` | Hardware MAC address (unique identifier) |
-| `Name` | `string` | User-assigned device name |
-| `ModelName` | `string` | Model name (e.g., `Filter350`) |
-| `FirmwareVersion` | `string` | Firmware version string |
-| `AquariumName` | `string` | User-assigned aquarium name |
-| `SystemLedBrightness` | `IObservable<int>` | Status LED brightness (0–100%) |
+| Property              | Type               | Description                              |
+|-----------------------|--------------------|------------------------------------------|
+| `MacAddress`          | `string`           | Hardware MAC address (unique identifier) |
+| `Name`                | `string`           | User-assigned device name                |
+| `ModelName`           | `string`           | Model name (e.g., `Filter350`)           |
+| `FirmwareVersion`     | `string`           | Firmware version string                  |
+| `AquariumName`        | `string`           | User-assigned aquarium name              |
+| `SystemLedBrightness` | `IObservable<int>` | Status LED brightness (0–100%)           |
 
 ```csharp
 // Read the system LED brightness
@@ -232,31 +234,32 @@ await filter.SetSystemLedBrightnessAsync(50);
 
 ## Filter Properties Reference
 
-All `IObservable<T>` properties emit the current value immediately upon subscription (BehaviorSubject semantics), then emit again whenever the device reports an update.
+All `IObservable<T>` properties emit the current value immediately upon subscription (BehaviorSubject semantics), then emit again whenever the device reports an
+update.
 
 ### State Properties
 
-| Property | Type | Unit | Description |
-|---|---|---|---|
-| `IsActive` | `IObservable<bool>` | — | Whether the filter pump is running |
-| `CurrentSpeed` | `IObservable<double>` | Hz | Current pump frequency |
-| `FilterMode` | `IObservable<FilterMode>` | — | Active operation mode |
-| `ServiceHours` | `IObservable<double>` | hours | Hours until next service |
-| `OperatingTime` | `IObservable<TimeSpan>` | — | Total operating time |
+| Property        | Type                      | Unit  | Description                        |
+|-----------------|---------------------------|-------|------------------------------------|
+| `IsActive`      | `IObservable<bool>`       | —     | Whether the filter pump is running |
+| `CurrentSpeed`  | `IObservable<double>`     | Hz    | Current pump frequency             |
+| `FilterMode`    | `IObservable<FilterMode>` | —     | Active operation mode              |
+| `ServiceHours`  | `IObservable<double>`     | hours | Hours until next service           |
+| `OperatingTime` | `IObservable<TimeSpan>`   | —     | Total operating time               |
 
 ### Manual Mode Properties
 
-| Property | Type | Unit | Description |
-|---|---|---|---|
-| `ManualSpeed` | `IObservable<double>` | Hz | Target frequency in manual mode |
-| `AvailableManualSpeeds` | `IReadOnlyList<double>` | Hz | Valid frequency values for this filter model |
+| Property                | Type                    | Unit | Description                                  |
+|-------------------------|-------------------------|------|----------------------------------------------|
+| `ManualSpeed`           | `IObservable<double>`   | Hz   | Target frequency in manual mode              |
+| `AvailableManualSpeeds` | `IReadOnlyList<double>` | Hz   | Valid frequency values for this filter model |
 
 ### Constant Flow Mode Properties
 
-| Property | Type | Unit | Description |
-|---|---|---|---|
-| `ConstantFlowIndex` | `IObservable<int>` | index 0–14 | Current flow rate index |
-| `AvailableFlowRates` | `IReadOnlyList<int>` | L/h | Flow rates in liters/hour for each index |
+| Property             | Type                 | Unit       | Description                              |
+|----------------------|----------------------|------------|------------------------------------------|
+| `ConstantFlowIndex`  | `IObservable<int>`   | index 0–14 | Current flow rate index                  |
+| `AvailableFlowRates` | `IReadOnlyList<int>` | L/h        | Flow rates in liters/hour for each index |
 
 To display the actual flow rate in L/h:
 
@@ -270,26 +273,26 @@ filter.ConstantFlowIndex.Subscribe(index =>
 
 ### Bio Mode Properties
 
-| Property | Type | Unit | Description |
-|---|---|---|---|
-| `DaySpeed` | `IObservable<int>` | flow index 0–14 | Day flow rate index |
-| `NightSpeed` | `IObservable<int>` | flow index 0–14 | Night flow rate index |
-| `DayStartTime` | `IObservable<TimeOnly>` | — | When the day cycle starts |
-| `NightStartTime` | `IObservable<TimeOnly>` | — | When the night cycle starts |
+| Property         | Type                    | Unit            | Description                 |
+|------------------|-------------------------|-----------------|-----------------------------|
+| `DaySpeed`       | `IObservable<int>`      | flow index 0–14 | Day flow rate index         |
+| `NightSpeed`     | `IObservable<int>`      | flow index 0–14 | Night flow rate index       |
+| `DayStartTime`   | `IObservable<TimeOnly>` | —               | When the day cycle starts   |
+| `NightStartTime` | `IObservable<TimeOnly>` | —               | When the night cycle starts |
 
 ### Pulse Mode Properties
 
-| Property | Type | Unit | Description |
-|---|---|---|---|
-| `HighPulseSpeed` | `IObservable<int>` | flow index 0–14 | High pulse flow rate index |
-| `LowPulseSpeed` | `IObservable<int>` | flow index 0–14 | Low pulse flow rate index |
-| `HighPulseTime` | `IObservable<TimeSpan>` | — | Duration of the high pulse phase |
-| `LowPulseTime` | `IObservable<TimeSpan>` | — | Duration of the low pulse phase |
+| Property         | Type                    | Unit            | Description                      |
+|------------------|-------------------------|-----------------|----------------------------------|
+| `HighPulseSpeed` | `IObservable<int>`      | flow index 0–14 | High pulse flow rate index       |
+| `LowPulseSpeed`  | `IObservable<int>`      | flow index 0–14 | Low pulse flow rate index        |
+| `HighPulseTime`  | `IObservable<TimeSpan>` | —               | Duration of the high pulse phase |
+| `LowPulseTime`   | `IObservable<TimeSpan>` | —               | Duration of the low pulse phase  |
 
 ### Filter Model Information
 
-| Property | Type | Description |
-|---|---|---|
+| Property      | Type               | Description                |
+|---------------|--------------------|----------------------------|
 | `FilterModel` | `EheimFilterModel` | The hardware model variant |
 
 `EheimFilterModel` values: `Filter350`, `Filter450`, `Filter600T`, `Filter700`.
@@ -300,7 +303,8 @@ filter.ConstantFlowIndex.Subscribe(index =>
 
 All commands are async, accept an optional `CancellationToken`, and throw `EheimCommunicationException` on failure.
 
-Commands that modify mode-specific settings (bio, pulse) use a **read-modify-write** pattern internally: they read the current state, change only the specified value, and send the full command to the device. This means you can safely call individual setters without losing other settings.
+Commands that modify mode-specific settings (bio, pulse) use a **read-modify-write** pattern internally: they read the current state, change only the specified
+value, and send the full command to the device. This means you can safely call individual setters without losing other settings.
 
 ### General
 
@@ -547,7 +551,9 @@ catch (EheimCommunicationException ex)
 }
 ```
 
-A common cause of `EheimCommunicationException` is sending a command before the device has reported its initial state. The read-modify-write setters (bio mode, pulse mode) require at least one `FILTER_DATA` message to have been received. In practice this happens within a second of connection, but if you need to send commands immediately after discovery, subscribe to any property first and wait for the initial value:
+A common cause of `EheimCommunicationException` is sending a command before the device has reported its initial state. The read-modify-write setters (bio mode,
+pulse mode) require at least one `FILTER_DATA` message to have been received. In practice this happens within a second of connection, but if you need to send
+commands immediately after discovery, subscribe to any property first and wait for the initial value:
 
 ```csharp
 // Wait until the filter has reported its state
@@ -561,7 +567,8 @@ await filter.SetFilterModeAsync(FilterMode.Bio);
 
 ## Connection Lifecycle
 
-The library does **not** automatically reconnect if the WebSocket drops. This is by design — reconnection strategy depends on your application (retry with backoff, prompt the user, etc.).
+The library does **not** automatically reconnect if the WebSocket drops. This is by design — reconnection strategy depends on your application (retry with
+backoff, prompt the user, etc.).
 
 ### Detecting disconnection
 
@@ -723,61 +730,61 @@ Hub → Client:  {"title":"FILTER_DATA","from":"AA:BB:CC:DD:EE:FF","freq":5600,"
 
 ### Data encoding conventions
 
-| Data | Encoding |
-|---|---|
-| Frequency | Integer, divide by 100 for Hz (e.g., `5600` = 56.00 Hz) |
-| Flow rate | Index 0–14 mapped to L/h per filter model |
-| Time of day | Minutes from midnight (e.g., `480` = 08:00) |
-| Booleans | `0` / `1` |
+| Data        | Encoding                                                      |
+|-------------|---------------------------------------------------------------|
+| Frequency   | Integer, divide by 100 for Hz (e.g., `5600` = 56.00 Hz)       |
+| Flow rate   | Index 0–14 mapped to L/h per filter model                     |
+| Time of day | Minutes from midnight (e.g., `480` = 08:00)                   |
+| Booleans    | `0` / `1`                                                     |
 | Filter mode | `pumpMode & 0xFF` → Manual=16, ConstantFlow=1, Pulse=8, Bio=4 |
 
 ### Filter model identification
 
 The `"version"` field in `FILTER_DATA` (not `USRDTA`) identifies the filter model:
 
-| Version | Model |
-|---|---|
-| 74 | professionel 5e 350 |
-| 76 | professionel 5e 450 |
+| Version                         | Model                |
+|---------------------------------|----------------------|
+| 74                              | professionel 5e 350  |
+| 76                              | professionel 5e 450  |
 | 78 + `tankconfig="WITH_THERMO"` | professionel 5e 600T |
-| 78 | professionel 5e 700 |
+| 78                              | professionel 5e 700  |
 
 ### Flow rate tables (L/h by index)
 
 | Index | Filter 350 | Filter 450 | Filter 600T/700 |
-|---|---|---|---|
-| 0 | 400 | 400 | 400 |
-| 1 | 440 | 460 | 470 |
-| 2 | 480 | 515 | 540 |
-| 3 | 515 | 565 | 600 |
-| 4 | 550 | 610 | 650 |
-| 5 | 585 | 650 | 700 |
-| 6 | 620 | 690 | 745 |
-| 7 | 650 | 730 | 785 |
-| 8 | 680 | 770 | 825 |
-| 9 | 710 | 805 | 865 |
-| 10 | 740 | 840 | 905 |
-| 11 | 770 | 875 | 945 |
-| 12 | 800 | 910 | 985 |
-| 13 | 830 | 945 | 1025 |
-| 14 | 860 | 980 | 1065 |
+|-------|------------|------------|-----------------|
+| 0     | 400        | 400        | 400             |
+| 1     | 440        | 460        | 470             |
+| 2     | 480        | 515        | 540             |
+| 3     | 515        | 565        | 600             |
+| 4     | 550        | 610        | 650             |
+| 5     | 585        | 650        | 700             |
+| 6     | 620        | 690        | 745             |
+| 7     | 650        | 730        | 785             |
+| 8     | 680        | 770        | 825             |
+| 9     | 710        | 805        | 865             |
+| 10    | 740        | 840        | 905             |
+| 11    | 770        | 875        | 945             |
+| 12    | 800        | 910        | 985             |
+| 13    | 830        | 945        | 1025            |
+| 14    | 860        | 980        | 1065            |
 
 ### Manual speed table (Hz by index)
 
 | Index | Filter 350 | Filter 450 | Filter 600T/700 |
-|---|---|---|---|
-| 0 | 35.0 | 35.0 | 35.0 |
-| 1 | 37.5 | 38.0 | 38.0 |
-| 2 | 40.5 | 41.0 | 41.5 |
-| 3 | 43.0 | 44.0 | 44.5 |
-| 4 | 45.5 | 46.5 | 48.0 |
-| 5 | 48.0 | 49.5 | 51.0 |
-| 6 | 51.0 | 52.5 | 54.0 |
-| 7 | 53.5 | 55.5 | 57.5 |
-| 8 | 56.0 | 58.5 | 60.5 |
-| 9 | 59.0 | 61.5 | 64.0 |
-| 10 | 61.5 | 64.5 | 67.0 |
-| 11 | 64.0 | 67.0 | 70.0 |
-| 12 | 66.5 | 70.0 | 73.5 |
-| 13 | 69.5 | 73.0 | 76.5 |
-| 14 | 72.0 | 76.0 | 80.0 |
+|-------|------------|------------|-----------------|
+| 0     | 35.0       | 35.0       | 35.0            |
+| 1     | 37.5       | 38.0       | 38.0            |
+| 2     | 40.5       | 41.0       | 41.5            |
+| 3     | 43.0       | 44.0       | 44.5            |
+| 4     | 45.5       | 46.5       | 48.0            |
+| 5     | 48.0       | 49.5       | 51.0            |
+| 6     | 51.0       | 52.5       | 54.0            |
+| 7     | 53.5       | 55.5       | 57.5            |
+| 8     | 56.0       | 58.5       | 60.5            |
+| 9     | 59.0       | 61.5       | 64.0            |
+| 10    | 61.5       | 64.5       | 67.0            |
+| 11    | 64.0       | 67.0       | 70.0            |
+| 12    | 66.5       | 70.0       | 73.5            |
+| 13    | 69.5       | 73.0       | 76.5            |
+| 14    | 72.0       | 76.0       | 80.0            |

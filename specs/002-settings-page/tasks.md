@@ -17,11 +17,11 @@
 
 **Purpose**: Create new model types and service interfaces that all user stories depend on
 
-- [ ] T001 [P] Create `AppTheme` enum (`System`, `Light`, `Dark`) in `AquaSync.App/Models/AppTheme.cs`
-- [ ] T002 [P] Create `DataFolderRedirect` sealed record with `CustomDataFolderPath` property in `AquaSync.App/Models/DataFolderRedirect.cs`
-- [ ] T003 Create `AppSettings` sealed class with `DefaultVolumeUnit` (default `Liters`), `DefaultDimensionUnit` (default `Centimeters`), `Theme` (default `System`), and `DataFolderPath` (default `null`) properties in `AquaSync.App/Models/AppSettings.cs`
-- [ ] T004 Create `ISettingsService` interface with `Settings` property, `InitializeAsync`, `SaveAsync`, `ApplyTheme`, `ExportDataAsync`, and `MoveDataFolderAsync` methods in `AquaSync.App/Contracts/Services/ISettingsService.cs` — see `specs/002-settings-page/contracts/ISettingsService.md` for full contract
-- [ ] T005 [P] Add `SetDataFolderPath(string newPath)` method and `bool HasRedirectFallback` property to `IDataService` interface in `AquaSync.App/Contracts/Services/IDataService.cs` — see `specs/002-settings-page/contracts/IDataService-extension.md` for full contract
+- [x] T001 [P] Create `AppTheme` enum (`System`, `Light`, `Dark`) in `AquaSync.App/Models/AppTheme.cs`
+- [x] T002 [P] Create `DataFolderRedirect` sealed record with `CustomDataFolderPath` property in `AquaSync.App/Models/DataFolderRedirect.cs`
+- [x] T003 Create `AppSettings` sealed class with `DefaultVolumeUnit` (default `Liters`), `DefaultDimensionUnit` (default `Centimeters`), `Theme` (default `System`), and `DataFolderPath` (default `null`) properties in `AquaSync.App/Models/AppSettings.cs`
+- [x] T004 Create `ISettingsService` interface with `Settings` property, `InitializeAsync`, `SaveAsync`, `ApplyTheme`, `ExportDataAsync`, and `MoveDataFolderAsync` methods in `AquaSync.App/Contracts/Services/ISettingsService.cs` — see `specs/002-settings-page/contracts/ISettingsService.md` for full contract
+- [x] T005 [P] Add `SetDataFolderPath(string newPath)` method and `bool HasRedirectFallback` property to `IDataService` interface in `AquaSync.App/Contracts/Services/IDataService.cs` — see `specs/002-settings-page/contracts/IDataService-extension.md` for full contract
 
 ---
 

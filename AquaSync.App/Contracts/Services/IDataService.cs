@@ -32,4 +32,16 @@ public interface IDataService
     ///     Returns the full path to the application data root folder.
     /// </summary>
     string GetDataFolderPath();
+
+    /// <summary>
+    ///     Updates the root data folder path. Used when the user relocates
+    ///     the data storage directory.
+    /// </summary>
+    void SetDataFolderPath(string newPath);
+
+    /// <summary>
+    ///     Gets whether the data-folder-redirect.json pointed to an invalid path
+    ///     at startup, causing a fallback to the default location.
+    /// </summary>
+    bool HasRedirectFallback { get; }
 }

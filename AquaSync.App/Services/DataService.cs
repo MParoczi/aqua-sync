@@ -16,7 +16,7 @@ public sealed class DataService : IDataService
 
     private readonly SemaphoreSlim _lock = new(1, 1);
 
-    private readonly string _rootPath;
+    private string _rootPath;
 
     public DataService()
     {
@@ -27,9 +27,15 @@ public sealed class DataService : IDataService
         Directory.CreateDirectory(_rootPath);
     }
 
-    public string GetDataFolderPath()
+    public bool HasRedirectFallback { get; private set; }
+
+    public string GetDataFolderPath() => _rootPath;
+
+    public void SetDataFolderPath(string newPath)
     {
-        return _rootPath;
+        _rootPath = newPath;
+        HasRedirectFallback = false;
+        Directory.CreateDirectory(_rootPath);
     }
 
     public async Task<T?> ReadAsync<T>(string folderName, string fileName) where T : class

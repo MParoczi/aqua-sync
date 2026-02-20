@@ -3,9 +3,9 @@
 **Feature**: 002-settings-page
 **Date**: 2026-02-20
 
-## New Method Required
+## New Members Required
 
-`DataService` needs to support updating its internal `_rootPath` at runtime when the data folder is relocated.
+`DataService` needs to support updating its internal `_rootPath` at runtime when the data folder is relocated, and expose whether a redirect fallback occurred at startup.
 
 ```csharp
 // Add to IDataService interface:
@@ -15,20 +15,29 @@
 ///     the data storage directory.
 /// </summary>
 void SetDataFolderPath(string newPath);
+
+/// <summary>
+///     Gets whether the data-folder-redirect.json pointed to an invalid path
+///     at startup, causing a fallback to the default location.
+/// </summary>
+bool HasRedirectFallback { get; }
 ```
 
 ## Implementation Notes
 
 ```csharp
 // In DataService:
+public bool HasRedirectFallback { get; private set; }
+
 public void SetDataFolderPath(string newPath)
 {
     _rootPath = newPath;
+    HasRedirectFallback = false;
     Directory.CreateDirectory(_rootPath);
 }
 ```
 
-The `_rootPath` field must be changed from `readonly` to mutable. Thread safety is maintained by the existing `SemaphoreSlim` — all read/write operations already acquire the lock before using `_rootPath`.
+The `_rootPath` field must be changed from `readonly` to mutable. `HasRedirectFallback` is set to `true` in the constructor when the redirect file exists but points to an invalid path, and reset to `false` when the user successfully sets a new data folder path. Thread safety is maintained by the existing `SemaphoreSlim` — all read/write operations already acquire the lock before using `_rootPath`.
 
 ## Startup Change
 
@@ -55,6 +64,9 @@ public DataService()
             _rootPath = redirect.CustomDataFolderPath;
             return;
         }
+
+        // Redirect file exists but path is invalid — fall back with warning
+        HasRedirectFallback = true;
     }
 
     _rootPath = defaultRoot;

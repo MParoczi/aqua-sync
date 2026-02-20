@@ -70,7 +70,7 @@ public sealed class ShellViewModel : ViewModelBase
     /// </summary>
     public async Task InitializeAsync(Guid aquariumId, CancellationToken cancellationToken = default)
     {
-        var aquarium = await _aquariumService.GetByIdAsync(aquariumId, cancellationToken).ConfigureAwait(false);
+        var aquarium = await _aquariumService.GetByIdAsync(aquariumId, cancellationToken);
 
         if (aquarium is null) return;
 
@@ -91,7 +91,7 @@ public sealed class ShellViewModel : ViewModelBase
         if (aquarium is null) return;
 
         aquarium.Status = AquariumStatus.Active;
-        await _aquariumService.SaveAsync(aquarium, cancellationToken).ConfigureAwait(false);
+        await _aquariumService.SaveAsync(aquarium, cancellationToken);
 
         _aquariumContext.SetCurrentAquarium(aquarium);
         IsReadOnly = _aquariumContext.IsReadOnly;

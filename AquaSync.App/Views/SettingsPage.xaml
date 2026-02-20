@@ -236,11 +236,13 @@
                 Grid.Column="0"
                 Header="Brand"
                 Text="{x:Bind ViewModel.EntryBrand, Mode=TwoWay}"
+                MinWidth="0"
                 PlaceholderText="e.g. ADA" />
               <TextBox
                 Grid.Column="1"
                 Header="Product Name"
                 Text="{x:Bind ViewModel.EntryProductName, Mode=TwoWay}"
+                MinWidth="0"
                 PlaceholderText="e.g. Amazonia" />
             </Grid>
             <Grid ColumnSpacing="8">
@@ -254,11 +256,13 @@
                 ItemsSource="{x:Bind ViewModel.SubstrateTypes}"
                 SelectedIndex="{x:Bind ViewModel.EntryTypeIndex, Mode=TwoWay}"
                 HorizontalAlignment="Stretch"
+                MinWidth="0"
                 PlaceholderText="Select type" />
               <NumberBox
                 Grid.Column="1"
                 Value="{x:Bind ViewModel.EntryLayerDepth, Mode=TwoWay}"
                 Minimum="0"
+                MinWidth="0"
                 PlaceholderText="0">
                 <NumberBox.Header>
                   <StackPanel Orientation="Horizontal" Spacing="4">

@@ -411,7 +411,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
 
         try
         {
-            var aquariums = await _aquariumService.GetAllAsync(cancellationToken).ConfigureAwait(false);
+            var aquariums = await _aquariumService.GetAllAsync(cancellationToken);
 
             var sorted = aquariums
                 .OrderBy(a => a.Status == AquariumStatus.Archived ? 1 : 0)
@@ -448,8 +448,8 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         try
         {
             aquarium.Status = AquariumStatus.Archived;
-            await _aquariumService.SaveAsync(aquarium, cancellationToken).ConfigureAwait(false);
-            await LoadProfilesAsync(cancellationToken).ConfigureAwait(false);
+            await _aquariumService.SaveAsync(aquarium, cancellationToken);
+            await LoadProfilesAsync(cancellationToken);
         }
         catch (IOException)
         {
@@ -468,8 +468,8 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         try
         {
             aquarium.Status = AquariumStatus.Active;
-            await _aquariumService.SaveAsync(aquarium, cancellationToken).ConfigureAwait(false);
-            await LoadProfilesAsync(cancellationToken).ConfigureAwait(false);
+            await _aquariumService.SaveAsync(aquarium, cancellationToken);
+            await LoadProfilesAsync(cancellationToken);
         }
         catch (IOException)
         {
@@ -486,7 +486,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     {
         try
         {
-            await _aquariumService.DeleteAsync(aquarium.Id, cancellationToken).ConfigureAwait(false);
+            await _aquariumService.DeleteAsync(aquarium.Id, cancellationToken);
             Profiles.Remove(aquarium);
             HasProfiles = Profiles.Count > 0;
         }
@@ -607,10 +607,10 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
             if (NewThumbnailSourcePath is not null)
                 aquarium.ThumbnailPath = await _aquariumService
                     .SaveThumbnailAsync(aquarium.Id, NewThumbnailSourcePath, cancellationToken)
-                    .ConfigureAwait(false);
+                    ;
 
-            await _aquariumService.SaveAsync(aquarium, cancellationToken).ConfigureAwait(false);
-            await LoadProfilesAsync(cancellationToken).ConfigureAwait(false);
+            await _aquariumService.SaveAsync(aquarium, cancellationToken);
+            await LoadProfilesAsync(cancellationToken);
         }
         catch (IOException)
         {

@@ -231,16 +231,23 @@
       PrimaryButtonText="Save"
       CloseButtonText="Cancel"
       DefaultButton="Primary"
+      FullSizeDesired="False"
       PrimaryButtonClick="CreateProfileDialog_PrimaryButtonClick"
       Closing="CreateProfileDialog_Closing">
+
+      <ContentDialog.Resources>
+        <x:Double x:Key="ContentDialogMinWidth">500</x:Double>
+        <x:Double x:Key="ContentDialogMaxWidth">500</x:Double>
+      </ContentDialog.Resources>
 
       <ScrollViewer
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled"
         MaxHeight="520"
         Padding="0,0,16,0">
 
-        <StackPanel Spacing="16" MinWidth="400">
+        <StackPanel Spacing="16">
 
           <!-- Name (VR-001) -->
           <StackPanel Spacing="4">
@@ -273,6 +280,7 @@
                 Header="Volume"
                 Value="{x:Bind ViewModel.NewVolume, Mode=TwoWay}"
                 Minimum="0"
+                MinWidth="0"
                 SpinButtonPlacementMode="Compact"
                 PlaceholderText="0" />
               <ToggleSwitch
@@ -306,18 +314,21 @@
                 Header="Length"
                 Value="{x:Bind ViewModel.NewLength, Mode=TwoWay}"
                 Minimum="0"
+                MinWidth="0"
                 PlaceholderText="0" />
               <NumberBox
                 Grid.Column="1"
                 Header="Width"
                 Value="{x:Bind ViewModel.NewWidth, Mode=TwoWay}"
                 Minimum="0"
+                MinWidth="0"
                 PlaceholderText="0" />
               <NumberBox
                 Grid.Column="2"
                 Header="Height"
                 Value="{x:Bind ViewModel.NewHeight, Mode=TwoWay}"
                 Minimum="0"
+                MinWidth="0"
                 PlaceholderText="0" />
             </Grid>
             <ToggleSwitch
@@ -446,11 +457,13 @@
                   Grid.Column="0"
                   Header="Brand"
                   Text="{x:Bind ViewModel.EntryBrand, Mode=TwoWay}"
+                  MinWidth="0"
                   PlaceholderText="e.g. ADA" />
                 <TextBox
                   Grid.Column="1"
                   Header="Product Name"
                   Text="{x:Bind ViewModel.EntryProductName, Mode=TwoWay}"
+                  MinWidth="0"
                   PlaceholderText="e.g. Amazonia" />
               </Grid>
               <Grid ColumnSpacing="8">
@@ -464,11 +477,13 @@
                   ItemsSource="{x:Bind ViewModel.SubstrateTypes}"
                   SelectedIndex="{x:Bind ViewModel.EntryTypeIndex, Mode=TwoWay}"
                   HorizontalAlignment="Stretch"
+                  MinWidth="0"
                   PlaceholderText="Select type" />
                 <NumberBox
                   Grid.Column="1"
                   Value="{x:Bind ViewModel.EntryLayerDepth, Mode=TwoWay}"
                   Minimum="0"
+                  MinWidth="0"
                   PlaceholderText="0">
                   <NumberBox.Header>
                     <StackPanel Orientation="Horizontal" Spacing="4">

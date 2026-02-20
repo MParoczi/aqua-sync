@@ -370,7 +370,7 @@ public sealed class SettingsViewModel : ViewModelBase
             {
                 aquarium.ThumbnailPath = await _aquariumService
                     .SaveThumbnailAsync(aquarium.Id, EditThumbnailSourcePath)
-                    .ConfigureAwait(false);
+                    ;
                 EditThumbnailSourcePath = null;
             }
 
@@ -381,7 +381,7 @@ public sealed class SettingsViewModel : ViewModelBase
                 return s;
             }).ToList();
 
-            await _aquariumService.SaveAsync(aquarium).ConfigureAwait(false);
+            await _aquariumService.SaveAsync(aquarium);
             ShowNotification("Profile saved");
         }
         catch (IOException)

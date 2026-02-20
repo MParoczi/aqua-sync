@@ -369,7 +369,7 @@ public sealed class SettingsViewModel : ViewModelBase
             if (EditThumbnailSourcePath is not null)
             {
                 aquarium.ThumbnailPath = await _aquariumService
-                    .SaveThumbnailAsync(aquarium.Id, EditThumbnailSourcePath)
+                        .SaveThumbnailAsync(aquarium.Id, EditThumbnailSourcePath)
                     ;
                 EditThumbnailSourcePath = null;
             }

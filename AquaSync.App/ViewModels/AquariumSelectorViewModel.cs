@@ -606,7 +606,7 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
         {
             if (NewThumbnailSourcePath is not null)
                 aquarium.ThumbnailPath = await _aquariumService
-                    .SaveThumbnailAsync(aquarium.Id, NewThumbnailSourcePath, cancellationToken)
+                        .SaveThumbnailAsync(aquarium.Id, NewThumbnailSourcePath, cancellationToken)
                     ;
 
             await _aquariumService.SaveAsync(aquarium, cancellationToken);

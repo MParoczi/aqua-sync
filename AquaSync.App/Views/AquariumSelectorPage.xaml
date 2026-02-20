@@ -236,8 +236,6 @@
       Closing="CreateProfileDialog_Closing">
 
       <ContentDialog.Resources>
-        <x:Double x:Key="ContentDialogMinWidth">500</x:Double>
-        <x:Double x:Key="ContentDialogMaxWidth">500</x:Double>
       </ContentDialog.Resources>
 
       <ScrollViewer

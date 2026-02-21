@@ -4,6 +4,7 @@ using AquaSync.App.Models;
 using AquaSync.App.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using WinRT.Interop;
 
 namespace AquaSync.App.Views;
@@ -44,6 +45,26 @@ public sealed partial class SettingsPage : Page
             case nameof(ViewModel.SelectedTheme):
                 SyncThemeRadioButtons();
                 break;
+            case nameof(ViewModel.IsNavigationBlocked):
+                SetNavigationBlocked(ViewModel.IsNavigationBlocked);
+                break;
+        }
+    }
+
+    private void SetNavigationBlocked(bool blocked)
+    {
+        BackButton.IsEnabled = !blocked;
+
+        // Walk up the visual tree to find ShellPage and disable its NavigationView.
+        DependencyObject? parent = Frame;
+        while (parent is not null)
+        {
+            if (parent is ShellPage shellPage)
+            {
+                shellPage.SetNavigationEnabled(!blocked);
+                break;
+            }
+            parent = VisualTreeHelper.GetParent(parent);
         }
     }
 
@@ -102,6 +123,62 @@ public sealed partial class SettingsPage : Page
     {
         if (ThemeRadioButtons.SelectedIndex >= 0)
             ViewModel.SelectedTheme = (AppTheme)ThemeRadioButtons.SelectedIndex;
+    }
+
+    // ========================================================================
+    // Data folder handlers (US4)
+    // ========================================================================
+
+    private async void BrowseDataFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FolderPicker();
+        picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        picker.FileTypeFilter.Add("*");
+
+        var mainWindow = App.GetService<MainWindow>();
+        InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(mainWindow));
+
+        var folder = await picker.PickSingleFolderAsync();
+        if (folder is null) return; // user cancelled
+
+        var confirmed = await ShowMoveConfirmationDialogAsync(ViewModel.DataFolderPath, folder.Path);
+        if (!confirmed) return;
+
+        await ViewModel.BrowseDataFolderCommand.ExecuteAsync(folder.Path);
+    }
+
+    private async void ResetDataFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        var defaultPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AquaSync");
+
+        var confirmed = await ShowMoveConfirmationDialogAsync(ViewModel.DataFolderPath, defaultPath);
+        if (!confirmed) return;
+
+        await ViewModel.ResetDataFolderCommand.ExecuteAsync(null);
+    }
+
+    private async Task<bool> ShowMoveConfirmationDialogAsync(string sourcePath, string destinationPath)
+    {
+        var content = new TextBlock
+        {
+            Text = $"From:\n{sourcePath}\n\nTo:\n{destinationPath}\n\nThis may take several minutes. Do not close the app during the move.",
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var dialog = new ContentDialog
+        {
+            Title = "Move Data Folder",
+            Content = content,
+            PrimaryButtonText = "Move",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = XamlRoot
+        };
+        dialog.Resources["ContentDialogMinWidth"] = 500.0;
+        dialog.Resources["ContentDialogMaxWidth"] = 500.0;
+
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
     }
 
     // ========================================================================

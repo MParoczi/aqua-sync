@@ -62,6 +62,15 @@ public sealed partial class ShellPage : Page
         await ViewModel.RestoreCurrentAquariumAsync();
     }
 
+    /// <summary>
+    ///     Enables or disables the NavigationView during a long-running operation
+    ///     to prevent the user from navigating away.
+    /// </summary>
+    public void SetNavigationEnabled(bool enabled)
+    {
+        NavigationViewControl.IsEnabled = enabled;
+    }
+
     private void OnNavigated(object sender, NavigationEventArgs e)
     {
         if (e.SourcePageType is not null)

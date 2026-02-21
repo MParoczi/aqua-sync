@@ -116,6 +116,44 @@
         </StackPanel>
       </StackPanel>
 
+      <!-- Data Folder section (US4) -->
+      <StackPanel Spacing="12">
+        <TextBlock
+          Text="Data Folder"
+          Style="{StaticResource SubtitleTextBlockStyle}" />
+        <InfoBar
+          Title="The previously configured data folder was inaccessible. Data has been loaded from the default location."
+          IsOpen="{x:Bind ViewModel.HasDataFolderWarning, Mode=OneWay}"
+          Severity="Warning"
+          IsClosable="False" />
+        <StackPanel Spacing="4">
+          <TextBlock
+            Text="Current location"
+            Style="{StaticResource BodyStrongTextBlockStyle}" />
+          <TextBlock
+            Text="{x:Bind ViewModel.DataFolderPath, Mode=OneWay}"
+            Style="{StaticResource BodyTextBlockStyle}"
+            TextWrapping="Wrap"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button
+            Content="Browse..."
+            IsEnabled="{x:Bind ViewModel.CanMoveData, Mode=OneWay}"
+            Click="BrowseDataFolderButton_Click" />
+          <Button
+            Content="Reset to default"
+            IsEnabled="{x:Bind ViewModel.CanMoveData, Mode=OneWay}"
+            Visibility="{x:Bind ViewModel.IsCustomDataFolder, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+            Click="ResetDataFolderButton_Click" />
+          <ProgressRing
+            IsActive="{x:Bind ViewModel.IsMovingData, Mode=OneWay}"
+            Visibility="{x:Bind ViewModel.IsMovingData, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+            Width="20"
+            Height="20" />
+        </StackPanel>
+      </StackPanel>
+
       <!-- Aquarium-scoped section (FR-027) — visible when an aquarium is active -->
       <StackPanel
         Spacing="16"

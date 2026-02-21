@@ -15,6 +15,7 @@ public sealed class SettingsViewModel : ViewModelBase
 {
     private readonly IAquariumContext _aquariumContext;
     private readonly IAquariumService _aquariumService;
+    private readonly IDataService _dataService;
     private readonly ISettingsService _settingsService;
     private string _aquariumTypeDisplay = string.Empty;
     private string _dimensionsDisplay = string.Empty;
@@ -44,6 +45,10 @@ public sealed class SettingsViewModel : ViewModelBase
     // --- Export state ---
     private bool _isExporting;
 
+    // --- Data folder move state ---
+    private bool _isMovingData;
+    private bool _isNavigationBlocked;
+
     // --- Substrate entry form ---
     private bool _isAddingSubstrate;
     private bool _isErrorOpen;
@@ -60,14 +65,18 @@ public sealed class SettingsViewModel : ViewModelBase
     public SettingsViewModel(
         IAquariumService aquariumService,
         IAquariumContext aquariumContext,
-        ISettingsService settingsService)
+        ISettingsService settingsService,
+        IDataService dataService)
     {
         _aquariumService = aquariumService;
         _aquariumContext = aquariumContext;
         _settingsService = settingsService;
+        _dataService = dataService;
 
         SaveProfileCommand = new RelayCommand(OnSaveProfile);
         ExportDataCommand = new AsyncRelayCommand<string?>(OnExportDataAsync);
+        BrowseDataFolderCommand = new AsyncRelayCommand<string?>(OnMoveDataFolderAsync);
+        ResetDataFolderCommand = new AsyncRelayCommand(OnResetDataFolderAsync);
 
         ShowSubstrateFormCommand = new RelayCommand(OnShowSubstrateForm);
         SaveSubstrateEntryCommand = new RelayCommand(OnSaveSubstrateEntry);
@@ -83,6 +92,8 @@ public sealed class SettingsViewModel : ViewModelBase
 
     public IRelayCommand SaveProfileCommand { get; }
     public IAsyncRelayCommand ExportDataCommand { get; }
+    public IAsyncRelayCommand<string?> BrowseDataFolderCommand { get; }
+    public IAsyncRelayCommand ResetDataFolderCommand { get; }
 
     public IRelayCommand ShowSubstrateFormCommand { get; }
     public IRelayCommand SaveSubstrateEntryCommand { get; }
@@ -191,8 +202,48 @@ public sealed class SettingsViewModel : ViewModelBase
         }
     }
 
-    // Updated in Phase 6 to also gate on IsMovingData.
-    public bool CanExport => !IsExporting;
+    public bool IsMovingData
+    {
+        get => _isMovingData;
+        private set
+        {
+            if (SetProperty(ref _isMovingData, value))
+            {
+                OnPropertyChanged(nameof(CanExport));
+                OnPropertyChanged(nameof(CanMoveData));
+            }
+        }
+    }
+
+    public bool IsNavigationBlocked
+    {
+        get => _isNavigationBlocked;
+        private set => SetProperty(ref _isNavigationBlocked, value);
+    }
+
+    public bool CanExport => !IsExporting && !IsMovingData;
+    public bool CanMoveData => !IsMovingData;
+
+    // ========================================================================
+    // Data folder properties (US4)
+    // ========================================================================
+
+    public string DataFolderPath => _dataService.GetDataFolderPath();
+
+    public bool IsCustomDataFolder
+    {
+        get
+        {
+            var defaultRoot = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AquaSync");
+            return !string.Equals(
+                Path.GetFullPath(_dataService.GetDataFolderPath()).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                Path.GetFullPath(defaultRoot).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    public bool HasDataFolderWarning => _dataService.HasRedirectFallback;
 
     // ========================================================================
     // Editable fields (FR-016)
@@ -441,6 +492,73 @@ public sealed class SettingsViewModel : ViewModelBase
 
         _selectedTheme = _settingsService.Settings.Theme;
         OnPropertyChanged(nameof(SelectedTheme));
+
+        OnPropertyChanged(nameof(DataFolderPath));
+        OnPropertyChanged(nameof(IsCustomDataFolder));
+        OnPropertyChanged(nameof(HasDataFolderWarning));
+    }
+
+    // ========================================================================
+    // Data folder move handlers (US4)
+    // ========================================================================
+
+    private async Task OnMoveDataFolderAsync(string? destinationPath)
+    {
+        if (string.IsNullOrEmpty(destinationPath)) return;
+
+        IsMovingData = true;
+        IsNavigationBlocked = true;
+        try
+        {
+            await _settingsService.MoveDataFolderAsync(destinationPath);
+            OnPropertyChanged(nameof(DataFolderPath));
+            OnPropertyChanged(nameof(IsCustomDataFolder));
+            OnPropertyChanged(nameof(HasDataFolderWarning));
+            ShowNotification("Data folder moved successfully.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            ShowError(ex.Message);
+        }
+        catch (IOException)
+        {
+            ShowError("Failed to move data folder. Check disk space and permissions.");
+        }
+        finally
+        {
+            IsMovingData = false;
+            IsNavigationBlocked = false;
+        }
+    }
+
+    private async Task OnResetDataFolderAsync()
+    {
+        var defaultPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AquaSync");
+
+        IsMovingData = true;
+        IsNavigationBlocked = true;
+        try
+        {
+            await _settingsService.MoveDataFolderAsync(defaultPath);
+            OnPropertyChanged(nameof(DataFolderPath));
+            OnPropertyChanged(nameof(IsCustomDataFolder));
+            OnPropertyChanged(nameof(HasDataFolderWarning));
+            ShowNotification("Data folder reset to default location.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            ShowError(ex.Message);
+        }
+        catch (IOException)
+        {
+            ShowError("Failed to reset data folder. Check disk space and permissions.");
+        }
+        finally
+        {
+            IsMovingData = false;
+            IsNavigationBlocked = false;
+        }
     }
 
     // ========================================================================

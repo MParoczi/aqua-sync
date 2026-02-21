@@ -2,6 +2,7 @@ using AquaSync.App.Contracts.Services;
 using AquaSync.App.Services;
 using AquaSync.App.ViewModels;
 using AquaSync.App.Views;
+using AquaSync.Chihiros.Discovery;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
@@ -29,6 +30,10 @@ public partial class App : Application
                 services.AddSingleton<IAquariumService, AquariumService>();
                 services.AddSingleton<IAquariumContext, AquariumContext>();
                 services.AddSingleton<ISettingsService, SettingsService>();
+
+                // Lamp services
+                services.AddSingleton<IDeviceScanner, DeviceScanner>();
+                services.AddSingleton<ILampService, LampService>();
 
                 // Main window
                 services.AddSingleton<MainWindow>();

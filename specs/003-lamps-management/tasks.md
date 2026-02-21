@@ -17,7 +17,7 @@
 
 **Purpose**: Confirm the baseline compiles before any new files are added (1 task).
 
-- [ ] T001 Verify clean baseline: run `dotnet build AquaSync.App/AquaSync.App.csproj -r win-x64` and confirm zero errors and zero warnings before adding any new files
+- [x] T001 Verify clean baseline: run `dotnet build AquaSync.App/AquaSync.App.csproj -r win-x64` and confirm zero errors and zero warnings before adding any new files
 
 ---
 

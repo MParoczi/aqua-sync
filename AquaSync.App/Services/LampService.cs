@@ -126,7 +126,7 @@ public sealed class LampService : ILampService
 
     public async Task ScanAsync(IProgress<DiscoveredDevice> progress, CancellationToken cancellationToken = default)
     {
-        await _scanner.ScanAsync(TimeSpan.FromMinutes(10), progress, cancellationToken).ConfigureAwait(false);
+        await _scanner.ScanByNameAsync(TimeSpan.FromMinutes(10), progress, cancellationToken).ConfigureAwait(false);
     }
 
     public DeviceProfile? GetProfileForModel(string modelName)

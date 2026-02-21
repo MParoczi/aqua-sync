@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Advertisement;
 using AquaSync.Chihiros.Devices;
 using AquaSync.Chihiros.Protocol;
@@ -24,11 +25,20 @@ public sealed class DeviceScanner : IDeviceScanner
 
         var watcher = new BluetoothLEAdvertisementWatcher
         {
-            ScanningMode = BluetoothLEScanningMode.Active
+            ScanningMode = BluetoothLEScanningMode.Active,
+            AllowExtendedAdvertisements = true
         };
 
         // Filter by UART service UUID to find Nordic UART devices
         watcher.AdvertisementFilter.Advertisement.ServiceUuids.Add(UartConstants.ServiceUuid);
+
+        watcher.Stopped += (_, args) =>
+        {
+            if (args.Error != BluetoothError.Success)
+                tcs.TrySetException(new InvalidOperationException($"Bluetooth scanner stopped with error: {args.Error}"));
+            else
+                tcs.TrySetResult();
+        };
 
         watcher.Received += (_, args) =>
         {
@@ -77,7 +87,16 @@ public sealed class DeviceScanner : IDeviceScanner
 
         var watcher = new BluetoothLEAdvertisementWatcher
         {
-            ScanningMode = BluetoothLEScanningMode.Active
+            ScanningMode = BluetoothLEScanningMode.Active,
+            AllowExtendedAdvertisements = true
+        };
+
+        watcher.Stopped += (_, args) =>
+        {
+            if (args.Error != BluetoothError.Success)
+                tcs.TrySetException(new InvalidOperationException($"Bluetooth scanner stopped with error: {args.Error}"));
+            else
+                tcs.TrySetResult();
         };
 
         watcher.Received += (_, args) =>
@@ -87,7 +106,14 @@ public sealed class DeviceScanner : IDeviceScanner
                 return;
 
             var profile = DeviceProfiles.MatchFromName(name);
-            if (profile is null)
+
+            // Accept if: profile matched by known code prefix, name starts with "DY" (all Chihiros
+            // model codes share this prefix, covering unknown/future models), or device advertises
+            // the Nordic UART service UUID directly.
+            var hasUartUuid = args.Advertisement.ServiceUuids.Contains(UartConstants.ServiceUuid);
+            if (profile is null
+                && !name.StartsWith("DY", StringComparison.OrdinalIgnoreCase)
+                && !hasUartUuid)
                 return;
 
             var address = args.BluetoothAddress;

@@ -5,8 +5,6 @@ namespace AquaSync.Chihiros.Devices;
 /// </summary>
 public static class DeviceProfiles
 {
-    // Pre-sorted (code, profile) pairs: longest code first for correct prefix matching.
-    private static readonly (string Code, DeviceProfile Profile)[] SortedCodeMap = BuildSortedCodeMap();
     // --- White-only devices ---
 
     public static DeviceProfile AII { get; } = new(
@@ -115,7 +113,11 @@ public static class DeviceProfiles
         Fallback
     ];
 
-    private static (string Code, DeviceProfile Profile)[] BuildSortedCodeMap()
+    // Pre-sorted (code, profile) pairs: longest code first for correct prefix matching.
+    // Must be declared after All so it is initialized after all profiles are ready.
+    private static readonly (string Code, DeviceProfile Profile)[] _sortedCodeMap = Build_sortedCodeMap();
+
+    private static (string Code, DeviceProfile Profile)[] Build_sortedCodeMap()
     {
         var pairs = new List<(string Code, DeviceProfile Profile)>();
         foreach (var profile in All)
@@ -136,7 +138,7 @@ public static class DeviceProfiles
         if (string.IsNullOrEmpty(bleLocalName))
             return null;
 
-        foreach (var (code, profile) in SortedCodeMap)
+        foreach (var (code, profile) in _sortedCodeMap)
             if (bleLocalName.StartsWith(code, StringComparison.OrdinalIgnoreCase))
                 return profile;
 

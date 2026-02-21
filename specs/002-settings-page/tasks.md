@@ -126,8 +126,8 @@
 
 **Purpose**: Final verification and edge case handling
 
-- [ ] T027 Full build verification: `dotnet build AquaSync.App/AquaSync.App.csproj -r win-x64` — ensure zero errors and zero warnings
-- [ ] T028 Verify edge cases from spec: invalid custom data path on startup falls back to default with warning, same-folder detection, non-empty destination warning, export disabled during folder move, export error messages for disk full/permission denied
+- [x] T027 Full build verification: `dotnet build AquaSync.App/AquaSync.App.csproj -r win-x64` — ensure zero errors and zero warnings
+- [x] T028 Verify edge cases from spec: invalid custom data path on startup falls back to default with warning, same-folder detection, non-empty destination warning, export disabled during folder move, export error messages for disk full/permission denied
 
 ---
 

@@ -484,7 +484,7 @@ public sealed class SettingsViewModel : ViewModelBase
         }
         catch (InvalidOperationException ex)
         {
-            ShowNotification(ex.Message);
+            ShowError(ex.Message);
         }
         catch (IOException)
         {

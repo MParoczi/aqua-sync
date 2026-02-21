@@ -22,4 +22,13 @@ public sealed partial class MainWindow : Window
     ///     The root frame used for top-level navigation (selector vs. shell).
     /// </summary>
     public Frame ContentFrame => RootFrame;
+
+    /// <summary>
+    ///     Sets the application theme on the root content element.
+    /// </summary>
+    public void SetTheme(ElementTheme theme)
+    {
+        if (Content is FrameworkElement rootElement)
+            rootElement.RequestedTheme = theme;
+    }
 }

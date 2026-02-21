@@ -19,12 +19,22 @@
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <!-- Page title -->
-    <TextBlock
-      Grid.Row="0"
-      Text="My Aquariums"
-      Style="{StaticResource TitleLargeTextBlockStyle}"
-      Margin="0,0,0,24" />
+    <!-- Page header -->
+    <Grid Grid.Row="0" Margin="0,0,0,24">
+      <TextBlock
+        Text="My Aquariums"
+        Style="{StaticResource TitleLargeTextBlockStyle}"
+        VerticalAlignment="Center" />
+      <Button
+        HorizontalAlignment="Right"
+        VerticalAlignment="Center"
+        ToolTipService.ToolTip="Settings"
+        Click="SettingsButton_Click">
+        <FontIcon
+          Glyph="&#xE713;"
+          FontFamily="{ThemeResource SymbolThemeFontFamily}" />
+      </Button>
+    </Grid>
 
     <!-- Notifications (FR-039) -->
     <StackPanel Grid.Row="1" Spacing="4">

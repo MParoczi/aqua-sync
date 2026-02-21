@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Reflection;
 using AquaSync.App.Contracts.Services;
 using AquaSync.App.Models;
 using CommunityToolkit.Mvvm.Input;
@@ -15,6 +16,8 @@ public sealed class SettingsViewModel : ViewModelBase
 {
     private readonly IAquariumContext _aquariumContext;
     private readonly IAquariumService _aquariumService;
+    private readonly IDataService _dataService;
+    private readonly ISettingsService _settingsService;
     private string _aquariumTypeDisplay = string.Empty;
     private string _dimensionsDisplay = string.Empty;
     private string _dimensionUnitLabel = string.Empty;
@@ -38,22 +41,46 @@ public sealed class SettingsViewModel : ViewModelBase
     // --- Substrate entry form ---
     private bool _isAddingSubstrate;
     private bool _isErrorOpen;
+
+    // --- Export state ---
+    private bool _isExporting;
+
+    // --- Data folder move state ---
+    private bool _isMovingData;
+    private bool _isNavigationBlocked;
     private bool _isNotificationOpen;
     private bool _isReadOnly;
     private bool _isSaving;
     private string _notificationMessage = string.Empty;
+    private DimensionUnit _selectedDimensionUnit;
+
+    // --- Section navigation ---
+    private SettingsSection _selectedSection = SettingsSection.Application;
+    private AppTheme _selectedTheme;
+
+    // --- Global settings ---
+    private VolumeUnit _selectedVolumeUnit;
     private string _setupDateDisplay = string.Empty;
     private string _substrateEntryError = string.Empty;
 
     // --- Locked field displays ---
     private string _volumeDisplay = string.Empty;
 
-    public SettingsViewModel(IAquariumService aquariumService, IAquariumContext aquariumContext)
+    public SettingsViewModel(
+        IAquariumService aquariumService,
+        IAquariumContext aquariumContext,
+        ISettingsService settingsService,
+        IDataService dataService)
     {
         _aquariumService = aquariumService;
         _aquariumContext = aquariumContext;
+        _settingsService = settingsService;
+        _dataService = dataService;
 
         SaveProfileCommand = new RelayCommand(OnSaveProfile);
+        ExportDataCommand = new AsyncRelayCommand<string?>(OnExportDataAsync);
+        BrowseDataFolderCommand = new AsyncRelayCommand<string?>(OnMoveDataFolderAsync);
+        ResetDataFolderCommand = new AsyncRelayCommand(OnResetDataFolderAsync);
 
         ShowSubstrateFormCommand = new RelayCommand(OnShowSubstrateForm);
         SaveSubstrateEntryCommand = new RelayCommand(OnSaveSubstrateEntry);
@@ -68,6 +95,9 @@ public sealed class SettingsViewModel : ViewModelBase
     // ========================================================================
 
     public IRelayCommand SaveProfileCommand { get; }
+    public IAsyncRelayCommand ExportDataCommand { get; }
+    public IAsyncRelayCommand<string?> BrowseDataFolderCommand { get; }
+    public IAsyncRelayCommand ResetDataFolderCommand { get; }
 
     public IRelayCommand ShowSubstrateFormCommand { get; }
     public IRelayCommand SaveSubstrateEntryCommand { get; }
@@ -121,6 +151,136 @@ public sealed class SettingsViewModel : ViewModelBase
         get => _isErrorOpen;
         private set => SetProperty(ref _isErrorOpen, value);
     }
+
+    // ========================================================================
+    // Global settings properties (US1)
+    // ========================================================================
+
+    public VolumeUnit SelectedVolumeUnit
+    {
+        get => _selectedVolumeUnit;
+        set
+        {
+            if (SetProperty(ref _selectedVolumeUnit, value))
+            {
+                _settingsService.Settings.DefaultVolumeUnit = value;
+                _ = _settingsService.SaveAsync();
+            }
+        }
+    }
+
+    public DimensionUnit SelectedDimensionUnit
+    {
+        get => _selectedDimensionUnit;
+        set
+        {
+            if (SetProperty(ref _selectedDimensionUnit, value))
+            {
+                _settingsService.Settings.DefaultDimensionUnit = value;
+                _ = _settingsService.SaveAsync();
+            }
+        }
+    }
+
+    public AppTheme SelectedTheme
+    {
+        get => _selectedTheme;
+        set
+        {
+            if (SetProperty(ref _selectedTheme, value))
+            {
+                _settingsService.Settings.Theme = value;
+                _ = _settingsService.SaveAsync();
+                _settingsService.ApplyTheme();
+            }
+        }
+    }
+
+    public bool IsExporting
+    {
+        get => _isExporting;
+        private set
+        {
+            if (SetProperty(ref _isExporting, value))
+                OnPropertyChanged(nameof(CanExport));
+        }
+    }
+
+    public bool IsMovingData
+    {
+        get => _isMovingData;
+        private set
+        {
+            if (SetProperty(ref _isMovingData, value))
+            {
+                OnPropertyChanged(nameof(CanExport));
+                OnPropertyChanged(nameof(CanMoveData));
+            }
+        }
+    }
+
+    public bool IsNavigationBlocked
+    {
+        get => _isNavigationBlocked;
+        private set => SetProperty(ref _isNavigationBlocked, value);
+    }
+
+    public SettingsSection SelectedSection
+    {
+        get => _selectedSection;
+        set
+        {
+            if (SetProperty(ref _selectedSection, value))
+            {
+                OnPropertyChanged(nameof(IsApplicationSection));
+                OnPropertyChanged(nameof(IsAquariumSection));
+                OnPropertyChanged(nameof(IsDataSection));
+                OnPropertyChanged(nameof(IsAboutSection));
+            }
+        }
+    }
+
+    public bool IsApplicationSection => _selectedSection == SettingsSection.Application;
+    public bool IsAquariumSection => _selectedSection == SettingsSection.Aquarium;
+    public bool IsDataSection => _selectedSection == SettingsSection.Data;
+    public bool IsAboutSection => _selectedSection == SettingsSection.About;
+
+    public bool CanExport => !IsExporting && !IsMovingData;
+    public bool CanMoveData => !IsMovingData;
+
+    // ========================================================================
+    // About properties (US5)
+    // ========================================================================
+
+    public string AppVersion
+    {
+        get
+        {
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            return version is not null ? $"{version.Major}.{version.Minor}.{version.Build}" : "1.0.0";
+        }
+    }
+
+    // ========================================================================
+    // Data folder properties (US4)
+    // ========================================================================
+
+    public string DataFolderPath => _dataService.GetDataFolderPath();
+
+    public bool IsCustomDataFolder
+    {
+        get
+        {
+            var defaultRoot = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AquaSync");
+            return !string.Equals(
+                Path.GetFullPath(_dataService.GetDataFolderPath()).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                Path.GetFullPath(defaultRoot).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    public bool HasDataFolderWarning => _dataService.HasRedirectFallback;
 
     // ========================================================================
     // Editable fields (FR-016)
@@ -284,6 +444,8 @@ public sealed class SettingsViewModel : ViewModelBase
     /// </summary>
     public void LoadFromContext()
     {
+        LoadGlobalSettings();
+
         var aquarium = _aquariumContext.CurrentAquarium;
         HasAquarium = aquarium is not null;
         IsReadOnly = _aquariumContext.IsReadOnly;
@@ -327,6 +489,113 @@ public sealed class SettingsViewModel : ViewModelBase
     {
         EditThumbnailSourcePath = null;
         EditThumbnailPreview = null;
+    }
+
+    // ========================================================================
+    // Global settings helpers
+    // ========================================================================
+
+    private async Task OnExportDataAsync(string? destinationPath)
+    {
+        if (string.IsNullOrEmpty(destinationPath)) return;
+
+        IsExporting = true;
+        try
+        {
+            await _settingsService.ExportDataAsync(destinationPath);
+            ShowNotification("Data exported successfully.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            ShowError(ex.Message);
+        }
+        catch (IOException)
+        {
+            ShowError("Export failed. Check disk space and permissions.");
+        }
+        finally
+        {
+            IsExporting = false;
+        }
+    }
+
+    private void LoadGlobalSettings()
+    {
+        _selectedVolumeUnit = _settingsService.Settings.DefaultVolumeUnit;
+        OnPropertyChanged(nameof(SelectedVolumeUnit));
+
+        _selectedDimensionUnit = _settingsService.Settings.DefaultDimensionUnit;
+        OnPropertyChanged(nameof(SelectedDimensionUnit));
+
+        _selectedTheme = _settingsService.Settings.Theme;
+        OnPropertyChanged(nameof(SelectedTheme));
+
+        OnPropertyChanged(nameof(DataFolderPath));
+        OnPropertyChanged(nameof(IsCustomDataFolder));
+        OnPropertyChanged(nameof(HasDataFolderWarning));
+    }
+
+    // ========================================================================
+    // Data folder move handlers (US4)
+    // ========================================================================
+
+    private async Task OnMoveDataFolderAsync(string? destinationPath)
+    {
+        if (string.IsNullOrEmpty(destinationPath)) return;
+
+        IsMovingData = true;
+        IsNavigationBlocked = true;
+        try
+        {
+            await _settingsService.MoveDataFolderAsync(destinationPath);
+            OnPropertyChanged(nameof(DataFolderPath));
+            OnPropertyChanged(nameof(IsCustomDataFolder));
+            OnPropertyChanged(nameof(HasDataFolderWarning));
+            ShowNotification("Data folder moved successfully.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            ShowError(ex.Message);
+        }
+        catch (IOException)
+        {
+            ShowError("Failed to move data folder. Check disk space and permissions.");
+        }
+        finally
+        {
+            IsMovingData = false;
+            IsNavigationBlocked = false;
+        }
+    }
+
+    private async Task OnResetDataFolderAsync()
+    {
+        var defaultPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AquaSync");
+
+        IsMovingData = true;
+        IsNavigationBlocked = true;
+        try
+        {
+            await _settingsService.MoveDataFolderAsync(defaultPath);
+            OnPropertyChanged(nameof(DataFolderPath));
+            OnPropertyChanged(nameof(IsCustomDataFolder));
+            OnPropertyChanged(nameof(HasDataFolderWarning));
+            ShowNotification("Data folder reset to default location.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            ShowError(ex.Message);
+        }
+        catch (IOException)
+        {
+            ShowError("Failed to reset data folder. Check disk space and permissions.");
+        }
+        finally
+        {
+            IsMovingData = false;
+            IsNavigationBlocked = false;
+        }
     }
 
     // ========================================================================

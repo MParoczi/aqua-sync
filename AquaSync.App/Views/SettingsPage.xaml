@@ -10,302 +10,451 @@
     <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibility" />
   </Page.Resources>
 
-  <ScrollViewer VerticalScrollBarVisibility="Auto">
-    <StackPanel Padding="36,24" Spacing="24" MaxWidth="700">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
 
+    <Grid Grid.Row="0" Padding="24,24,24,16">
+      <StackPanel
+        Orientation="Horizontal"
+        Spacing="12"
+        Visibility="{x:Bind ViewModel.HasAquarium, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
+        <Button
+          x:Name="BackButton"
+          ToolTipService.ToolTip="Back"
+          Click="BackButton_Click">
+          <FontIcon Glyph="&#xE72B;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />
+        </Button>
+        <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+      </StackPanel>
       <TextBlock
         Text="Settings"
-        Style="{StaticResource TitleTextBlockStyle}" />
+        Style="{StaticResource TitleTextBlockStyle}"
+        Visibility="{x:Bind ViewModel.HasAquarium, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+    </Grid>
 
-      <!-- Notifications (FR-039) -->
-      <InfoBar
-        Title="{x:Bind ViewModel.NotificationMessage, Mode=OneWay}"
-        IsOpen="{x:Bind ViewModel.IsNotificationOpen, Mode=OneWay}"
-        Severity="Success"
-        IsClosable="True" />
-      <InfoBar
-        Title="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
-        IsOpen="{x:Bind ViewModel.IsErrorOpen, Mode=OneWay}"
-        Severity="Error"
-        IsClosable="True" />
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="180" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
 
-      <!-- Global settings section (FR-027 — placeholder for future app-wide settings) -->
-      <StackPanel Spacing="8">
-        <TextBlock
-          Text="General"
-          Style="{StaticResource SubtitleTextBlockStyle}" />
-        <TextBlock
-          Text="No global settings available yet."
-          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-          Style="{StaticResource BodyTextBlockStyle}" />
-      </StackPanel>
+      <ListView
+        Grid.Column="0"
+        x:Name="SectionListView"
+        SelectionMode="Single"
+        SelectionChanged="SectionListView_SelectionChanged"
+        Margin="0,4,0,0">
+        <ListViewItem Tag="Application">
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <FontIcon Glyph="&#xE713;" FontSize="16" VerticalAlignment="Center" />
+            <TextBlock Text="Application" VerticalAlignment="Center" />
+          </StackPanel>
+        </ListViewItem>
+        <ListViewItem x:Name="AquariumSectionItem" Tag="Aquarium">
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <FontIcon Glyph="&#xE9D9;" FontSize="16" VerticalAlignment="Center" />
+            <TextBlock Text="Aquarium" VerticalAlignment="Center" />
+          </StackPanel>
+        </ListViewItem>
+        <ListViewItem Tag="Data">
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <FontIcon Glyph="&#xE74E;" FontSize="16" VerticalAlignment="Center" />
+            <TextBlock Text="Data" VerticalAlignment="Center" />
+          </StackPanel>
+        </ListViewItem>
+        <ListViewItem Tag="About">
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <FontIcon Glyph="&#xE946;" FontSize="16" VerticalAlignment="Center" />
+            <TextBlock Text="About" VerticalAlignment="Center" />
+          </StackPanel>
+        </ListViewItem>
+      </ListView>
 
-      <!-- Aquarium-scoped section (FR-027) — visible when an aquarium is active -->
-      <StackPanel
-        Spacing="16"
-        Visibility="{x:Bind ViewModel.HasAquarium, Mode=OneWay, Converter={StaticResource BoolToVisibility}}">
+      <Border Grid.Column="1" Width="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
 
-        <TextBlock
-          Text="Aquarium Profile"
-          Style="{StaticResource SubtitleTextBlockStyle}" />
+      <Grid Grid.Column="2">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <!-- Locked fields with lock icon (FR-017) -->
-        <StackPanel Spacing="8">
-          <TextBlock
-            Text="Locked Fields"
-            Style="{StaticResource BodyStrongTextBlockStyle}"
-            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-
-          <Grid ColumnSpacing="8" RowSpacing="8">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-              <RowDefinition Height="Auto" />
-              <RowDefinition Height="Auto" />
-              <RowDefinition Height="Auto" />
-              <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
-            <FontIcon Grid.Row="0" Grid.Column="0" Glyph="&#xE72E;" FontSize="14"
-                      Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
-            <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center">
-              <Run Text="Volume: " FontWeight="SemiBold" />
-              <Run Text="{x:Bind ViewModel.VolumeDisplay, Mode=OneWay}" />
-            </TextBlock>
-
-            <FontIcon Grid.Row="1" Grid.Column="0" Glyph="&#xE72E;" FontSize="14"
-                      Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
-            <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center">
-              <Run Text="Dimensions: " FontWeight="SemiBold" />
-              <Run Text="{x:Bind ViewModel.DimensionsDisplay, Mode=OneWay}" />
-            </TextBlock>
-
-            <FontIcon Grid.Row="2" Grid.Column="0" Glyph="&#xE72E;" FontSize="14"
-                      Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
-            <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
-              <Run Text="Type: " FontWeight="SemiBold" />
-              <Run Text="{x:Bind ViewModel.AquariumTypeDisplay, Mode=OneWay}" />
-            </TextBlock>
-
-            <FontIcon Grid.Row="3" Grid.Column="0" Glyph="&#xE72E;" FontSize="14"
-                      Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
-            <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center">
-              <Run Text="Setup Date: " FontWeight="SemiBold" />
-              <Run Text="{x:Bind ViewModel.SetupDateDisplay, Mode=OneWay}" />
-            </TextBlock>
-          </Grid>
+        <StackPanel Grid.Row="0" Padding="24,12,24,0" Spacing="8">
+          <InfoBar
+            Title="{x:Bind ViewModel.NotificationMessage, Mode=OneWay}"
+            IsOpen="{x:Bind ViewModel.IsNotificationOpen, Mode=OneWay}"
+            Severity="Success"
+            IsClosable="True" />
+          <InfoBar
+            Title="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+            IsOpen="{x:Bind ViewModel.IsErrorOpen, Mode=OneWay}"
+            Severity="Error"
+            IsClosable="True" />
         </StackPanel>
 
-        <!-- Editable fields (FR-016) -->
-        <StackPanel Spacing="12">
-          <TextBlock
-            Text="Editable Fields"
-            Style="{StaticResource BodyStrongTextBlockStyle}" />
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+          <StackPanel Padding="24,16,24,24" Spacing="24" MaxWidth="600">
 
-          <TextBox
-            Header="Name"
-            Text="{x:Bind ViewModel.EditName, Mode=TwoWay}"
-            MaxLength="100"
-            IsReadOnly="{x:Bind ViewModel.IsReadOnly, Mode=OneWay}" />
-
-          <TextBox
-            Header="Notes"
-            Text="{x:Bind ViewModel.EditNotes, Mode=TwoWay}"
-            AcceptsReturn="True"
-            TextWrapping="Wrap"
-            MaxLength="2000"
-            Height="100"
-            IsReadOnly="{x:Bind ViewModel.IsReadOnly, Mode=OneWay}" />
-
-          <!-- Thumbnail photo -->
-          <StackPanel Spacing="8">
-            <TextBlock Text="Thumbnail Photo" Style="{StaticResource BodyStrongTextBlockStyle}" />
-            <Image
-              Source="{x:Bind ViewModel.EditThumbnailPreview, Mode=OneWay}"
-              MaxHeight="160"
-              HorizontalAlignment="Left"
-              Stretch="Uniform"
-              Visibility="{x:Bind ViewModel.HasEditThumbnailPreview, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+            <!-- Application section -->
             <StackPanel
-              Orientation="Horizontal"
-              Spacing="8"
-              Visibility="{x:Bind ViewModel.IsReadOnly, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
-              <Button Content="Browse..." Click="BrowsePhoto_Click" />
-              <Button
-                Content="Clear"
-                Click="ClearPhoto_Click"
-                Visibility="{x:Bind ViewModel.HasEditThumbnailPreview, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+              Spacing="24"
+              Visibility="{x:Bind ViewModel.IsApplicationSection, Mode=OneWay, Converter={StaticResource BoolToVisibility}}">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Default Units" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Volume" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                  <RadioButtons x:Name="VolumeUnitRadioButtons" SelectionChanged="VolumeUnitRadioButtons_SelectionChanged">
+                    <RadioButton Content="Liters" />
+                    <RadioButton Content="Gallons" />
+                  </RadioButtons>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Dimensions" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                  <RadioButtons x:Name="DimensionUnitRadioButtons" SelectionChanged="DimensionUnitRadioButtons_SelectionChanged">
+                    <RadioButton Content="Centimeters" />
+                    <RadioButton Content="Inches" />
+                  </RadioButtons>
+                </StackPanel>
+              </StackPanel>
+              <StackPanel Spacing="4">
+                <TextBlock Text="Theme" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <RadioButtons x:Name="ThemeRadioButtons" SelectionChanged="ThemeRadioButtons_SelectionChanged">
+                  <RadioButton Content="Follow system theme" />
+                  <RadioButton Content="Always light" />
+                  <RadioButton Content="Always dark" />
+                </RadioButtons>
+              </StackPanel>
             </StackPanel>
-            <TextBlock
-              x:Name="PhotoErrorText"
-              Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-              Style="{StaticResource CaptionTextBlockStyle}"
-              Visibility="Collapsed" />
-          </StackPanel>
 
-          <StackPanel Orientation="Horizontal" Spacing="12"
-                      Visibility="{x:Bind ViewModel.IsReadOnly, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
-            <Button
-              Content="Save Changes"
-              Style="{StaticResource AccentButtonStyle}"
-              Click="SaveProfile_Click" />
-            <ProgressRing
-              IsActive="{x:Bind ViewModel.IsSaving, Mode=OneWay}"
-              Visibility="{x:Bind ViewModel.IsSaving, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
-              Width="24"
-              Height="24"
-              VerticalAlignment="Center" />
-          </StackPanel>
-        </StackPanel>
+            <!-- Aquarium section -->
+            <StackPanel
+              Spacing="16"
+              Visibility="{x:Bind ViewModel.IsAquariumSection, Mode=OneWay, Converter={StaticResource BoolToVisibility}}">
 
-        <!-- Substrates section (FR-018, FR-019, FR-020) -->
-        <StackPanel Spacing="8">
-          <TextBlock
-            Text="Substrates and Additives"
-            Style="{StaticResource SubtitleTextBlockStyle}" />
+              <TextBlock Text="Aquarium Profile" Style="{StaticResource SubtitleTextBlockStyle}" />
 
-          <!-- Substrate list -->
-          <ListView
-            ItemsSource="{x:Bind ViewModel.Substrates, Mode=OneWay}"
-            SelectionMode="None">
-            <ListView.ItemTemplate>
-              <DataTemplate x:DataType="models:SubstrateEntry">
-                <Grid ColumnSpacing="8" Padding="0,4">
+              <!-- Locked fields (FR-017) -->
+              <StackPanel Spacing="8">
+                <TextBlock
+                  Text="Locked Fields"
+                  Style="{StaticResource BodyStrongTextBlockStyle}"
+                  Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Grid ColumnSpacing="8" RowSpacing="8">
                   <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
-                  <StackPanel Grid.Column="0" Spacing="2">
-                    <TextBlock Style="{StaticResource BodyTextBlockStyle}">
-                      <Run Text="{x:Bind Brand}" FontWeight="SemiBold" />
-                      <Run Text=" — " />
-                      <Run Text="{x:Bind ProductName}" />
-                    </TextBlock>
-                    <TextBlock
-                      Style="{StaticResource CaptionTextBlockStyle}"
-                      Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                      <Run Text="{x:Bind Type}" />
-                      <Run Text=" · " />
-                      <Run Text="{x:Bind LayerDepth}" />
-                    </TextBlock>
-                  </StackPanel>
-                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
-                    <Button
-                      Padding="4"
-                      ToolTipService.ToolTip="Move up"
-                      Click="MoveSubstrateUp_Click"
-                      Tag="{x:Bind}">
-                      <FontIcon Glyph="&#xE74A;" FontSize="12" />
-                    </Button>
-                    <Button
-                      Padding="4"
-                      ToolTipService.ToolTip="Move down"
-                      Click="MoveSubstrateDown_Click"
-                      Tag="{x:Bind}">
-                      <FontIcon Glyph="&#xE74B;" FontSize="12" />
-                    </Button>
-                    <Button
-                      Padding="4"
-                      ToolTipService.ToolTip="Remove"
-                      Click="RemoveSubstrate_Click"
-                      Tag="{x:Bind}">
-                      <FontIcon Glyph="&#xE74D;" FontSize="12" />
-                    </Button>
-                  </StackPanel>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+                  <FontIcon Grid.Row="0" Grid.Column="0" Glyph="&#xE72E;" FontSize="14"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                  <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center">
+                    <Run Text="Volume: " FontWeight="SemiBold" />
+                    <Run Text="{x:Bind ViewModel.VolumeDisplay, Mode=OneWay}" />
+                  </TextBlock>
+                  <FontIcon Grid.Row="1" Grid.Column="0" Glyph="&#xE72E;" FontSize="14"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                  <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center">
+                    <Run Text="Dimensions: " FontWeight="SemiBold" />
+                    <Run Text="{x:Bind ViewModel.DimensionsDisplay, Mode=OneWay}" />
+                  </TextBlock>
+                  <FontIcon Grid.Row="2" Grid.Column="0" Glyph="&#xE72E;" FontSize="14"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                  <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
+                    <Run Text="Type: " FontWeight="SemiBold" />
+                    <Run Text="{x:Bind ViewModel.AquariumTypeDisplay, Mode=OneWay}" />
+                  </TextBlock>
+                  <FontIcon Grid.Row="3" Grid.Column="0" Glyph="&#xE72E;" FontSize="14"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                  <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center">
+                    <Run Text="Setup Date: " FontWeight="SemiBold" />
+                    <Run Text="{x:Bind ViewModel.SetupDateDisplay, Mode=OneWay}" />
+                  </TextBlock>
                 </Grid>
-              </DataTemplate>
-            </ListView.ItemTemplate>
-          </ListView>
+              </StackPanel>
 
-          <!-- Inline substrate entry form -->
-          <StackPanel
-            Spacing="8"
-            Visibility="{x:Bind ViewModel.IsAddingSubstrate, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1"
-            CornerRadius="4"
-            Padding="12">
-            <Grid ColumnSpacing="8">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-              </Grid.ColumnDefinitions>
-              <TextBox
-                Grid.Column="0"
-                Header="Brand"
-                Text="{x:Bind ViewModel.EntryBrand, Mode=TwoWay}"
-                MinWidth="0"
-                PlaceholderText="e.g. ADA" />
-              <TextBox
-                Grid.Column="1"
-                Header="Product Name"
-                Text="{x:Bind ViewModel.EntryProductName, Mode=TwoWay}"
-                MinWidth="0"
-                PlaceholderText="e.g. Amazonia" />
-            </Grid>
-            <Grid ColumnSpacing="8">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-              </Grid.ColumnDefinitions>
-              <ComboBox
-                Grid.Column="0"
-                Header="Type"
-                ItemsSource="{x:Bind ViewModel.SubstrateTypes}"
-                SelectedIndex="{x:Bind ViewModel.EntryTypeIndex, Mode=TwoWay}"
-                HorizontalAlignment="Stretch"
-                MinWidth="0"
-                PlaceholderText="Select type" />
-              <NumberBox
-                Grid.Column="1"
-                Value="{x:Bind ViewModel.EntryLayerDepth, Mode=TwoWay}"
-                Minimum="0"
-                MinWidth="0"
-                PlaceholderText="0">
-                <NumberBox.Header>
-                  <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="Layer Depth" />
-                    <TextBlock
-                      Text="{x:Bind ViewModel.DimensionUnitLabel, Mode=OneWay}"
-                      Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+              <!-- Editable fields (FR-016) -->
+              <StackPanel Spacing="12">
+                <TextBlock Text="Editable Fields" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                <TextBox
+                  Header="Name"
+                  Text="{x:Bind ViewModel.EditName, Mode=TwoWay}"
+                  MaxLength="100"
+                  IsReadOnly="{x:Bind ViewModel.IsReadOnly, Mode=OneWay}" />
+                <TextBox
+                  Header="Notes"
+                  Text="{x:Bind ViewModel.EditNotes, Mode=TwoWay}"
+                  AcceptsReturn="True"
+                  TextWrapping="Wrap"
+                  MaxLength="2000"
+                  Height="100"
+                  IsReadOnly="{x:Bind ViewModel.IsReadOnly, Mode=OneWay}" />
+                <!-- Thumbnail photo -->
+                <StackPanel Spacing="8">
+                  <TextBlock Text="Thumbnail Photo" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                  <Image
+                    Source="{x:Bind ViewModel.EditThumbnailPreview, Mode=OneWay}"
+                    MaxHeight="160"
+                    HorizontalAlignment="Left"
+                    Stretch="Uniform"
+                    Visibility="{x:Bind ViewModel.HasEditThumbnailPreview, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+                  <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="8"
+                    Visibility="{x:Bind ViewModel.IsReadOnly, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
+                    <Button Content="Browse..." Click="BrowsePhoto_Click" />
+                    <Button
+                      Content="Clear"
+                      Click="ClearPhoto_Click"
+                      Visibility="{x:Bind ViewModel.HasEditThumbnailPreview, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
                   </StackPanel>
-                </NumberBox.Header>
-              </NumberBox>
-            </Grid>
-            <CalendarDatePicker
-              Header="Date Added"
-              Date="{x:Bind ViewModel.EntryDateAdded, Mode=TwoWay}"
-              HorizontalAlignment="Stretch"
-              PlaceholderText="Select a date" />
-            <TextBox
-              Header="Notes (optional)"
-              Text="{x:Bind ViewModel.EntryNotes, Mode=TwoWay}"
-              PlaceholderText="Optional notes" />
-            <TextBlock
-              Text="{x:Bind ViewModel.SubstrateEntryError, Mode=OneWay}"
-              Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-              Style="{StaticResource CaptionTextBlockStyle}"
-              Visibility="{x:Bind ViewModel.SubstrateEntryError, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibility}}" />
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <Button
-                Content="Add Entry"
-                Style="{StaticResource AccentButtonStyle}"
-                Click="SaveSubstrateEntry_Click" />
-              <Button
-                Content="Cancel"
-                Click="CancelSubstrateEntry_Click" />
-            </StackPanel>
-          </StackPanel>
+                  <TextBlock
+                    x:Name="PhotoErrorText"
+                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Visibility="Collapsed" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="12"
+                            Visibility="{x:Bind ViewModel.IsReadOnly, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
+                  <Button
+                    Content="Save Changes"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Click="SaveProfile_Click" />
+                  <ProgressRing
+                    IsActive="{x:Bind ViewModel.IsSaving, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.IsSaving, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+                    Width="24"
+                    Height="24"
+                    VerticalAlignment="Center" />
+                </StackPanel>
+              </StackPanel>
 
-          <!-- Add Substrate button -->
-          <Button
-            Content="Add Substrate"
-            Click="ShowSubstrateForm_Click"
-            Visibility="{x:Bind ViewModel.IsAddingSubstrate, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}" />
-        </StackPanel>
-      </StackPanel>
-    </StackPanel>
-  </ScrollViewer>
+              <!-- Substrates section (FR-018, FR-019, FR-020) -->
+              <StackPanel Spacing="8">
+                <TextBlock Text="Substrates and Additives" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <ListView
+                  ItemsSource="{x:Bind ViewModel.Substrates, Mode=OneWay}"
+                  SelectionMode="None">
+                  <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="models:SubstrateEntry">
+                      <Grid ColumnSpacing="8" Padding="0,4">
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="*" />
+                          <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Spacing="2">
+                          <TextBlock Style="{StaticResource BodyTextBlockStyle}">
+                            <Run Text="{x:Bind Brand}" FontWeight="SemiBold" />
+                            <Run Text=" — " />
+                            <Run Text="{x:Bind ProductName}" />
+                          </TextBlock>
+                          <TextBlock
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                            <Run Text="{x:Bind Type}" />
+                            <Run Text=" · " />
+                            <Run Text="{x:Bind LayerDepth}" />
+                          </TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
+                          <Button
+                            Padding="4"
+                            ToolTipService.ToolTip="Move up"
+                            Click="MoveSubstrateUp_Click"
+                            Tag="{x:Bind}">
+                            <FontIcon Glyph="&#xE74A;" FontSize="12" />
+                          </Button>
+                          <Button
+                            Padding="4"
+                            ToolTipService.ToolTip="Move down"
+                            Click="MoveSubstrateDown_Click"
+                            Tag="{x:Bind}">
+                            <FontIcon Glyph="&#xE74B;" FontSize="12" />
+                          </Button>
+                          <Button
+                            Padding="4"
+                            ToolTipService.ToolTip="Remove"
+                            Click="RemoveSubstrate_Click"
+                            Tag="{x:Bind}">
+                            <FontIcon Glyph="&#xE74D;" FontSize="12" />
+                          </Button>
+                        </StackPanel>
+                      </Grid>
+                    </DataTemplate>
+                  </ListView.ItemTemplate>
+                </ListView>
+                <!-- Inline substrate entry form -->
+                <StackPanel
+                  Spacing="8"
+                  Visibility="{x:Bind ViewModel.IsAddingSubstrate, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                  BorderThickness="1"
+                  CornerRadius="4"
+                  Padding="12">
+                  <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox
+                      Grid.Column="0"
+                      Header="Brand"
+                      Text="{x:Bind ViewModel.EntryBrand, Mode=TwoWay}"
+                      MinWidth="0"
+                      PlaceholderText="e.g. ADA" />
+                    <TextBox
+                      Grid.Column="1"
+                      Header="Product Name"
+                      Text="{x:Bind ViewModel.EntryProductName, Mode=TwoWay}"
+                      MinWidth="0"
+                      PlaceholderText="e.g. Amazonia" />
+                  </Grid>
+                  <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox
+                      Grid.Column="0"
+                      Header="Type"
+                      ItemsSource="{x:Bind ViewModel.SubstrateTypes}"
+                      SelectedIndex="{x:Bind ViewModel.EntryTypeIndex, Mode=TwoWay}"
+                      HorizontalAlignment="Stretch"
+                      MinWidth="0"
+                      PlaceholderText="Select type" />
+                    <NumberBox
+                      Grid.Column="1"
+                      Value="{x:Bind ViewModel.EntryLayerDepth, Mode=TwoWay}"
+                      Minimum="0"
+                      MinWidth="0"
+                      PlaceholderText="0">
+                      <NumberBox.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                          <TextBlock Text="Layer Depth" />
+                          <TextBlock
+                            Text="{x:Bind ViewModel.DimensionUnitLabel, Mode=OneWay}"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                      </NumberBox.Header>
+                    </NumberBox>
+                  </Grid>
+                  <CalendarDatePicker
+                    Header="Date Added"
+                    Date="{x:Bind ViewModel.EntryDateAdded, Mode=TwoWay}"
+                    HorizontalAlignment="Stretch"
+                    PlaceholderText="Select a date" />
+                  <TextBox
+                    Header="Notes (optional)"
+                    Text="{x:Bind ViewModel.EntryNotes, Mode=TwoWay}"
+                    PlaceholderText="Optional notes" />
+                  <TextBlock
+                    Text="{x:Bind ViewModel.SubstrateEntryError, Mode=OneWay}"
+                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Visibility="{x:Bind ViewModel.SubstrateEntryError, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibility}}" />
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button
+                      Content="Add Entry"
+                      Style="{StaticResource AccentButtonStyle}"
+                      Click="SaveSubstrateEntry_Click" />
+                    <Button
+                      Content="Cancel"
+                      Click="CancelSubstrateEntry_Click" />
+                  </StackPanel>
+                </StackPanel>
+
+                <Button
+                  Content="Add Substrate"
+                  Click="ShowSubstrateForm_Click"
+                  Visibility="{x:Bind ViewModel.IsAddingSubstrate, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}" />
+              </StackPanel>
+
+            </StackPanel>
+
+            <!-- Data section (full) -->
+            <StackPanel
+              Spacing="24"
+              Visibility="{x:Bind ViewModel.IsDataSection, Mode=OneWay, Converter={StaticResource BoolToVisibility}}">
+              <StackPanel Spacing="12">
+                <TextBlock Text="Data Export" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <TextBlock
+                  Text="Export all your aquarium data and photos as a ZIP archive."
+                  Style="{StaticResource BodyTextBlockStyle}"
+                  Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                  <Button
+                    Content="Export Data..."
+                    IsEnabled="{x:Bind ViewModel.CanExport, Mode=OneWay}"
+                    Click="ExportButton_Click" />
+                  <ProgressRing
+                    IsActive="{x:Bind ViewModel.IsExporting, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.IsExporting, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+                    Width="20"
+                    Height="20" />
+                </StackPanel>
+              </StackPanel>
+              <StackPanel Spacing="12">
+                <TextBlock Text="Data Folder" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <InfoBar
+                  Title="The previously configured data folder was inaccessible. Data has been loaded from the default location."
+                  IsOpen="{x:Bind ViewModel.HasDataFolderWarning, Mode=OneWay}"
+                  Severity="Warning"
+                  IsClosable="False" />
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Current location" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                  <TextBlock
+                    Text="{x:Bind ViewModel.DataFolderPath, Mode=OneWay}"
+                    Style="{StaticResource BodyTextBlockStyle}"
+                    TextWrapping="Wrap"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <Button
+                    Content="Browse..."
+                    IsEnabled="{x:Bind ViewModel.CanMoveData, Mode=OneWay}"
+                    Click="BrowseDataFolderButton_Click" />
+                  <Button
+                    Content="Reset to default"
+                    IsEnabled="{x:Bind ViewModel.CanMoveData, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.IsCustomDataFolder, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+                    Click="ResetDataFolderButton_Click" />
+                  <ProgressRing
+                    IsActive="{x:Bind ViewModel.IsMovingData, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.IsMovingData, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+                    Width="20"
+                    Height="20" />
+                </StackPanel>
+              </StackPanel>
+            </StackPanel>
+
+            <!-- About section (full) -->
+            <StackPanel
+              Spacing="8"
+              Visibility="{x:Bind ViewModel.IsAboutSection, Mode=OneWay, Converter={StaticResource BoolToVisibility}}">
+              <TextBlock Text="About" Style="{StaticResource SubtitleTextBlockStyle}" />
+              <TextBlock Text="AquaSync" Style="{StaticResource BodyStrongTextBlockStyle}" />
+              <TextBlock
+                Style="{StaticResource BodyTextBlockStyle}"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                <Run Text="Version " /><Run Text="{x:Bind ViewModel.AppVersion}" />
+              </TextBlock>
+              <TextBlock
+                Text="A desktop application for managing home aquariums, controlling LED lights, and monitoring filters."
+                Style="{StaticResource BodyTextBlockStyle}"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                TextWrapping="Wrap" />
+            </StackPanel>
+
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+    </Grid>
+  </Grid>
 </Page>

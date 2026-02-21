@@ -1,8 +1,10 @@
+using System.ComponentModel;
 using Windows.Storage.Pickers;
 using AquaSync.App.Models;
 using AquaSync.App.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using WinRT.Interop;
 
 namespace AquaSync.App.Views;
@@ -26,7 +28,200 @@ public sealed partial class SettingsPage : Page
 
     private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
     {
+        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         ViewModel.LoadFromContext();
+        SyncUnitRadioButtons();
+        SyncThemeRadioButtons();
+        SyncSectionListView();
+        SyncAquariumSectionVisibility();
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(ViewModel.SelectedVolumeUnit):
+            case nameof(ViewModel.SelectedDimensionUnit):
+                SyncUnitRadioButtons();
+                break;
+            case nameof(ViewModel.SelectedTheme):
+                SyncThemeRadioButtons();
+                break;
+            case nameof(ViewModel.IsNavigationBlocked):
+                SetNavigationBlocked(ViewModel.IsNavigationBlocked);
+                break;
+            case nameof(ViewModel.SelectedSection):
+                SyncSectionListView();
+                break;
+            case nameof(ViewModel.HasAquarium):
+                SyncAquariumSectionVisibility();
+                break;
+        }
+    }
+
+    private void SetNavigationBlocked(bool blocked)
+    {
+        BackButton.IsEnabled = !blocked;
+
+        // Walk up the visual tree to find ShellPage and disable its NavigationView.
+        DependencyObject? parent = Frame;
+        while (parent is not null)
+        {
+            if (parent is ShellPage shellPage)
+            {
+                shellPage.SetNavigationEnabled(!blocked);
+                break;
+            }
+
+            parent = VisualTreeHelper.GetParent(parent);
+        }
+    }
+
+    private void SyncUnitRadioButtons()
+    {
+        VolumeUnitRadioButtons.SelectedIndex = (int)ViewModel.SelectedVolumeUnit;
+        DimensionUnitRadioButtons.SelectedIndex = (int)ViewModel.SelectedDimensionUnit;
+    }
+
+    private void SyncThemeRadioButtons()
+    {
+        ThemeRadioButtons.SelectedIndex = (int)ViewModel.SelectedTheme;
+    }
+
+    private void SyncSectionListView()
+    {
+        SectionListView.SelectedIndex = (int)ViewModel.SelectedSection;
+    }
+
+    private void SyncAquariumSectionVisibility()
+    {
+        AquariumSectionItem.Visibility = ViewModel.HasAquarium ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    // ========================================================================
+    // Section navigation handler
+    // ========================================================================
+
+    private void SectionListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (SectionListView.SelectedItem is ListViewItem { Tag: string tagStr }
+            && Enum.TryParse<SettingsSection>(tagStr, out var section))
+            ViewModel.SelectedSection = section;
+    }
+
+    // ========================================================================
+    // Default unit selection handlers (US1)
+    // ========================================================================
+
+    private void VolumeUnitRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (VolumeUnitRadioButtons.SelectedIndex >= 0)
+            ViewModel.SelectedVolumeUnit = (VolumeUnit)VolumeUnitRadioButtons.SelectedIndex;
+    }
+
+    private void DimensionUnitRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (DimensionUnitRadioButtons.SelectedIndex >= 0)
+            ViewModel.SelectedDimensionUnit = (DimensionUnit)DimensionUnitRadioButtons.SelectedIndex;
+    }
+
+    // ========================================================================
+    // Data export handler (US3)
+    // ========================================================================
+
+    private async void ExportButton_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FileSavePicker();
+        picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        picker.FileTypeChoices.Add("ZIP archive", new List<string> { ".zip" });
+        picker.SuggestedFileName = $"AquaSync-Export-{DateTime.Today:yyyy-MM-dd}";
+
+        var mainWindow = App.GetService<MainWindow>();
+        InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(mainWindow));
+
+        var file = await picker.PickSaveFileAsync();
+        if (file is null) return; // user cancelled
+
+        await ViewModel.ExportDataCommand.ExecuteAsync(file.Path);
+    }
+
+    // ========================================================================
+    // Theme selection handler (US2)
+    // ========================================================================
+
+    private void ThemeRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ThemeRadioButtons.SelectedIndex >= 0)
+            ViewModel.SelectedTheme = (AppTheme)ThemeRadioButtons.SelectedIndex;
+    }
+
+    // ========================================================================
+    // Data folder handlers (US4)
+    // ========================================================================
+
+    private async void BrowseDataFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FolderPicker();
+        picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        picker.FileTypeFilter.Add("*");
+
+        var mainWindow = App.GetService<MainWindow>();
+        InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(mainWindow));
+
+        var folder = await picker.PickSingleFolderAsync();
+        if (folder is null) return; // user cancelled
+
+        var confirmed = await ShowMoveConfirmationDialogAsync(ViewModel.DataFolderPath, folder.Path);
+        if (!confirmed) return;
+
+        await ViewModel.BrowseDataFolderCommand.ExecuteAsync(folder.Path);
+    }
+
+    private async void ResetDataFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        var defaultPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AquaSync");
+
+        var confirmed = await ShowMoveConfirmationDialogAsync(ViewModel.DataFolderPath, defaultPath);
+        if (!confirmed) return;
+
+        await ViewModel.ResetDataFolderCommand.ExecuteAsync(null);
+    }
+
+    private async Task<bool> ShowMoveConfirmationDialogAsync(string sourcePath, string destinationPath)
+    {
+        var content = new TextBlock
+        {
+            Text = $"From:\n{sourcePath}\n\nTo:\n{destinationPath}\n\nThis may take several minutes. Do not close the app during the move.",
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var dialog = new ContentDialog
+        {
+            Title = "Move Data Folder",
+            Content = content,
+            PrimaryButtonText = "Move",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = XamlRoot
+        };
+        dialog.Resources["ContentDialogMinWidth"] = 500.0;
+        dialog.Resources["ContentDialogMaxWidth"] = 500.0;
+
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+    }
+
+    // ========================================================================
+    // Back navigation for standalone mode (FR-001)
+    // ========================================================================
+
+    /// <summary>
+    ///     Navigates back to AquariumSelectorPage when in standalone mode.
+    /// </summary>
+    private void BackButton_Click(object sender, RoutedEventArgs e)
+    {
+        var mainWindow = App.GetService<MainWindow>();
+        mainWindow.ContentFrame.Navigate(typeof(AquariumSelectorPage));
     }
 
     // ========================================================================

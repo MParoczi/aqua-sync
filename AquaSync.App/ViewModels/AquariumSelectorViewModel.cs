@@ -13,6 +13,7 @@ namespace AquaSync.App.ViewModels;
 public sealed class AquariumSelectorViewModel : ViewModelBase
 {
     private readonly IAquariumService _aquariumService;
+    private readonly ISettingsService _settingsService;
     private string _dateError = string.Empty;
     private string _dimensionError = string.Empty;
 
@@ -66,9 +67,10 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     private string _typeError = string.Empty;
     private string _volumeError = string.Empty;
 
-    public AquariumSelectorViewModel(IAquariumService aquariumService)
+    public AquariumSelectorViewModel(IAquariumService aquariumService, ISettingsService settingsService)
     {
         _aquariumService = aquariumService;
+        _settingsService = settingsService;
 
         CreateProfileCommand = new RelayCommand(OnCreateProfile);
         ArchiveProfileCommand = new RelayCommand<Aquarium>(OnArchiveProfile);
@@ -643,11 +645,11 @@ public sealed class AquariumSelectorViewModel : ViewModelBase
     {
         NewName = string.Empty;
         NewVolume = double.NaN;
-        IsVolumeLiters = true;
+        IsVolumeLiters = _settingsService.Settings.DefaultVolumeUnit == VolumeUnit.Liters;
         NewLength = double.NaN;
         NewWidth = double.NaN;
         NewHeight = double.NaN;
-        IsDimensionCentimeters = true;
+        IsDimensionCentimeters = _settingsService.Settings.DefaultDimensionUnit == DimensionUnit.Centimeters;
         NewAquariumTypeIndex = -1;
         NewSetupDate = DateTimeOffset.Now;
         NewNotes = string.Empty;

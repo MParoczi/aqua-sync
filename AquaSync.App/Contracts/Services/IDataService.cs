@@ -7,6 +7,12 @@ namespace AquaSync.App.Contracts.Services;
 public interface IDataService
 {
     /// <summary>
+    ///     Gets whether the data-folder-redirect.json pointed to an invalid path
+    ///     at startup, causing a fallback to the default location.
+    /// </summary>
+    bool HasRedirectFallback { get; }
+
+    /// <summary>
     ///     Reads and deserializes a JSON file. Returns default(T) if the file does not exist.
     /// </summary>
     Task<T?> ReadAsync<T>(string folderName, string fileName) where T : class;
@@ -32,4 +38,10 @@ public interface IDataService
     ///     Returns the full path to the application data root folder.
     /// </summary>
     string GetDataFolderPath();
+
+    /// <summary>
+    ///     Updates the root data folder path. Used when the user relocates
+    ///     the data storage directory.
+    /// </summary>
+    void SetDataFolderPath(string newPath);
 }

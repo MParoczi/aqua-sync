@@ -32,6 +32,8 @@ public sealed partial class SettingsPage : Page
         ViewModel.LoadFromContext();
         SyncUnitRadioButtons();
         SyncThemeRadioButtons();
+        SyncSectionListView();
+        SyncAquariumSectionVisibility();
     }
 
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -47,6 +49,12 @@ public sealed partial class SettingsPage : Page
                 break;
             case nameof(ViewModel.IsNavigationBlocked):
                 SetNavigationBlocked(ViewModel.IsNavigationBlocked);
+                break;
+            case nameof(ViewModel.SelectedSection):
+                SyncSectionListView();
+                break;
+            case nameof(ViewModel.HasAquarium):
+                SyncAquariumSectionVisibility();
                 break;
         }
     }
@@ -77,6 +85,27 @@ public sealed partial class SettingsPage : Page
     private void SyncThemeRadioButtons()
     {
         ThemeRadioButtons.SelectedIndex = (int)ViewModel.SelectedTheme;
+    }
+
+    private void SyncSectionListView()
+    {
+        SectionListView.SelectedIndex = (int)ViewModel.SelectedSection;
+    }
+
+    private void SyncAquariumSectionVisibility()
+    {
+        AquariumSectionItem.Visibility = ViewModel.HasAquarium ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    // ========================================================================
+    // Section navigation handler
+    // ========================================================================
+
+    private void SectionListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (SectionListView.SelectedItem is ListViewItem { Tag: string tagStr }
+            && Enum.TryParse<SettingsSection>(tagStr, out var section))
+            ViewModel.SelectedSection = section;
     }
 
     // ========================================================================

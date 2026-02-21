@@ -50,6 +50,9 @@ public sealed class SettingsViewModel : ViewModelBase
     private bool _isMovingData;
     private bool _isNavigationBlocked;
 
+    // --- Section navigation ---
+    private SettingsSection _selectedSection = SettingsSection.Application;
+
     // --- Substrate entry form ---
     private bool _isAddingSubstrate;
     private bool _isErrorOpen;
@@ -221,6 +224,26 @@ public sealed class SettingsViewModel : ViewModelBase
         get => _isNavigationBlocked;
         private set => SetProperty(ref _isNavigationBlocked, value);
     }
+
+    public SettingsSection SelectedSection
+    {
+        get => _selectedSection;
+        set
+        {
+            if (SetProperty(ref _selectedSection, value))
+            {
+                OnPropertyChanged(nameof(IsApplicationSection));
+                OnPropertyChanged(nameof(IsAquariumSection));
+                OnPropertyChanged(nameof(IsDataSection));
+                OnPropertyChanged(nameof(IsAboutSection));
+            }
+        }
+    }
+
+    public bool IsApplicationSection => _selectedSection == SettingsSection.Application;
+    public bool IsAquariumSection => _selectedSection == SettingsSection.Aquarium;
+    public bool IsDataSection => _selectedSection == SettingsSection.Data;
+    public bool IsAboutSection => _selectedSection == SettingsSection.About;
 
     public bool CanExport => !IsExporting && !IsMovingData;
     public bool CanMoveData => !IsMovingData;

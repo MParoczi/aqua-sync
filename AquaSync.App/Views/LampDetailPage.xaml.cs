@@ -20,4 +20,18 @@ public sealed partial class LampDetailPage : Page
         if (sender is Slider slider && slider.DataContext is ChannelSlider channel)
             ViewModel.ApplyBrightnessCommand.Execute(channel);
     }
+
+    private void SunriseTimePicker_SelectedTimeChanged(TimePicker sender, TimePickerSelectedValueChangedEventArgs args)
+    {
+        ViewModel.ScheduleSunrise = args.NewTime.HasValue
+            ? TimeOnly.FromTimeSpan(args.NewTime.Value)
+            : null;
+    }
+
+    private void SunsetTimePicker_SelectedTimeChanged(TimePicker sender, TimePickerSelectedValueChangedEventArgs args)
+    {
+        ViewModel.ScheduleSunset = args.NewTime.HasValue
+            ? TimeOnly.FromTimeSpan(args.NewTime.Value)
+            : null;
+    }
 }

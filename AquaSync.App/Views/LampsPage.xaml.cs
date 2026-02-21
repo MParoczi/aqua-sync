@@ -1,4 +1,5 @@
 using AquaSync.App.Contracts.Services;
+using AquaSync.App.Models;
 using AquaSync.App.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -15,6 +16,12 @@ public sealed partial class LampsPage : Page
     }
 
     public LampsViewModel ViewModel { get; }
+
+    private void LampsList_ItemClick(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is LampConfiguration lamp)
+            ViewModel.SelectLampCommand.Execute(lamp);
+    }
 
     private async void AddButton_Click(object sender, RoutedEventArgs e)
     {

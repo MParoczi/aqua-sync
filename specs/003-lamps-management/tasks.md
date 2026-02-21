@@ -67,9 +67,9 @@
 
 **Independent Test**: With lamps pre-added, open Lamps page — verify each entry shows model, device name, status text, entries ordered by `CreatedAt` ascending, and tapping one navigates away.
 
-- [ ] T012 [US2] Complete `LampsPage.xaml` lamp entry `DataTemplate` in `AquaSync.App/Views/LampsPage.xaml`: replace placeholder DataTemplate with full template — outer `Grid` (2 cols, VerticalAlignment=Center, Padding=12 8): Col0 `StackPanel` (TextBlock `ModelName` SemiLightWeight, TextBlock `DeviceName` Subtle `TextTrimming=CharacterEllipsis` per FR-041); Col1 `StackPanel` RightAligned (TextBlock `Mode` text, TextBlock connection state "Connected"/"Disconnected" Subtle); wire `ListView.IsItemClickEnabled=True` and `ItemClick` event to `ViewModel.SelectLampCommand` passing the clicked `LampConfiguration` as parameter
+- [x] T012 [US2] Complete `LampsPage.xaml` lamp entry `DataTemplate` in `AquaSync.App/Views/LampsPage.xaml`: replace placeholder DataTemplate with full template — outer `Grid` (2 cols, VerticalAlignment=Center, Padding=12 8): Col0 `StackPanel` (TextBlock `ModelName` SemiLightWeight, TextBlock `DeviceName` Subtle `TextTrimming=CharacterEllipsis` per FR-041); Col1 `StackPanel` RightAligned (TextBlock `Mode` text, TextBlock connection state "Connected"/"Disconnected" Subtle); wire `ListView.IsItemClickEnabled=True` and `ItemClick` event to `ViewModel.SelectLampCommand` passing the clicked `LampConfiguration` as parameter
 
-- [ ] T013 [US2] Add `SelectLampCommand` to `LampsViewModel` in `AquaSync.App/ViewModels/LampsViewModel.cs`: `RelayCommand<LampConfiguration> SelectLampCommand` that calls `_navigationService.NavigateTo(typeof(LampDetailViewModel).FullName!, lamp.Id)` passing the lamp `Guid` as the navigation parameter
+- [x] T013 [US2] Add `SelectLampCommand` to `LampsViewModel` in `AquaSync.App/ViewModels/LampsViewModel.cs`: `RelayCommand<LampConfiguration> SelectLampCommand` that calls `_navigationService.NavigateTo(typeof(LampDetailViewModel).FullName!, lamp.Id)` passing the lamp `Guid` as the navigation parameter
 
 **Checkpoint**: Lamp entries show full status → tapping navigates (to a blank shell page initially, completed in Phase 5).
 

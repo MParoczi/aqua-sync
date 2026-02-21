@@ -17,6 +17,7 @@ public sealed class PageService : IPageService
     {
         Configure<DashboardViewModel, DashboardPage>();
         Configure<LampsViewModel, LampsPage>();
+        Configure<LampDetailViewModel, LampDetailPage>();
         Configure<FiltersViewModel, FiltersPage>();
         Configure<OtherEquipmentViewModel, OtherEquipmentPage>();
         Configure<WaterParametersViewModel, WaterParametersPage>();

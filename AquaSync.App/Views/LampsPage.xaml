@@ -38,10 +38,44 @@
       <ListView
         x:Name="LampsList"
         ItemsSource="{x:Bind ViewModel.Lamps, Mode=OneWay}"
+        HorizontalContentAlignment="Stretch"
+        SelectionMode="None"
+        IsItemClickEnabled="True"
+        ItemClick="LampsList_ItemClick"
         Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
         <ListView.ItemTemplate>
           <DataTemplate x:DataType="models:LampConfiguration">
-            <TextBlock Text="{x:Bind ModelName}" Padding="0,8" />
+            <Grid Padding="0,4" VerticalAlignment="Center">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              <!-- Col 0: Model name + device name -->
+              <StackPanel Grid.Column="0">
+                <TextBlock Text="{x:Bind ModelName}" FontWeight="SemiLight" />
+                <TextBlock
+                  Text="{x:Bind DeviceName}"
+                  Style="{StaticResource CaptionTextBlockStyle}"
+                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                  TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+
+              <!-- Col 1: Mode + connection state -->
+              <StackPanel
+                Grid.Column="1"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Spacing="2">
+                <TextBlock Text="{x:Bind Mode}" HorizontalAlignment="Right" />
+                <TextBlock
+                  Text="Disconnected"
+                  Style="{StaticResource CaptionTextBlockStyle}"
+                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                  HorizontalAlignment="Right" />
+              </StackPanel>
+
+            </Grid>
           </DataTemplate>
         </ListView.ItemTemplate>
       </ListView>

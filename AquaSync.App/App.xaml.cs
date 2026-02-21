@@ -43,6 +43,7 @@ public partial class App : Application
                 services.AddTransient<AquariumSelectorViewModel>();
                 services.AddTransient<DashboardViewModel>();
                 services.AddTransient<LampsViewModel>();
+                services.AddTransient<LampDetailViewModel>();
                 services.AddTransient<FiltersViewModel>();
                 services.AddTransient<OtherEquipmentViewModel>();
                 services.AddTransient<WaterParametersViewModel>();
@@ -57,6 +58,7 @@ public partial class App : Application
                 services.AddTransient<AquariumSelectorPage>();
                 services.AddTransient<DashboardPage>();
                 services.AddTransient<LampsPage>();
+                services.AddTransient<LampDetailPage>();
                 services.AddTransient<FiltersPage>();
                 services.AddTransient<OtherEquipmentPage>();
                 services.AddTransient<WaterParametersPage>();

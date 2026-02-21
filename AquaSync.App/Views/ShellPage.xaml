@@ -20,7 +20,6 @@
     <NavigationView.Resources>
       <!-- Remove the NavigationView's own content-area backdrop so only our
            explicit backgrounds (Page bg for header, Grid bg for content) show. -->
-      <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
     </NavigationView.Resources>
 
     <!-- Shell header showing aquarium name, type, and read-only badge (FR-023) -->

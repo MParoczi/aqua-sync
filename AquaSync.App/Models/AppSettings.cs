@@ -2,7 +2,7 @@ namespace AquaSync.App.Models;
 
 /// <summary>
 ///     Persisted global application settings.
-///     Stored as <c>settings/app-settings.json</c> via <see cref="Contracts.Services.IDataService"/>.
+///     Stored as <c>settings/app-settings.json</c> via <see cref="Contracts.Services.IDataService" />.
 /// </summary>
 public sealed class AppSettings
 {

@@ -38,10 +38,9 @@ public sealed class SettingsViewModel : ViewModelBase
     // --- State ---
     private bool _hasAquarium;
 
-    // --- Global settings ---
-    private VolumeUnit _selectedVolumeUnit;
-    private DimensionUnit _selectedDimensionUnit;
-    private AppTheme _selectedTheme;
+    // --- Substrate entry form ---
+    private bool _isAddingSubstrate;
+    private bool _isErrorOpen;
 
     // --- Export state ---
     private bool _isExporting;
@@ -49,17 +48,18 @@ public sealed class SettingsViewModel : ViewModelBase
     // --- Data folder move state ---
     private bool _isMovingData;
     private bool _isNavigationBlocked;
-
-    // --- Section navigation ---
-    private SettingsSection _selectedSection = SettingsSection.Application;
-
-    // --- Substrate entry form ---
-    private bool _isAddingSubstrate;
-    private bool _isErrorOpen;
     private bool _isNotificationOpen;
     private bool _isReadOnly;
     private bool _isSaving;
     private string _notificationMessage = string.Empty;
+    private DimensionUnit _selectedDimensionUnit;
+
+    // --- Section navigation ---
+    private SettingsSection _selectedSection = SettingsSection.Application;
+    private AppTheme _selectedTheme;
+
+    // --- Global settings ---
+    private VolumeUnit _selectedVolumeUnit;
     private string _setupDateDisplay = string.Empty;
     private string _substrateEntryError = string.Empty;
 

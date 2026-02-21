@@ -443,7 +443,7 @@
               <TextBlock
                 Style="{StaticResource BodyTextBlockStyle}"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                <Run Text="Version " /><Run Text="{x:Bind ViewModel.AppVersion, Mode=OneTime}" />
+                <Run Text="Version " /><Run Text="{x:Bind ViewModel.AppVersion}" />
               </TextBlock>
               <TextBlock
                 Text="A desktop application for managing home aquariums, controlling LED lights, and monitoring filters."

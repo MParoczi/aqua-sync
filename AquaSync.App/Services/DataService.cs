@@ -54,7 +54,10 @@ public sealed class DataService : IDataService
 
     public bool HasRedirectFallback { get; private set; }
 
-    public string GetDataFolderPath() => _rootPath;
+    public string GetDataFolderPath()
+    {
+        return _rootPath;
+    }
 
     public void SetDataFolderPath(string newPath)
     {

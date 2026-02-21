@@ -102,7 +102,7 @@ public sealed class SettingsService : ISettingsService
             var redirectPath = Path.Combine(defaultRoot, "data-folder-redirect.json");
             try
             {
-                CopyDirectory(sourcePath, newFolderPath, excludeFileName: "data-folder-redirect.json");
+                CopyDirectory(sourcePath, newFolderPath, "data-folder-redirect.json");
 
                 if (isDefaultDest)
                 {
@@ -128,11 +128,11 @@ public sealed class SettingsService : ISettingsService
                                      StringComparison.OrdinalIgnoreCase)))
                         File.Delete(f);
                     foreach (var d in Directory.GetDirectories(sourcePath))
-                        Directory.Delete(d, recursive: true);
+                        Directory.Delete(d, true);
                 }
                 else
                 {
-                    Directory.Delete(sourcePath, recursive: true);
+                    Directory.Delete(sourcePath, true);
                 }
             }
             catch
@@ -141,12 +141,16 @@ public sealed class SettingsService : ISettingsService
                 try
                 {
                     if (!isDefaultDest && Directory.Exists(newFolderPath))
-                        Directory.Delete(newFolderPath, recursive: true);
+                        Directory.Delete(newFolderPath, true);
                     // For a failed reset-to-default: the redirect file was not yet modified
                     // when the copy throws, so the original custom folder remains intact
                     // and the app will continue working from it on next startup.
                 }
-                catch { /* best-effort rollback */ }
+                catch
+                {
+                    /* best-effort rollback */
+                }
+
                 throw;
             }
         }, cancellationToken).ConfigureAwait(false);
@@ -162,8 +166,9 @@ public sealed class SettingsService : ISettingsService
             if (excludeFileName is not null
                 && string.Equals(Path.GetFileName(file), excludeFileName, StringComparison.OrdinalIgnoreCase))
                 continue;
-            File.Copy(file, Path.Combine(destination, Path.GetFileName(file)), overwrite: false);
+            File.Copy(file, Path.Combine(destination, Path.GetFileName(file)), false);
         }
+
         foreach (var dir in Directory.GetDirectories(source))
             CopyDirectory(dir, Path.Combine(destination, Path.GetFileName(dir)), excludeFileName);
     }

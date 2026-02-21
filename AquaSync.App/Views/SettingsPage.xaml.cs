@@ -72,6 +72,7 @@ public sealed partial class SettingsPage : Page
                 shellPage.SetNavigationEnabled(!blocked);
                 break;
             }
+
             parent = VisualTreeHelper.GetParent(parent);
         }
     }

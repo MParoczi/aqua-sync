@@ -15,12 +15,10 @@ public sealed class SettingsService : ISettingsService
     private const string SettingsFile = "app-settings";
 
     private readonly IDataService _dataService;
-    private readonly MainWindow _mainWindow;
 
-    public SettingsService(IDataService dataService, MainWindow mainWindow)
+    public SettingsService(IDataService dataService)
     {
         _dataService = dataService;
-        _mainWindow = mainWindow;
         Settings = new AppSettings();
     }
 
@@ -50,7 +48,8 @@ public sealed class SettingsService : ISettingsService
             _ => ElementTheme.Default
         };
 
-        _mainWindow.DispatcherQueue.TryEnqueue(() => _mainWindow.SetTheme(theme));
+        var mainWindow = App.GetService<MainWindow>();
+        mainWindow.DispatcherQueue.TryEnqueue(() => mainWindow.SetTheme(theme));
     }
 
     public Task ExportDataAsync(string destinationPath, CancellationToken cancellationToken = default)

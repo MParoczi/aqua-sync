@@ -2,7 +2,8 @@
   x:Class="AquaSync.App.Views.ShellPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:converters="using:AquaSync.App.Converters">
+  xmlns:converters="using:AquaSync.App.Converters"
+  Background="{ThemeResource SolidBackgroundFillColorTertiaryBrush}">
 
   <Page.Resources>
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
@@ -16,9 +17,18 @@
     SelectionChanged="OnSelectionChanged"
     BackRequested="OnBackRequested">
 
+    <NavigationView.Resources>
+      <!-- Remove the NavigationView's own content-area backdrop so only our
+           explicit backgrounds (Page bg for header, Grid bg for content) show. -->
+      <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
+    </NavigationView.Resources>
+
     <!-- Shell header showing aquarium name, type, and read-only badge (FR-023) -->
     <NavigationView.Header>
-      <Grid Padding="0,4,0,0">
+      <Grid
+        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+        BorderThickness="0,0,0,1"
+        Padding="0,4,0,20">
         <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
           <TextBlock
             Text="{x:Bind ViewModel.AquariumName, Mode=OneWay}"
@@ -99,7 +109,7 @@
       </NavigationViewItem>
     </NavigationView.FooterMenuItems>
 
-    <Grid>
+    <Grid Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
         <RowDefinition Height="*" />

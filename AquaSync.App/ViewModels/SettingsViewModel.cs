@@ -41,6 +41,9 @@ public sealed class SettingsViewModel : ViewModelBase
     private DimensionUnit _selectedDimensionUnit;
     private AppTheme _selectedTheme;
 
+    // --- Export state ---
+    private bool _isExporting;
+
     // --- Substrate entry form ---
     private bool _isAddingSubstrate;
     private bool _isErrorOpen;
@@ -64,6 +67,7 @@ public sealed class SettingsViewModel : ViewModelBase
         _settingsService = settingsService;
 
         SaveProfileCommand = new RelayCommand(OnSaveProfile);
+        ExportDataCommand = new AsyncRelayCommand<string?>(OnExportDataAsync);
 
         ShowSubstrateFormCommand = new RelayCommand(OnShowSubstrateForm);
         SaveSubstrateEntryCommand = new RelayCommand(OnSaveSubstrateEntry);
@@ -78,6 +82,7 @@ public sealed class SettingsViewModel : ViewModelBase
     // ========================================================================
 
     public IRelayCommand SaveProfileCommand { get; }
+    public IAsyncRelayCommand ExportDataCommand { get; }
 
     public IRelayCommand ShowSubstrateFormCommand { get; }
     public IRelayCommand SaveSubstrateEntryCommand { get; }
@@ -175,6 +180,19 @@ public sealed class SettingsViewModel : ViewModelBase
             }
         }
     }
+
+    public bool IsExporting
+    {
+        get => _isExporting;
+        private set
+        {
+            if (SetProperty(ref _isExporting, value))
+                OnPropertyChanged(nameof(CanExport));
+        }
+    }
+
+    // Updated in Phase 6 to also gate on IsMovingData.
+    public bool CanExport => !IsExporting;
 
     // ========================================================================
     // Editable fields (FR-016)
@@ -388,6 +406,30 @@ public sealed class SettingsViewModel : ViewModelBase
     // ========================================================================
     // Global settings helpers
     // ========================================================================
+
+    private async Task OnExportDataAsync(string? destinationPath)
+    {
+        if (string.IsNullOrEmpty(destinationPath)) return;
+
+        IsExporting = true;
+        try
+        {
+            await _settingsService.ExportDataAsync(destinationPath);
+            ShowNotification("Data exported successfully.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            ShowNotification(ex.Message);
+        }
+        catch (IOException)
+        {
+            ShowError("Export failed. Check disk space and permissions.");
+        }
+        finally
+        {
+            IsExporting = false;
+        }
+    }
 
     private void LoadGlobalSettings()
     {

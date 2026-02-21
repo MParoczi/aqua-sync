@@ -83,9 +83,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T019 [US3] Implement `ExportDataAsync` in `SettingsService` in `AquaSync.App/Services/SettingsService.cs`: use `System.IO.Compression.ZipFile.CreateFromDirectory()` to archive the entire data folder, run on background thread via `Task.Run`, check data folder is non-empty before export, throw `IOException` on failure
-- [ ] T020 [US3] Add export command and state to `SettingsViewModel` in `AquaSync.App/ViewModels/SettingsViewModel.cs`: add `IsExporting` property, `ExportDataCommand` (AsyncRelayCommand), `OnExportDataAsync` handler that calls `ISettingsService.ExportDataAsync()`, show success notification or error InfoBar, disable export button during data folder move (`IsMovingData`)
-- [ ] T021 [US3] Add "Data Export" section UI to `SettingsPage.xaml` with export button, `ProgressRing` bound to `IsExporting`, and add `FileSavePicker` handler in code-behind (`AquaSync.App/Views/SettingsPage.xaml.cs`) with default filename `AquaSync-Export-YYYY-MM-DD.zip` — handle empty data case with info message, handle picker cancellation gracefully
+- [x] T019 [US3] Implement `ExportDataAsync` in `SettingsService` in `AquaSync.App/Services/SettingsService.cs`: use `System.IO.Compression.ZipFile.CreateFromDirectory()` to archive the entire data folder, run on background thread via `Task.Run`, check data folder is non-empty before export, throw `IOException` on failure
+- [x] T020 [US3] Add export command and state to `SettingsViewModel` in `AquaSync.App/ViewModels/SettingsViewModel.cs`: add `IsExporting` property, `ExportDataCommand` (AsyncRelayCommand), `OnExportDataAsync` handler that calls `ISettingsService.ExportDataAsync()`, show success notification or error InfoBar, disable export button during data folder move (`IsMovingData`)
+- [x] T021 [US3] Add "Data Export" section UI to `SettingsPage.xaml` with export button, `ProgressRing` bound to `IsExporting`, and add `FileSavePicker` handler in code-behind (`AquaSync.App/Views/SettingsPage.xaml.cs`) with default filename `AquaSync-Export-YYYY-MM-DD.zip` — handle empty data case with info message, handle picker cancellation gracefully
 
 **Checkpoint**: Data export works. ZIP contains all data folder contents. Progress indicator shown during export. Error messages on failure.
 

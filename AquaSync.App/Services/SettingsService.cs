@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using AquaSync.App.Contracts.Services;
 using AquaSync.App.Models;
 using AquaSync.App.Views;
@@ -52,9 +53,20 @@ public sealed class SettingsService : ISettingsService
         mainWindow.DispatcherQueue.TryEnqueue(() => mainWindow.SetTheme(theme));
     }
 
-    public Task ExportDataAsync(string destinationPath, CancellationToken cancellationToken = default)
+    public async Task ExportDataAsync(string destinationPath, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var sourceDir = _dataService.GetDataFolderPath();
+
+        if (!Directory.EnumerateFileSystemEntries(sourceDir).Any())
+            throw new InvalidOperationException("The data folder is empty. There is nothing to export.");
+
+        await Task.Run(() =>
+        {
+            if (File.Exists(destinationPath))
+                File.Delete(destinationPath);
+
+            ZipFile.CreateFromDirectory(sourceDir, destinationPath);
+        }, cancellationToken).ConfigureAwait(false);
     }
 
     public Task MoveDataFolderAsync(string newFolderPath, CancellationToken cancellationToken = default)

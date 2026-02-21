@@ -94,6 +94,28 @@
         </RadioButtons>
       </StackPanel>
 
+      <!-- Data Export section (US3) -->
+      <StackPanel Spacing="12">
+        <TextBlock
+          Text="Data Export"
+          Style="{StaticResource SubtitleTextBlockStyle}" />
+        <TextBlock
+          Text="Export all your aquarium data and photos as a ZIP archive."
+          Style="{StaticResource BodyTextBlockStyle}"
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+          <Button
+            Content="Export Data..."
+            IsEnabled="{x:Bind ViewModel.CanExport, Mode=OneWay}"
+            Click="ExportButton_Click" />
+          <ProgressRing
+            IsActive="{x:Bind ViewModel.IsExporting, Mode=OneWay}"
+            Visibility="{x:Bind ViewModel.IsExporting, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+            Width="20"
+            Height="20" />
+        </StackPanel>
+      </StackPanel>
+
       <!-- Aquarium-scoped section (FR-027) — visible when an aquarium is active -->
       <StackPanel
         Spacing="16"

@@ -75,6 +75,26 @@ public sealed partial class SettingsPage : Page
     }
 
     // ========================================================================
+    // Data export handler (US3)
+    // ========================================================================
+
+    private async void ExportButton_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FileSavePicker();
+        picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        picker.FileTypeChoices.Add("ZIP archive", new List<string> { ".zip" });
+        picker.SuggestedFileName = $"AquaSync-Export-{DateTime.Today:yyyy-MM-dd}";
+
+        var mainWindow = App.GetService<MainWindow>();
+        InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(mainWindow));
+
+        var file = await picker.PickSaveFileAsync();
+        if (file is null) return; // user cancelled
+
+        await ViewModel.ExportDataCommand.ExecuteAsync(file.Path);
+    }
+
+    // ========================================================================
     // Theme selection handler (US2)
     // ========================================================================
 

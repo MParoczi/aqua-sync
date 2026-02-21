@@ -115,8 +115,8 @@
 
 ### Implementation for User Story 5
 
-- [ ] T025 [US5] Add `AppVersion` read-only property to `SettingsViewModel` in `AquaSync.App/ViewModels/SettingsViewModel.cs`: read version from assembly metadata via `Assembly.GetExecutingAssembly().GetName().Version`
-- [ ] T026 [US5] Add "About" section UI to `SettingsPage.xaml` with app name "AquaSync" as header, version number from ViewModel binding, and a one-sentence description: "A desktop application for managing home aquariums, controlling LED lights, and monitoring filters." in `AquaSync.App/Views/SettingsPage.xaml`
+- [x] T025 [US5] Add `AppVersion` read-only property to `SettingsViewModel` in `AquaSync.App/ViewModels/SettingsViewModel.cs`: read version from assembly metadata via `Assembly.GetExecutingAssembly().GetName().Version`
+- [x] T026 [US5] Add "About" section UI to `SettingsPage.xaml` with app name "AquaSync" as header, version number from ViewModel binding, and a one-sentence description: "A desktop application for managing home aquariums, controlling LED lights, and monitoring filters." in `AquaSync.App/Views/SettingsPage.xaml`
 
 **Checkpoint**: About section displays correct app name, version, and description. No interactive behavior needed.
 

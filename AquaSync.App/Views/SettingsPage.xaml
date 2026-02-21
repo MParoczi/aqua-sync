@@ -154,6 +154,26 @@
         </StackPanel>
       </StackPanel>
 
+      <!-- About section (US5) -->
+      <StackPanel Spacing="8">
+        <TextBlock
+          Text="About"
+          Style="{StaticResource SubtitleTextBlockStyle}" />
+        <TextBlock
+          Text="AquaSync"
+          Style="{StaticResource BodyStrongTextBlockStyle}" />
+        <TextBlock
+          Style="{StaticResource BodyTextBlockStyle}"
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+          <Run Text="Version " /><Run Text="{x:Bind ViewModel.AppVersion, Mode=OneTime}" />
+        </TextBlock>
+        <TextBlock
+          Text="A desktop application for managing home aquariums, controlling LED lights, and monitoring filters."
+          Style="{StaticResource BodyTextBlockStyle}"
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+          TextWrapping="Wrap" />
+      </StackPanel>
+
       <!-- Aquarium-scoped section (FR-027) — visible when an aquarium is active -->
       <StackPanel
         Spacing="16"

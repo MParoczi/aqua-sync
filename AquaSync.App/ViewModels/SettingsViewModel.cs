@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Reflection;
 using AquaSync.App.Contracts.Services;
 using AquaSync.App.Models;
 using CommunityToolkit.Mvvm.Input;
@@ -223,6 +224,19 @@ public sealed class SettingsViewModel : ViewModelBase
 
     public bool CanExport => !IsExporting && !IsMovingData;
     public bool CanMoveData => !IsMovingData;
+
+    // ========================================================================
+    // About properties (US5)
+    // ========================================================================
+
+    public string AppVersion
+    {
+        get
+        {
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            return version is not null ? $"{version.Major}.{version.Minor}.{version.Build}" : "1.0.0";
+        }
+    }
 
     // ========================================================================
     // Data folder properties (US4)

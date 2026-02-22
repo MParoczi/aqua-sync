@@ -16,6 +16,10 @@ public sealed class ChihirosDevice : IChihirosDevice
     private readonly SemaphoreSlim _commandLock = new(1, 1);
 
     private BluetoothLEDevice? _bleDevice;
+    // GattDeviceService must be kept alive for the lifetime of the connection.
+    // CsWinRT's finalizer will call IClosable.Close() if the reference is dropped,
+    // which closes the GATT channel and causes the BLE connection to drop.
+    private GattDeviceService? _gattService;
     private bool _disposed;
     private MessageId _messageId = new();
     private GattCharacteristic? _rxCharacteristic;
@@ -63,6 +67,7 @@ public sealed class ChihirosDevice : IChihirosDevice
             throw new CharacteristicMissingException($"UART service not found on device {Name}.");
 
         var service = servicesResult.Services[0];
+        _gattService = service;
 
         // Resolve RX characteristic (write target)
         var rxResult = await service.GetCharacteristicsForUuidAsync(UartConstants.RxCharacteristicUuid)
@@ -116,6 +121,9 @@ public sealed class ChihirosDevice : IChihirosDevice
         }
 
         _rxCharacteristic = null;
+
+        _gattService?.Dispose();
+        _gattService = null;
 
         if (_bleDevice is not null)
         {

@@ -430,6 +430,12 @@ public sealed class LampDetailViewModel : ViewModelBase, INavigationAware
         Lamp.ManualBrightness[slider.Channel.ToString()] = brightness;
         await _lampService.SaveManualBrightnessAsync(Lamp.Id, Lamp.ManualBrightness, cancellationToken);
 
+        if (Lamp.Mode != LampMode.Manual)
+        {
+            Lamp.Mode = LampMode.Manual;
+            await _lampService.SaveModeAsync(Lamp.Id, LampMode.Manual, cancellationToken);
+        }
+
         IsBrightnessApplying = true;
         try
         {
